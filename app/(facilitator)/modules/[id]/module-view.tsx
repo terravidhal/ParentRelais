@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Play, Users } from "lucide-react";
 import { useModuleQuery } from "@/lib/hooks/use-modules-query";
 import { LangPills } from "@/components/facilitator/lang-pills";
 import { AudioPlayer } from "@/components/facilitator/audio-player";
+import { VideoPlayer } from "@/components/facilitator/video-player";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -61,12 +62,20 @@ export function ModuleView({ id }: { id: number }) {
         <AudioPlayer src={displayTranslation.audio_url} lang={displayTranslation.lang} />
       )}
 
-      <div className="mt-3 flex h-[90px] items-center justify-center rounded-2xl bg-foreground text-background">
-        <Play size={22} aria-hidden="true" />
-        <span className="font-display ml-2 text-sm">
-          Vidéo d&apos;exemple (sous-titrée)
-        </span>
-      </div>
+      {displayTranslation.video_url ? (
+        <VideoPlayer
+          src={displayTranslation.video_url}
+          lang={displayTranslation.lang}
+          subtitlesUrl={displayTranslation.subtitles_url}
+        />
+      ) : (
+        <div className="mt-3 flex h-[90px] items-center justify-center rounded-2xl bg-foreground text-background">
+          <Play size={22} aria-hidden="true" />
+          <span className="font-display ml-2 text-sm">
+            Vidéo d&apos;exemple (sous-titrée) — à venir
+          </span>
+        </div>
+      )}
 
       <button
         type="button"

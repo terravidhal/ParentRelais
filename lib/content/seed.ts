@@ -22,6 +22,8 @@ export const SEED_MODULES: CachedModule[] = [
           "Écouter avant de corriger",
         ],
         audio_url: "/audio/module-1-fr.mp3",
+        video_url: "/video/module-1.mp4",
+        subtitles_url: "/video/module-1-fr.vtt",
         status: "ready",
       },
       {

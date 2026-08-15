@@ -58,4 +58,25 @@ test.describe("Tableau de bord admin", () => {
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/dashboard\/login$/, { timeout: 10_000 });
   });
+
+  test("l'icône œil bascule la visibilité du mot de passe sans soumettre le formulaire", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard/login");
+
+    const passwordInput = page.getByRole("textbox", { name: "Mot de passe" });
+    await passwordInput.fill("un-mot-de-passe-secret");
+    await expect(passwordInput).toHaveAttribute("type", "password");
+
+    const toggle = page.getByRole("button", { name: "Afficher le mot de passe" });
+    await toggle.click();
+
+    await expect(passwordInput).toHaveAttribute("type", "text");
+    await expect(passwordInput).toHaveValue("un-mot-de-passe-secret");
+    // Toujours sur /login : cliquer l'icône ne doit jamais soumettre le formulaire.
+    await expect(page).toHaveURL(/\/dashboard\/login$/);
+
+    await page.getByRole("button", { name: "Masquer le mot de passe" }).click();
+    await expect(passwordInput).toHaveAttribute("type", "password");
+  });
 });

@@ -57,10 +57,18 @@ test.describe("Lecteur audio", () => {
 
     await page.getByLabel("Lire l'audio").click();
 
-    // Laisser jouer un instant (le fichier de démo dure ~4s), puis vérifier
-    // que currentTime a avancé — preuve que la lecture progresse réellement,
-    // pas seulement que l'état React "playing" a changé.
-    await page.waitForTimeout(1500);
+    // Poll actif plutôt qu'un délai fixe : sous exécution parallèle (workers
+    // concurrents), le décodage/démarrage audio peut prendre plus de temps
+    // qu'un waitForTimeout arbitraire — waitForFunction réessaie jusqu'à ce
+    // que currentTime avance réellement, preuve que la lecture progresse
+    // vraiment, pas seulement que l'état React "playing" a changé.
+    await page.waitForFunction(
+      () => {
+        const audio = document.querySelector("audio");
+        return !!audio && audio.currentTime > 0;
+      },
+      { timeout: 10_000 },
+    );
 
     const currentTime = await page
       .locator("audio")

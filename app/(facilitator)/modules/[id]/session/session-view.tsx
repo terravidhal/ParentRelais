@@ -6,6 +6,7 @@ import { ChevronLeft, MapPin, Users, Circle, Accessibility, GraduationCap, Check
 import { useModuleQuery } from "@/lib/hooks/use-modules-query";
 import { useFacilitatorSessionQuery } from "@/lib/hooks/use-facilitator-session";
 import { useAddSessionMutation } from "@/lib/hooks/use-add-session-mutation";
+import { usePreferredLangQuery } from "@/lib/hooks/use-preferred-lang";
 import { Stepper } from "@/components/facilitator/stepper";
 import { QuizStep } from "@/components/facilitator/quiz-step";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ export function SessionView({ moduleId }: { moduleId: number }) {
   const [answers, setAnswers] = useState<(number | null)[]>(
     DEMO_QUIZ.map(() => null),
   );
-  const [lang] = useState("fr");
+  const { data: lang = "fr" } = usePreferredLangQuery();
   const [recorded, setRecorded] = useState(false);
 
   if (isLoading) {

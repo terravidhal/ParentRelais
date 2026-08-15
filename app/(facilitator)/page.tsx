@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import { useModulesQuery } from "@/lib/hooks/use-modules-query";
 import { useFacilitatorSessionQuery } from "@/lib/hooks/use-facilitator-session";
+import {
+  usePreferredLangQuery,
+  useSetPreferredLangMutation,
+} from "@/lib/hooks/use-preferred-lang";
 import { LangPills } from "@/components/facilitator/lang-pills";
 import { ModuleCard } from "@/components/facilitator/module-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,7 +18,8 @@ export default function HomePage() {
   const router = useRouter();
   const { data: session, isLoading: sessionLoading } = useFacilitatorSessionQuery();
   const { data: modules = [], isLoading: modulesLoading } = useModulesQuery();
-  const [lang, setLang] = useState("fr");
+  const { data: lang = "fr" } = usePreferredLangQuery();
+  const setLangMutation = useSetPreferredLangMutation();
 
   useEffect(() => {
     if (!sessionLoading && !session) {
@@ -50,7 +55,10 @@ export default function HomePage() {
         <p className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
           <BookOpen size={14} aria-hidden="true" /> Modules de formation
         </p>
-        <LangPills lang={lang} onLangChange={setLang} />
+        <LangPills
+          lang={lang}
+          onLangChange={(l) => setLangMutation.mutate(l)}
+        />
       </div>
 
       <div className="flex flex-col gap-3">

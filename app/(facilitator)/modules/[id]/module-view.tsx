@@ -4,6 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Play, Users } from "lucide-react";
 import { useModuleQuery } from "@/lib/hooks/use-modules-query";
+import {
+  usePreferredLangQuery,
+  useSetPreferredLangMutation,
+} from "@/lib/hooks/use-preferred-lang";
 import { LangPills } from "@/components/facilitator/lang-pills";
 import { AudioPlayer } from "@/components/facilitator/audio-player";
 import { VideoPlayer } from "@/components/facilitator/video-player";
@@ -13,7 +17,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function ModuleView({ id }: { id: number }) {
   const router = useRouter();
   const { data: module, isLoading } = useModuleQuery(id);
-  const [lang, setLang] = useState("fr");
+  const { data: lang = "fr" } = usePreferredLangQuery();
+  const setLangMutation = useSetPreferredLangMutation();
   const [guideOpen, setGuideOpen] = useState(false);
 
   if (isLoading) {
@@ -46,7 +51,10 @@ export function ModuleView({ id }: { id: number }) {
         <span className="font-display rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
           Module {module.id}
         </span>
-        <LangPills lang={lang} onLangChange={setLang} />
+        <LangPills
+          lang={lang}
+          onLangChange={(l) => setLangMutation.mutate(l)}
+        />
       </div>
 
       <div lang={displayTranslation.lang}>

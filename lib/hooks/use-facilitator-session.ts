@@ -1,29 +1,20 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { db } from "@/lib/db/dexie";
+import {
+  readFacilitatorSession,
+  saveFacilitatorSession,
+  type FacilitatorSession,
+} from "@/lib/db/meta";
 
-const SESSION_KEY = "facilitator_session";
+export type { FacilitatorSession };
 
-export interface FacilitatorSession {
-  facilitator_id: string;
-  full_name: string;
-  region: string;
-  pin: string;
-}
+const SESSION_QUERY_KEY = ["dexie", "meta", "facilitator_session"];
 
 export function useFacilitatorSessionQuery() {
   return useQuery<FacilitatorSession | null>({
-    queryKey: ["dexie", "meta", SESSION_KEY],
-    queryFn: async () => {
-      try {
-        const row = await db.meta.get(SESSION_KEY);
-        return row ? (JSON.parse(row.value) as FacilitatorSession) : null;
-      } catch (error: unknown) {
-        console.error("[meta] lecture de la session facilitateur échouée:", error);
-        return null;
-      }
-    },
+    queryKey: SESSION_QUERY_KEY,
+    queryFn: readFacilitatorSession,
   });
 }
 
@@ -36,17 +27,9 @@ export function useSaveFacilitatorSessionMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (session: FacilitatorSession) => {
-      try {
-        await db.meta.put({ key: SESSION_KEY, value: JSON.stringify(session) });
-      } catch (error: unknown) {
-        throw new Error("Impossible d'enregistrer la session facilitateur", {
-          cause: error,
-        });
-      }
-    },
+    mutationFn: saveFacilitatorSession,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["dexie", "meta", SESSION_KEY] });
+      queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY });
     },
   });
 }

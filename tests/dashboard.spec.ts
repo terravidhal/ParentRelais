@@ -39,8 +39,13 @@ test.describe("Tableau de bord admin", () => {
       .fill("ParentRelais2026!");
     await page.getByRole("button", { name: "Se connecter" }).click();
     await expect(page).toHaveURL(/\/dashboard$/, { timeout: 10_000 });
+    // Laisser le cookie de session Supabase (server-side) se propager avant
+    // une nouvelle navigation qui redéclenche la vérification d'auth côté
+    // serveur — sans ce délai, /dashboard/content peut retomber sur /login.
+    await page.waitForLoadState("networkidle");
 
     await page.goto("/dashboard/content");
+    await expect(page).toHaveURL(/\/dashboard\/content$/, { timeout: 10_000 });
     await expect(
       page.getByRole("heading", { name: /Contenus.*langues/ }),
     ).toBeVisible();

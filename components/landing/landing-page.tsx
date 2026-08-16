@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowDownRight,
@@ -22,15 +23,12 @@ import {
 } from "lucide-react";
 
 /**
- * Photos libres de droits (Pexels) choisies pour leur contexte réel — la
- * première est prise à Mintom, Cameroun, la deuxième au Nigeria voisin.
- * Remplace la version de référence qui pointait vers /manus-storage/*, un
- * hébergement externe non disponible dans ce projet.
+ * Assets fournis pour la landing, servis depuis public/images/landing/
+ * (remplace la version de référence qui pointait vers /manus-storage/*, un
+ * hébergement externe non disponible dans ce projet).
  */
-const heroImage =
-  "https://images.pexels.com/photos/15546252/pexels-photo-15546252.jpeg?auto=compress&cs=tinysrgb&w=1400";
-const deviceImage =
-  "https://images.pexels.com/photos/38226075/pexels-photo-38226075.jpeg?auto=compress&cs=tinysrgb&w=1200";
+const heroImage = "/images/landing/hero.webp";
+const deviceImage = "/images/landing/offline-device.webp";
 
 const steps = [
   {
@@ -219,12 +217,16 @@ export function LandingPage() {
               <div className="absolute left-5 top-5 z-10 flex items-center gap-2 rounded-full bg-[#16241F] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white">
                 <span className="h-2 w-2 rounded-full bg-[#E0961A]" /> Terrain — Cameroun
               </div>
-              {/* eslint-disable-next-line @next/next/no-img-element -- source photo distante (Pexels), pas d'asset local à optimiser */}
-              <img
-                src={heroImage}
-                alt="Enfant souriant à Mintom, Cameroun"
-                className="aspect-[16/10] w-full rounded-[1.6rem] object-cover"
-              />
+              <div className="relative aspect-16/10 w-full overflow-hidden rounded-[1.6rem]">
+                <Image
+                  src={heroImage}
+                  alt="Facilitatrice animant une séance de parentalité positive sur le terrain"
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 560px, 100vw"
+                  className="object-cover"
+                />
+              </div>
               <div className="absolute bottom-7 left-7 flex items-center gap-3 rounded-2xl bg-white/95 px-4 py-3 shadow-xl">
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FBEFD6] text-[#E0961A]">
                   <CloudOff className="h-5 w-5" />
@@ -377,12 +379,15 @@ export function LandingPage() {
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-[1.05fr_.95fr] lg:gap-20 lg:px-10">
           <div className="relative order-2 lg:order-1">
             <div className="absolute -bottom-7 -left-7 h-32 w-32 border-b-2 border-l-2 border-[#E0961A]" />
-            {/* eslint-disable-next-line @next/next/no-img-element -- source photo distante (Pexels) */}
-            <img
-              src={deviceImage}
-              alt="Enfants réunis en extérieur, Afrique de l'Ouest"
-              className="relative aspect-[4/3] w-full rounded-[2rem] object-cover shadow-[0_30px_55px_-35px_rgba(8,89,110,.65)]"
-            />
+            <div className="relative aspect-4/3 w-full overflow-hidden rounded-[2rem] shadow-[0_30px_55px_-35px_rgba(8,89,110,.65)]">
+              <Image
+                src={deviceImage}
+                alt="Téléphone et carnet de terrain utilisés hors-ligne par un facilitateur"
+                fill
+                sizes="(min-width: 1024px) 560px, 100vw"
+                className="object-cover"
+              />
+            </div>
             <div className="absolute -right-3 top-7 rounded-2xl bg-[#E0961A] px-4 py-3 text-sm font-bold text-[#16241F] shadow-lg sm:-right-6">
               <AudioLines className="mr-2 inline h-4 w-4" /> Audio-first
             </div>

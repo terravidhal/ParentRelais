@@ -26,7 +26,7 @@ export default async function MediaLibraryPage() {
   }));
 
   return (
-    <div className="lg:max-w-3xl">
+    <div>
       <Link
         href="/dashboard/content"
         className="mb-3 flex h-11 w-fit items-center gap-1 text-sm font-semibold text-primary"
@@ -34,9 +34,18 @@ export default async function MediaLibraryPage() {
         <ChevronLeft size={16} aria-hidden="true" /> Retour aux contenus
       </Link>
 
-      <div className="rounded-2xl border border-border bg-card p-4 lg:p-6">
-        <h3 className="font-display mb-3 flex items-center gap-2 font-bold">
-          <Library size={16} aria-hidden="true" /> Tous les fichiers déposés
+      <div className="mb-6">
+        <p className="font-display text-xs font-semibold tracking-wide text-accent">
+          PILOTAGE NATIONAL
+        </p>
+        <h1 className="font-display text-2xl font-bold">
+          Tous les fichiers déposés
+        </h1>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm lg:p-6">
+        <h3 className="font-display mb-4 flex items-center gap-2 font-bold">
+          <Library size={16} aria-hidden="true" /> Bibliothèque média
         </h3>
         <MediaLibraryList entries={entries} />
       </div>

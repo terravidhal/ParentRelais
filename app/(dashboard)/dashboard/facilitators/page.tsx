@@ -1,6 +1,7 @@
-import { Users } from "lucide-react";
+import { Users, MapPin, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { StatCard } from "@/components/dashboard/stat-card";
 
 /**
  * Server component. Le nom du facilitateur est synchronisé depuis
@@ -18,49 +19,69 @@ export default async function DashboardFacilitatorsPage() {
     .order("last_session_at", { ascending: false });
 
   const rows = facilitators ?? [];
+  const totalSessions = rows.reduce((n, r) => n + r.sessions_count, 0);
+  const regionCount = new Set(rows.map((r) => r.region)).size;
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="mb-6">
         <p className="font-display text-xs font-semibold tracking-wide text-accent">
           PILOTAGE NATIONAL
         </p>
         <h1 className="font-display text-2xl font-bold">Facilitateurs</h1>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4 lg:p-6">
-        <h3 className="font-display mb-3 flex items-center gap-2 font-bold">
-          <Users size={16} aria-hidden="true" /> Activité par facilitateur
-        </h3>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard
+          label="Facilitateurs actifs"
+          value={rows.length}
+          icon={<Users size={18} aria-hidden="true" />}
+          color="primary"
+        />
+        <StatCard
+          label="Séances animées au total"
+          value={totalSessions}
+          icon={<BookOpen size={18} aria-hidden="true" />}
+          color="success"
+        />
+        <StatCard
+          label="Régions couvertes"
+          value={regionCount}
+          icon={<MapPin size={18} aria-hidden="true" />}
+          color="accent"
+        />
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-border bg-card shadow-sm">
+        <div className="flex items-center gap-2 border-b border-border px-5 py-4">
+          <Users size={16} className="text-muted-foreground" aria-hidden="true" />
+          <h3 className="font-display font-bold">Activité par facilitateur</h3>
+        </div>
 
         {rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="p-5 text-sm text-muted-foreground">
             Aucune séance synchronisée pour l&apos;instant.
           </p>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-border">
-            <div className="grid grid-cols-4 text-xs font-semibold">
-              <div className="bg-background p-2">Facilitateur</div>
-              <div className="bg-background p-2 text-center">Région</div>
-              <div className="bg-background p-2 text-center">Séances</div>
-              <div className="bg-background p-2 text-center">Familles</div>
+          <div className="overflow-x-auto">
+            <div className="grid min-w-150 grid-cols-4 gap-2 px-5 py-2 text-xs font-semibold text-muted-foreground">
+              <span>Facilitateur</span>
+              <span className="text-center">Région</span>
+              <span className="text-center">Séances</span>
+              <span className="text-center">Familles</span>
             </div>
             {rows.map((f) => (
               <Link
                 key={f.facilitator_id}
                 href={`/dashboard/facilitators/${f.facilitator_id}`}
-                className="grid grid-cols-4 items-center border-t border-border text-sm transition-colors hover:bg-muted"
+                className="grid min-w-150 grid-cols-4 items-center gap-2 border-t border-border px-5 py-3 text-sm transition-colors hover:bg-muted"
               >
-                <div className="p-2 font-semibold">
+                <span className="font-display font-semibold">
                   {f.full_name ?? `${f.facilitator_id.slice(0, 8)}…`}
-                </div>
-                <div className="p-2 text-center">{f.region}</div>
-                <div className="p-2 text-center font-semibold">
-                  {f.sessions_count}
-                </div>
-                <div className="p-2 text-center font-semibold">
-                  {f.families_reached}
-                </div>
+                </span>
+                <span className="text-center text-muted-foreground">{f.region}</span>
+                <span className="text-center font-semibold">{f.sessions_count}</span>
+                <span className="text-center font-semibold">{f.families_reached}</span>
               </Link>
             ))}
           </div>

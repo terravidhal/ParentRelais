@@ -1,6 +1,7 @@
-import { ChevronLeft, MapPin } from "lucide-react";
+import { ChevronLeft, MapPin, BookOpen, Users, Award } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { StatCard } from "@/components/dashboard/stat-card";
 
 /**
  * Server component — historique des séances d'un facilitateur donné. Même
@@ -31,6 +32,13 @@ export default async function FacilitatorDetailPage({
 
   const rows = sessions ?? [];
   const displayName = facilitator?.full_name ?? `${facilitator_id.slice(0, 8)}…`;
+  const totalFamilies = rows.reduce((n, s) => n + s.parents_total, 0);
+  const avgQuiz =
+    rows.length === 0
+      ? 0
+      : Math.round(
+          (rows.reduce((n, s) => n + s.quiz_score / s.quiz_max, 0) / rows.length) * 100,
+        );
 
   return (
     <div>
@@ -41,7 +49,7 @@ export default async function FacilitatorDetailPage({
         <ChevronLeft size={16} aria-hidden="true" /> Retour
       </Link>
 
-      <div className="mb-4">
+      <div className="mb-6">
         <p className="font-display text-xs font-semibold tracking-wide text-accent">
           PILOTAGE NATIONAL
         </p>
@@ -53,42 +61,66 @@ export default async function FacilitatorDetailPage({
         )}
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4 lg:p-6">
-        <h3 className="font-display mb-3 font-bold">Historique des séances</h3>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard
+          label="Séances animées"
+          value={rows.length}
+          icon={<BookOpen size={18} aria-hidden="true" />}
+          color="primary"
+        />
+        <StatCard
+          label="Familles touchées"
+          value={totalFamilies}
+          icon={<Users size={18} aria-hidden="true" />}
+          color="success"
+        />
+        <StatCard
+          label="Score moyen au quiz"
+          value={avgQuiz}
+          icon={<Award size={18} aria-hidden="true" />}
+          color="accent"
+        />
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-border bg-card shadow-sm">
+        <div className="flex items-center gap-2 border-b border-border px-5 py-4">
+          <BookOpen size={16} className="text-muted-foreground" aria-hidden="true" />
+          <h3 className="font-display font-bold">Historique des séances</h3>
+        </div>
 
         {rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="p-5 text-sm text-muted-foreground">
             Aucune séance synchronisée pour ce facilitateur.
           </p>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-border">
-            <div className="grid grid-cols-6 text-xs font-semibold">
-              <div className="bg-background p-2">Module</div>
-              <div className="bg-background p-2 text-center">Localité</div>
-              <div className="bg-background p-2 text-center">Parents</div>
-              <div className="bg-background p-2 text-center">Femmes</div>
-              <div className="bg-background p-2 text-center">Quiz</div>
-              <div className="bg-background p-2 text-center">Date</div>
+          <div className="overflow-x-auto">
+            <div className="grid min-w-150 grid-cols-6 gap-2 px-5 py-2 text-xs font-semibold text-muted-foreground">
+              <span>Module</span>
+              <span className="text-center">Localité</span>
+              <span className="text-center">Parents</span>
+              <span className="text-center">Femmes</span>
+              <span className="text-center">Quiz</span>
+              <span className="text-center">Date</span>
             </div>
             {rows.map((s) => (
               <div
                 key={s.client_uuid}
-                className="grid grid-cols-6 items-center border-t border-border text-sm"
+                className="grid min-w-150 grid-cols-6 items-center gap-2 border-t border-border px-5 py-3 text-sm"
               >
-                <div className="p-2 font-semibold">Module {s.module_id}</div>
-                <div className="p-2 text-center">{s.locality}</div>
-                <div className="p-2 text-center">{s.parents_total}</div>
-                <div className="p-2 text-center">{s.women}</div>
-                <div className="p-2 text-center">
+                <span className="font-semibold">Module {s.module_id}</span>
+                <span className="text-center">{s.locality}</span>
+                <span className="text-center">{s.parents_total}</span>
+                <span className="text-center">{s.women}</span>
+                <span className="text-center">
                   {s.quiz_score}/{s.quiz_max}
-                </div>
-                <div className="p-2 text-center text-xs text-muted-foreground">
+                </span>
+                <span className="text-center text-xs text-muted-foreground">
                   {new Date(s.held_at).toLocaleDateString("fr-FR", {
                     day: "2-digit",
                     month: "2-digit",
                     year: "numeric",
                   })}
-                </div>
+                </span>
               </div>
             ))}
           </div>

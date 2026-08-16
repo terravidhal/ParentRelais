@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Globe, Library } from "lucide-react";
+import { Globe, Library, CheckCircle2, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ContentMatrix } from "@/components/dashboard/content-matrix";
 import { MediaUploadCell } from "@/components/dashboard/media-upload-cell";
+import { StatCard } from "@/components/dashboard/stat-card";
 
 const UPLOADABLE_LANGS = new Set(["fr", "en", "ff", "sign"]);
 
@@ -33,28 +34,64 @@ export default async function DashboardContentPage() {
     return { moduleId: m.id, statusByLang };
   });
 
+  const totalCells = rows.length * 4;
+  const readyCells = rows.reduce(
+    (n, r) => n + Object.values(r.statusByLang).filter((s) => s === "ready").length,
+    0,
+  );
+
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 lg:max-w-3xl lg:p-6">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h3 className="font-display flex items-center gap-2 font-bold">
-          <Globe size={16} aria-hidden="true" /> Contenus & langues
-        </h3>
-        <Link
-          href="/dashboard/content/media"
-          className="flex h-11 items-center gap-1.5 text-sm font-semibold text-primary underline-offset-2 hover:underline"
-        >
-          <Library size={14} aria-hidden="true" />
-          Voir tous les fichiers →
-        </Link>
+    <div>
+      <div className="mb-6">
+        <p className="font-display text-xs font-semibold tracking-wide text-accent">
+          PILOTAGE NATIONAL
+        </p>
+        <h1 className="font-display text-2xl font-bold">Contenus & langues</h1>
       </div>
-      <ContentMatrix
-        rows={rows}
-        renderCellAction={(moduleId, lang) =>
-          UPLOADABLE_LANGS.has(lang) ? (
-            <MediaUploadCell moduleId={moduleId} lang={lang} />
-          ) : null
-        }
-      />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard
+          label="Modules"
+          value={rows.length}
+          icon={<Globe size={18} aria-hidden="true" />}
+          color="primary"
+        />
+        <StatCard
+          label="Cases prêtes"
+          value={readyCells}
+          icon={<CheckCircle2 size={18} aria-hidden="true" />}
+          color="success"
+        />
+        <StatCard
+          label="En attente de contenu"
+          value={totalCells - readyCells}
+          icon={<Clock size={18} aria-hidden="true" />}
+          color="accent"
+        />
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-sm lg:p-6">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <h3 className="font-display flex items-center gap-2 font-bold">
+            <Globe size={16} aria-hidden="true" /> Matrice module × langue
+          </h3>
+          <Link
+            href="/dashboard/content/media"
+            className="flex h-11 items-center gap-1.5 text-sm font-semibold text-primary underline-offset-2 hover:underline"
+          >
+            <Library size={14} aria-hidden="true" />
+            Voir tous les fichiers →
+          </Link>
+        </div>
+        <ContentMatrix
+          rows={rows}
+          renderCellAction={(moduleId, lang) =>
+            UPLOADABLE_LANGS.has(lang) ? (
+              <MediaUploadCell moduleId={moduleId} lang={lang} />
+            ) : null
+          }
+        />
+      </div>
     </div>
   );
 }

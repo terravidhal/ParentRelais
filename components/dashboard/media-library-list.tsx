@@ -47,7 +47,7 @@ export function MediaLibraryList({ entries }: MediaLibraryListProps) {
           <h3 className="font-display mb-2 text-sm font-bold">
             Module {moduleId}
           </h3>
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             {moduleEntries.map((entry) => (
               <div
                 key={entry.lang}

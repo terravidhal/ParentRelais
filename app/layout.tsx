@@ -21,11 +21,14 @@ export const metadata: Metadata = {
     "Boîte à outils numérique hors-ligne des facilitateurs de parentalité positive — UNICEF Cameroon × MINPROFF.",
   manifest: "/manifest.webmanifest",
   icons: {
-    // TODO Phase 1 : remplacer par le vrai logo ParentRelais/UNICEF une fois fourni.
-    // iOS Safari ignore le manifest pour l'icône d'accueil et exige un raster —
-    // le SVG suffit pour Chrome/Edge/Firefox Android en Phase 0.
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    // iOS Safari ignore le manifest pour l'icône d'accueil et exige un PNG
+    // raster — le SVG seul laissait l'app sans icône fonctionnelle sur iOS.
+    apple: "/apple-touch-icon.png",
   },
 };
 

@@ -38,6 +38,8 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
   --color-primary-dark: var(--primary-dark);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-foreground: var(--brand-accent-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-success-soft: var(--success-soft);
@@ -66,9 +68,14 @@
   --card-foreground: oklch(0.246 0.022 170.3);
   --popover: oklch(1.000 0.000 89.9);
   --popover-foreground: oklch(0.246 0.022 170.3);
-  --primary: oklch(0.545 0.099 223.1); /* primary #0C7C9A */
+  --primary: oklch(0.545 0.115 223.1); /* primary #0C7C9A, chroma nudgée vers le bleu UNICEF */
   --primary-foreground: oklch(1.000 0.000 89.9);
   --primary-dark: oklch(0.431 0.077 221.8); /* primaryDark #08596E */
+  /* Bleu institutionnel plus affirmé (proche #1CABE2) — réservé aux surfaces
+     de marque (landing, bandeaux de connexion), jamais l'UI applicative qui
+     reste sur --primary (voir 05-DESIGN-SYSTEM.md). */
+  --brand-accent: oklch(0.720 0.130 226.0);
+  --brand-accent-foreground: oklch(1.000 0.000 89.9);
   --secondary: oklch(0.955 0.005 165.0);
   --secondary-foreground: oklch(0.246 0.022 170.3);
   --muted: oklch(0.912 0.009 171.8); /* line #DCE4E1 */
@@ -107,9 +114,11 @@
   --card-foreground: oklch(0.955 0.005 165.0);
   --popover: oklch(0.248 0.018 172.2);
   --popover-foreground: oklch(0.955 0.005 165.0);
-  --primary: oklch(0.687 0.104 220.2);
+  --primary: oklch(0.687 0.120 220.2);
   --primary-foreground: oklch(0.192 0.012 167.1);
   --primary-dark: oklch(0.545 0.099 223.1);
+  --brand-accent: oklch(0.760 0.130 226.0);
+  --brand-accent-foreground: oklch(0.192 0.012 167.1);
   --secondary: oklch(0.248 0.018 172.2);
   --secondary-foreground: oklch(0.955 0.005 165.0);
   --muted: oklch(0.315 0.020 165.3);

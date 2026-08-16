@@ -1,13 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="112" fill="#0C7C9A" />
-  <text
-    x="50%"
-    y="52%"
-    text-anchor="middle"
-    dominant-baseline="middle"
-    font-family="'Space Grotesk', 'Inter', sans-serif"
-    font-weight="700"
-    font-size="200"
-    fill="#EDF1EF"
-  >PR</text>
+  <!--
+    Parent et enfant stylisés, silhouettes pleines rapprochées (formes
+    simples, lisibles jusqu'à 16px) — évoque directement la parentalité
+    sans dépendre de texte.
+  -->
+  <g fill="#EDF1EF">
+    <!-- Silhouette parent (gauche, grande) -->
+    <circle cx="176" cy="164" r="48" />
+    <path d="M176 224c-58 0-96 46-96 112v22h140v-60c0-34 10-58 28-74-24-1-48 0-72 0z" />
+    <!-- Silhouette enfant (droite, petite), rapprochée du parent -->
+    <circle cx="322" cy="232" r="34" />
+    <path d="M322 276c-42 0-70 34-70 82v18h108v-52c0-24 6-40 16-52-18-1-38 4-54 4z" />
+  </g>
 </svg>

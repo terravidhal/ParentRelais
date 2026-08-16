@@ -1,21 +1,33 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "@/lib/db/dexie";
 import { addOutboxSession } from "@/lib/db/outbox";
+import { saveFacilitatorSession, clearFacilitatorSession } from "@/lib/db/meta";
 import { syncOutbox } from "./engine";
 
+/**
+ * Mock générique : `from("sessions")` répond via `upsertImpl` (comme avant),
+ * `from("facilitators")` répond succès par défaut — la plupart des tests
+ * de séances ne portent pas sur l'identité facilitateur, mais syncOutbox
+ * l'upsert désormais à chaque appel (voir lib/sync/engine.ts).
+ */
 function mockSupabase(
   upsertImpl: (rows: unknown[]) => { data: { client_uuid: string }[] | null; error: unknown },
 ) {
-  const upsert = vi.fn(upsertImpl);
+  const sessionsUpsert = vi.fn(upsertImpl);
   return {
-    from: vi.fn(() => ({
-      upsert: vi.fn((rows: unknown[]) => {
-        const result = upsert(rows);
-        return {
-          select: vi.fn(() => Promise.resolve(result)),
-        };
-      }),
-    })),
+    from: vi.fn((table: string) => {
+      if (table === "facilitators") {
+        return { upsert: vi.fn(() => Promise.resolve({ error: null })) };
+      }
+      return {
+        upsert: vi.fn((rows: unknown[]) => {
+          const result = sessionsUpsert(rows);
+          return {
+            select: vi.fn(() => Promise.resolve(result)),
+          };
+        }),
+      };
+    }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 }
@@ -23,15 +35,95 @@ function mockSupabase(
 describe("syncOutbox", () => {
   beforeEach(async () => {
     await db.outbox.clear();
+    await clearFacilitatorSession();
   });
 
-  it("ne fait rien si l'outbox est vide", async () => {
+  it("ne synchronise aucune séance si l'outbox est vide", async () => {
     const supabase = mockSupabase(() => ({ data: [], error: null }));
 
     const result = await syncOutbox(supabase);
 
     expect(result).toEqual({ syncedCount: 0, failedCount: 0 });
-    expect(supabase.from).not.toHaveBeenCalled();
+  });
+
+  it("upsert l'identité facilitateur à chaque appel, indépendamment de l'outbox", async () => {
+    await saveFacilitatorSession({
+      facilitator_id: "fac-1",
+      full_name: "Aïcha Test",
+      region: "Extrême-Nord",
+      pin: "1234",
+    });
+    const facilitatorsUpsert = vi.fn(() => Promise.resolve({ error: null }));
+    const supabase = {
+      from: vi.fn((table: string) => {
+        if (table === "facilitators") {
+          return { upsert: facilitatorsUpsert };
+        }
+        return {
+          upsert: vi.fn(() => ({
+            select: vi.fn(() => Promise.resolve({ data: [], error: null })),
+          })),
+        };
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any;
+
+    await syncOutbox(supabase);
+
+    expect(facilitatorsUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        facilitator_id: "fac-1",
+        full_name: "Aïcha Test",
+        region: "Extrême-Nord",
+      }),
+      expect.objectContaining({ onConflict: "facilitator_id" }),
+    );
+  });
+
+  it("un échec de l'upsert facilitateur ne bloque pas la synchro des séances", async () => {
+    await saveFacilitatorSession({
+      facilitator_id: "fac-1",
+      full_name: "Aïcha Test",
+      region: "Extrême-Nord",
+      pin: "1234",
+    });
+    const uuid = await addOutboxSession({
+      facilitator_id: "fac-1",
+      module_id: 1,
+      region: "Extrême-Nord",
+      locality: "Maroua",
+      parents_total: 10,
+      women: 6,
+      disability_count: 1,
+      quiz_score: 2,
+      quiz_max: 2,
+      held_at: new Date().toISOString(),
+    });
+    const supabase = {
+      from: vi.fn((table: string) => {
+        if (table === "facilitators") {
+          return {
+            upsert: vi.fn(() =>
+              Promise.resolve({ error: { message: "facilitators write failed" } }),
+            ),
+          };
+        }
+        return {
+          upsert: vi.fn(() => ({
+            select: vi.fn(() =>
+              Promise.resolve({ data: [{ client_uuid: uuid }], error: null }),
+            ),
+          })),
+        };
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any;
+
+    const result = await syncOutbox(supabase);
+
+    expect(result).toEqual({ syncedCount: 1, failedCount: 0 });
+    const stored = await db.outbox.get(uuid);
+    expect(stored?.status).toBe("synced");
   });
 
   it("upsert les séances pending et les marque synced après confirmation serveur", async () => {

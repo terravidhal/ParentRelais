@@ -55,6 +55,21 @@ export type SessionRow = {
   synced_at: string | null;
 };
 
+// Identité facilitateur — voir supabase/migrations/0009_facilitators_table.sql.
+// Distincte de `profiles` (comptes admin) : un facilitateur n'a jamais de
+// auth.uid(), cette table est peuplée par upsert anonyme depuis le moteur
+// de synchro (lib/sync/engine.ts).
+export type FacilitatorRow = {
+  facilitator_id: string;
+  full_name: string;
+  region: string;
+  photo_url: string | null;
+  phone: string | null;
+  hired_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 // Vue d'agrégation, voir supabase/migrations/0002_dashboard_view.sql.
 export type DashboardCoverageRow = {
   locality: string;
@@ -65,9 +80,11 @@ export type DashboardCoverageRow = {
   sessions_count: number;
 };
 
-// Vue d'agrégation, voir supabase/migrations/0008_facilitators_view.sql.
+// Vue d'agrégation, voir supabase/migrations/0008_facilitators_view.sql et
+// 0010_facilitators_view_name.sql (ajout de full_name).
 export type DashboardFacilitatorRow = {
   facilitator_id: string;
+  full_name: string | null;
   region: string;
   sessions_count: number;
   families_reached: number;
@@ -99,6 +116,19 @@ export type Database = {
         Row: SessionRow;
         Insert: Omit<SessionRow, "synced_at">;
         Update: Partial<SessionRow>;
+        Relationships: [];
+      };
+      facilitators: {
+        Row: FacilitatorRow;
+        Insert: Omit<
+          FacilitatorRow,
+          "photo_url" | "phone" | "hired_at" | "created_at"
+        > & {
+          photo_url?: string | null;
+          phone?: string | null;
+          hired_at?: string | null;
+        };
+        Update: Partial<FacilitatorRow>;
         Relationships: [];
       };
     };

@@ -33,10 +33,31 @@ export interface OutboxSession {
   status: "pending" | "synced";
 }
 
+export type MediaDownloadStatus =
+  | "queued"
+  | "downloading"
+  | "paused"
+  | "done"
+  | "failed";
+
+export interface MediaDownload {
+  media_url: string;
+  module_id: number;
+  lang: string;
+  media_type: "audio" | "video" | "subtitles";
+  total_bytes: number | null;
+  downloaded_bytes: number;
+  status: MediaDownloadStatus;
+  error_message: string | null;
+  attempt_count: number;
+  updated_at: string;
+}
+
 export class ParentRelaisDB extends Dexie {
   modules!: Table<CachedModule, number>;
   outbox!: Table<OutboxSession, string>;
   meta!: Table<{ key: string; value: string }, string>;
+  mediaDownloads!: Table<MediaDownload, string>;
 
   constructor() {
     super("parentrelais");
@@ -44,6 +65,12 @@ export class ParentRelaisDB extends Dexie {
       modules: "id, position",
       outbox: "client_uuid, status",
       meta: "key",
+    });
+    this.version(2).stores({
+      modules: "id, position",
+      outbox: "client_uuid, status",
+      meta: "key",
+      mediaDownloads: "media_url, status, module_id",
     });
   }
 }

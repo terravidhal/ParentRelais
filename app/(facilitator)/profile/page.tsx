@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, LogOut, RotateCcw } from "lucide-react";
+import { ChevronLeft, LogOut, RotateCcw, UserCircle2 } from "lucide-react";
 import {
   useFacilitatorSessionQuery,
   useSignOutFacilitatorMutation,
 } from "@/lib/hooks/use-facilitator-session";
 import { useResetContentMutation } from "@/lib/hooks/use-reset-content-mutation";
+import { useAllSessionsQuery } from "@/lib/hooks/use-outbox-query";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
@@ -19,6 +20,7 @@ export default function ProfilePage() {
   const { data: session, isLoading: sessionLoading } = useFacilitatorSessionQuery();
   const signOutMutation = useSignOutFacilitatorMutation();
   const resetContentMutation = useResetContentMutation();
+  const { data: sessions = [] } = useAllSessionsQuery();
   const [confirmingReset, setConfirmingReset] = useState(false);
 
   useEffect(() => {
@@ -64,6 +66,20 @@ export default function ProfilePage() {
           <p className="font-display text-sm font-semibold">{session.full_name}</p>
           <p className="text-xs text-muted-foreground">{session.region}</p>
         </div>
+      </div>
+
+      <div className="mt-3 rounded-2xl border border-border bg-background p-3">
+        <p className="flex items-center gap-2 font-display text-sm font-semibold">
+          <UserCircle2 size={16} className="text-accent" aria-hidden="true" />
+          Informations
+        </p>
+        <div className="mt-2 flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Séances animées</span>
+          <span className="font-display font-semibold">{sessions.length}</span>
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Informations complémentaires à venir.
+        </p>
       </div>
 
       <button

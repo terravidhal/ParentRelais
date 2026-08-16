@@ -26,9 +26,12 @@ interface MediaUploadCellProps {
 }
 
 /**
- * "sign" (langue des signes) est une case réservée à l'UI (voir
- * ContentMatrix) sans ligne module_translations correspondante — aucun
- * upload n'est possible tant que la table ne porte pas cette langue.
+ * Uploade un fichier média pour une cellule (module × langue) donnée. Le
+ * flip "pending"→"ready" repose sur une ligne module_translations
+ * pré-existante pour (moduleId, lang) — un UPDATE sur zéro ligne réussit
+ * silencieusement sans rien changer (voir
+ * supabase/migrations/0011_seed_ff_sign_shell_rows.sql, qui garantit cette
+ * ligne pour "ff" et "sign").
  */
 export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
   const router = useRouter();
@@ -99,7 +102,7 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
         onClick={() => inputRef.current?.click()}
         disabled={isUploading}
         className="inline-flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
-        aria-label="Téléverser un fichier pour cette case"
+        aria-label={`Téléverser un fichier — module ${moduleId}, ${lang}`}
       >
         {isUploading ? (
           <Loader2 size={14} className="animate-spin" aria-hidden="true" />

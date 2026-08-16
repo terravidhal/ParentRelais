@@ -1,12 +1,13 @@
 import { Users } from "lucide-react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Server component. Le nom du facilitateur n'existe nulle part côté
- * Supabase : il est saisi au login PIN local et ne quitte jamais Dexie
- * (voir lib/db/meta.ts) — seul facilitator_id (UUID généré côté client)
- * accompagne chaque séance synchronisée. On affiche donc un identifiant
- * court plutôt qu'un nom, fidèle à l'état réel des données.
+ * Server component. Le nom du facilitateur est synchronisé depuis
+ * l'appareil vers `facilitators` à chaque cycle de sync (voir
+ * lib/sync/engine.ts, supabase/migrations/0009_facilitators_table.sql) —
+ * peut être absent pour des lignes historiques (séance synchronisée avant
+ * l'upsert facilitateur correspondant), d'où le repli sur l'UUID tronqué.
  */
 export default async function DashboardFacilitatorsPage() {
   const supabase = await createClient();
@@ -45,12 +46,13 @@ export default async function DashboardFacilitatorsPage() {
               <div className="bg-background p-2 text-center">Familles</div>
             </div>
             {rows.map((f) => (
-              <div
+              <Link
                 key={f.facilitator_id}
-                className="grid grid-cols-4 items-center border-t border-border text-sm"
+                href={`/dashboard/facilitators/${f.facilitator_id}`}
+                className="grid grid-cols-4 items-center border-t border-border text-sm transition-colors hover:bg-muted"
               >
-                <div className="p-2 font-mono text-xs">
-                  {f.facilitator_id.slice(0, 8)}…
+                <div className="p-2 font-semibold">
+                  {f.full_name ?? `${f.facilitator_id.slice(0, 8)}…`}
                 </div>
                 <div className="p-2 text-center">{f.region}</div>
                 <div className="p-2 text-center font-semibold">
@@ -59,15 +61,10 @@ export default async function DashboardFacilitatorsPage() {
                 <div className="p-2 text-center font-semibold">
                   {f.families_reached}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
-        <p className="mt-2 text-xs text-muted-foreground">
-          Identifiant technique affiché plutôt qu&apos;un nom : le
-          facilitateur s&apos;authentifie localement (PIN), son nom ne
-          quitte jamais son appareil.
-        </p>
       </div>
     </div>
   );

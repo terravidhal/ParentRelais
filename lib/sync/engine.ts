@@ -1,11 +1,39 @@
 import type { createClient } from "@/lib/supabase/client";
 import { getPendingSessions, markSessionsSynced } from "@/lib/db/outbox";
+import { readFacilitatorSession } from "@/lib/db/meta";
 
 type SupabaseClient = ReturnType<typeof createClient>;
 
 export interface SyncResult {
   syncedCount: number;
   failedCount: number;
+}
+
+/**
+ * Upsert la ligne d'identité facilitateur courante (nom, région) — voir
+ * supabase/migrations/0009_facilitators_table.sql. Un échec ici est loggé
+ * mais ne bloque JAMAIS la synchro des séances (partie chargée de sens du
+ * produit) : contrairement à l'outbox, il n'y a qu'une identité courante à
+ * synchroniser à chaque cycle, pas une file d'éléments distincts — un échec
+ * silencieux est simplement retenté au prochain cycle, sans perte.
+ */
+async function syncFacilitatorIdentity(supabase: SupabaseClient): Promise<void> {
+  const session = await readFacilitatorSession();
+  if (!session) return;
+
+  const { error } = await supabase.from("facilitators").upsert(
+    {
+      facilitator_id: session.facilitator_id,
+      full_name: session.full_name,
+      region: session.region,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "facilitator_id" },
+  );
+
+  if (error) {
+    console.error("[sync] upsert facilitators échoué:", error);
+  }
 }
 
 /**
@@ -25,6 +53,8 @@ export interface SyncResult {
 export async function syncOutbox(
   supabase: SupabaseClient,
 ): Promise<SyncResult> {
+  await syncFacilitatorIdentity(supabase);
+
   const pending = await getPendingSessions();
   if (pending.length === 0) {
     return { syncedCount: 0, failedCount: 0 };

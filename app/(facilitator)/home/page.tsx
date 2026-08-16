@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, History } from "lucide-react";
+import { BookOpen, History, Settings2 } from "lucide-react";
 import { useModulesQuery } from "@/lib/hooks/use-modules-query";
 import { useFacilitatorSessionQuery } from "@/lib/hooks/use-facilitator-session";
 import { useAllSessionsQuery } from "@/lib/hooks/use-outbox-query";
@@ -13,6 +13,7 @@ import {
 import { LangPills } from "@/components/facilitator/lang-pills";
 import { ModuleCard } from "@/components/facilitator/module-card";
 import { ModulePagination } from "@/components/facilitator/module-pagination";
+import { MediaDownloadBanner } from "@/components/facilitator/media-download-banner";
 import { FacilitatorOnboardingTour } from "@/components/facilitator/onboarding-tour";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CachedModule } from "@/lib/db/dexie";
@@ -77,9 +78,15 @@ export default function HomePage() {
             onClick={() => router.push("/profile")}
             aria-label="Profil et paramètres"
             id="profile-button"
-            className="font-display flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft font-bold text-accent lg:order-first lg:mb-4"
+            className="font-display relative flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft font-bold text-accent lg:order-first lg:mb-4"
           >
             {session.full_name.slice(0, 2).toUpperCase()}
+            <span
+              aria-hidden="true"
+              className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-card"
+            >
+              <Settings2 size={10} strokeWidth={3} />
+            </span>
           </button>
         </div>
 
@@ -126,6 +133,8 @@ export default function HomePage() {
         <p className="mb-2 flex items-center gap-1 text-sm font-semibold text-muted-foreground">
           <BookOpen size={14} aria-hidden="true" /> Modules de formation
         </p>
+
+        {!modulesLoading && <MediaDownloadBanner modules={modules} />}
 
         <div
           id="module-list"

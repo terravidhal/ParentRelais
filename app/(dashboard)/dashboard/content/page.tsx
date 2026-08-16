@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ContentMatrix } from "@/components/dashboard/content-matrix";
 import { MediaUploadCell } from "@/components/dashboard/media-upload-cell";
 
-const UPLOADABLE_LANGS = new Set(["fr", "en", "ff"]);
+const UPLOADABLE_LANGS = new Set(["fr", "en", "ff", "sign"]);
 
 /**
  * Server component pour la lecture ; l'upload lui-même est délégué à

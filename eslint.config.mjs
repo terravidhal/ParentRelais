@@ -17,6 +17,11 @@ const eslintConfig = defineConfig([
     // Démo de référence (pas du code de production, voir docs/04-SCREENS.md) —
     // sert uniquement de source visuelle à réimplémenter proprement.
     "ParentRelais_Demo.jsx",
+    // Projets de référence pour le design de la landing — jamais buildés ni
+    // déployés, uniquement une source d'inspiration à réimplémenter (voir
+    // components/landing/landing-page.tsx).
+    "parentrelais-landing/**",
+    "parentrelais-preview/**",
   ]),
 ]);
 

@@ -220,6 +220,7 @@
 .driver-popover-arrow-side-right.driver-popover-arrow {
   border-right-color: var(--popover);
 }
-.driver-overlay {
-  background: var(--foreground);
-}
+/* Pas de surcharge sur .driver-overlay : driver.js dessine le voile/spotlight
+   via un <svg> avec fill-opacity géré en JS (option overlayOpacity), pas via
+   une classe CSS statique — lui imposer un background ici écrase ce mécanisme
+   et rend tout l'overlay opaque, quel que soit overlayOpacity. */

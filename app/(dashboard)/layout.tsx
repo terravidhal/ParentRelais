@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 
 /**
  * Server component — zone en ligne (CLAUDE.md règle 2). Non exécutable en
@@ -21,6 +22,8 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">{children}</div>
+    <DashboardShell userEmail={user.email ?? "Compte admin"}>
+      {children}
+    </DashboardShell>
   );
 }

@@ -2,6 +2,7 @@ import { Users, BookOpen, Accessibility } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { CoverageBars } from "@/components/dashboard/coverage-bars";
+import { CoverageChart } from "@/components/dashboard/coverage-chart";
 
 /**
  * Server component — agrégations via la vue Postgres dashboard_coverage
@@ -63,6 +64,15 @@ export default async function DashboardPage() {
           Familles touchées par localité
         </h3>
         <CoverageBars
+          data={rows.map((r) => ({ label: r.locality, value: r.families_reached }))}
+        />
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-border bg-card p-4">
+        <h3 className="font-display mb-3 font-bold">
+          Vue graphique — familles touchées par localité
+        </h3>
+        <CoverageChart
           data={rows.map((r) => ({ label: r.locality, value: r.families_reached }))}
         />
       </div>

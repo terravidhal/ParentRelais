@@ -21,6 +21,14 @@ export default function LoginPage() {
   const [region, setRegion] = useState<string>(REGIONS[0]);
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [recoveryMode, setRecoveryMode] = useState(false);
+
+  // En mode récupération, on retraite comme une première connexion : un
+  // nouveau facilitator_id est généré plutôt que de réutiliser l'ancien.
+  // Les séances déjà écrites dans l'outbox portent leur propre facilitator_id
+  // (voir lib/db/outbox.ts, addOutboxSession) et continuent de se synchroniser
+  // sous leur identité d'origine, indépendamment du changement de session.
+  const isFirstLoginForm = !existingSession || recoveryMode;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -31,18 +39,21 @@ export default function LoginPage() {
       return;
     }
 
-    // Première connexion : le PIN saisi devient la référence locale.
-    // Connexions suivantes : le PIN doit correspondre à la session existante.
-    if (existingSession && existingSession.pin !== pin) {
+    // Connexion existante (hors récupération) : le PIN doit correspondre.
+    if (existingSession && !recoveryMode && existingSession.pin !== pin) {
       setError("Code PIN incorrect.");
       return;
     }
 
     try {
       await saveMutation.mutateAsync({
-        facilitator_id: existingSession?.facilitator_id ?? crypto.randomUUID(),
-        full_name: existingSession?.full_name ?? (fullName || "Facilitateur"),
-        region: existingSession?.region ?? region,
+        facilitator_id: isFirstLoginForm
+          ? crypto.randomUUID()
+          : existingSession!.facilitator_id,
+        full_name: isFirstLoginForm
+          ? fullName || "Facilitateur"
+          : existingSession!.full_name,
+        region: isFirstLoginForm ? region : existingSession!.region,
         pin,
       });
       router.push("/");
@@ -60,7 +71,16 @@ export default function LoginPage() {
         <h1 className="font-display text-xl font-bold">Connexion</h1>
       </div>
 
-      {!existingSession && (
+      {recoveryMode && (
+        <p className="text-xs text-muted-foreground">
+          Une nouvelle identité locale sera créée sur cet appareil. Vos
+          séances déjà synchronisées restent disponibles côté tableau de
+          bord ; vos séances en attente continueront de se synchroniser
+          normalement.
+        </p>
+      )}
+
+      {isFirstLoginForm && (
         <>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="full_name">Votre nom</Label>
@@ -114,6 +134,20 @@ export default function LoginPage() {
       <Button type="submit" className="h-11 font-display font-semibold">
         Se connecter
       </Button>
+
+      {existingSession && (
+        <button
+          type="button"
+          onClick={() => {
+            setRecoveryMode((v) => !v);
+            setError(null);
+            setPin("");
+          }}
+          className="h-11 text-xs font-semibold text-primary underline-offset-2 hover:underline"
+        >
+          {recoveryMode ? "Annuler et revenir à la connexion" : "PIN oublié ?"}
+        </button>
+      )}
     </form>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen } from "lucide-react";
+import { BookOpen, History } from "lucide-react";
 import { useModulesQuery } from "@/lib/hooks/use-modules-query";
 import { useFacilitatorSessionQuery } from "@/lib/hooks/use-facilitator-session";
 import {
@@ -11,8 +11,12 @@ import {
 } from "@/lib/hooks/use-preferred-lang";
 import { LangPills } from "@/components/facilitator/lang-pills";
 import { ModuleCard } from "@/components/facilitator/module-card";
+import { ModulePagination } from "@/components/facilitator/module-pagination";
+import { FacilitatorOnboardingTour } from "@/components/facilitator/onboarding-tour";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CachedModule } from "@/lib/db/dexie";
+
+const PAGE_SIZE = 4;
 
 export default function HomePage() {
   const router = useRouter();
@@ -20,6 +24,7 @@ export default function HomePage() {
   const { data: modules = [], isLoading: modulesLoading } = useModulesQuery();
   const { data: lang = "fr" } = usePreferredLangQuery();
   const setLangMutation = useSetPreferredLangMutation();
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     if (!sessionLoading && !session) {
@@ -30,6 +35,16 @@ export default function HomePage() {
   const handleOpen = (module: CachedModule) => {
     router.push(`/modules/${module.id}`);
   };
+
+  const pageCount = Math.max(1, Math.ceil(modules.length / PAGE_SIZE));
+  // Dérivé plutôt que corrigé via un effet : si le nombre de modules baisse
+  // (ex. après un reset de contenu), la page courante peut dépasser le
+  // nouveau pageCount le temps d'un rendu — on la ramène ici, sans setState.
+  const currentPage = Math.min(page, pageCount);
+  const pagedModules = modules.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   if (sessionLoading || !session) {
     return <Skeleton className="h-40 w-full" />;
@@ -46,37 +61,45 @@ export default function HomePage() {
             Bonjour, {session.full_name}
           </h1>
         </div>
-        <div className="font-display flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft font-bold text-accent">
+        <button
+          type="button"
+          onClick={() => router.push("/profile")}
+          aria-label="Profil et paramètres"
+          id="profile-button"
+          className="font-display flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft font-bold text-accent"
+        >
           {session.full_name.slice(0, 2).toUpperCase()}
-        </div>
+        </button>
       </div>
 
       <button
         type="button"
         onClick={() => router.push("/history")}
-        className="mt-1 text-xs font-semibold text-primary underline-offset-2 hover:underline"
+        className="mt-1 flex h-11 items-center gap-1.5 text-sm font-semibold text-primary underline-offset-2 hover:underline"
       >
-        Mes séances →
+        <History size={16} aria-hidden="true" /> Mes séances →
       </button>
 
       <div className="mt-4 mb-2 flex items-center justify-between">
         <p className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
           <BookOpen size={14} aria-hidden="true" /> Modules de formation
         </p>
-        <LangPills
-          lang={lang}
-          onLangChange={(l) => setLangMutation.mutate(l)}
-        />
+        <div id="lang-pills">
+          <LangPills
+            lang={lang}
+            onLangChange={(l) => setLangMutation.mutate(l)}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div id="module-list" className="flex flex-col gap-3">
         {modulesLoading ? (
           <>
             <Skeleton className="h-24 w-full" />
             <Skeleton className="h-24 w-full" />
           </>
         ) : (
-          modules.map((module) => (
+          pagedModules.map((module) => (
             <ModuleCard
               key={module.id}
               module={module}
@@ -86,6 +109,10 @@ export default function HomePage() {
           ))
         )}
       </div>
+
+      <ModulePagination page={currentPage} pageCount={pageCount} onPageChange={setPage} />
+
+      {!modulesLoading && <FacilitatorOnboardingTour />}
     </div>
   );
 }

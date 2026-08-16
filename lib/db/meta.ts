@@ -35,3 +35,35 @@ export async function saveFacilitatorSession(
     });
   }
 }
+
+export async function clearFacilitatorSession(): Promise<void> {
+  try {
+    await db.meta.delete(SESSION_KEY);
+  } catch (error: unknown) {
+    throw new Error("Impossible de supprimer la session facilitateur", {
+      cause: error,
+    });
+  }
+}
+
+const ONBOARDING_KEY = "onboarding_seen";
+
+export async function readOnboardingSeen(): Promise<boolean> {
+  try {
+    const row = await db.meta.get(ONBOARDING_KEY);
+    return row?.value === "true";
+  } catch (error: unknown) {
+    console.error("[meta] lecture de onboarding_seen échouée:", error);
+    // Échec de lecture : on préfère ne pas réafficher le guide plutôt que
+    // risquer de le montrer en boucle si le stockage local est instable.
+    return true;
+  }
+}
+
+export async function markOnboardingSeen(): Promise<void> {
+  try {
+    await db.meta.put({ key: ONBOARDING_KEY, value: "true" });
+  } catch (error: unknown) {
+    console.error("[meta] écriture de onboarding_seen échouée:", error);
+  }
+}

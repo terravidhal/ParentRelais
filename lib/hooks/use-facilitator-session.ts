@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  clearFacilitatorSession,
   readFacilitatorSession,
   saveFacilitatorSession,
   type FacilitatorSession,
@@ -30,6 +31,17 @@ export function useSaveFacilitatorSessionMutation() {
     mutationFn: saveFacilitatorSession,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY });
+    },
+  });
+}
+
+export function useSignOutFacilitatorMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: clearFacilitatorSession,
+    onSuccess: () => {
+      queryClient.setQueryData(SESSION_QUERY_KEY, null);
     },
   });
 }

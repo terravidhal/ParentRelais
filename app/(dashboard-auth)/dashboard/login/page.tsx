@@ -10,11 +10,13 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function DashboardLoginPage() {
   const router = useRouter();
+  const [mode, setMode] = useState<"signin" | "reset">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -38,6 +40,77 @@ export default function DashboardLoginPage() {
       setLoading(false);
     }
   };
+
+  const handleResetRequest = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+        email,
+        { redirectTo: `${window.location.origin}/dashboard/reset-password` },
+      );
+      if (resetError) {
+        setError("Impossible d'envoyer le lien de réinitialisation.");
+        return;
+      }
+      setResetSent(true);
+    } catch {
+      setError("Impossible d'envoyer le lien de réinitialisation.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (mode === "reset") {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
+        <h1 className="font-display mb-6 text-xl font-bold">
+          Mot de passe oublié
+        </h1>
+        {resetSent ? (
+          <p className="text-sm text-muted-foreground">
+            Si un compte existe pour cette adresse, un email avec un lien de
+            réinitialisation vient d&apos;être envoyé.
+          </p>
+        ) : (
+          <form onSubmit={handleResetRequest} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="reset-email">Email</Label>
+              <Input
+                id="reset-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-11"
+                required
+              />
+            </div>
+            {error && (
+              <p role="alert" className="text-sm font-medium text-destructive">
+                {error}
+              </p>
+            )}
+            <Button type="submit" disabled={loading} className="h-11 font-semibold">
+              {loading ? "Envoi…" : "Envoyer le lien"}
+            </Button>
+          </form>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            setMode("signin");
+            setError(null);
+            setResetSent(false);
+          }}
+          className="mt-4 h-11 text-xs font-semibold text-primary underline-offset-2 hover:underline"
+        >
+          Retour à la connexion
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
@@ -93,6 +166,16 @@ export default function DashboardLoginPage() {
         <Button type="submit" disabled={loading} className="h-11 font-semibold">
           {loading ? "Connexion…" : "Se connecter"}
         </Button>
+        <button
+          type="button"
+          onClick={() => {
+            setMode("reset");
+            setError(null);
+          }}
+          className="h-11 text-xs font-semibold text-primary underline-offset-2 hover:underline"
+        >
+          Mot de passe oublié ?
+        </button>
       </form>
     </div>
   );

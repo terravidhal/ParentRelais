@@ -1,0 +1,125 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ChevronLeft, LogOut, RotateCcw } from "lucide-react";
+import {
+  useFacilitatorSessionQuery,
+  useSignOutFacilitatorMutation,
+} from "@/lib/hooks/use-facilitator-session";
+import { useResetContentMutation } from "@/lib/hooks/use-reset-content-mutation";
+import { Skeleton } from "@/components/ui/skeleton";
+
+/**
+ * Profil facilitateur — déconnexion locale et filet de secours de contenu
+ * (jamais le mécanisme principal, voir lib/db/seedDb.ts ensureSeeded).
+ */
+export default function ProfilePage() {
+  const router = useRouter();
+  const { data: session, isLoading: sessionLoading } = useFacilitatorSessionQuery();
+  const signOutMutation = useSignOutFacilitatorMutation();
+  const resetContentMutation = useResetContentMutation();
+  const [confirmingReset, setConfirmingReset] = useState(false);
+
+  useEffect(() => {
+    if (!sessionLoading && !session) {
+      router.replace("/login");
+    }
+  }, [sessionLoading, session, router]);
+
+  if (sessionLoading || !session) {
+    return <Skeleton className="h-40 w-full" />;
+  }
+
+  const handleSignOut = async () => {
+    await signOutMutation.mutateAsync();
+    router.replace("/login");
+  };
+
+  const handleResetContent = async () => {
+    await resetContentMutation.mutateAsync();
+    setConfirmingReset(false);
+  };
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => router.push("/")}
+        className="mb-3 flex h-11 items-center gap-1 text-sm font-semibold text-primary"
+      >
+        <ChevronLeft size={16} aria-hidden="true" /> Retour
+      </button>
+
+      <p className="font-display text-xs font-semibold tracking-wide text-accent">
+        PARENTRELAIS
+      </p>
+      <h1 className="font-display text-xl font-bold">Mon profil</h1>
+
+      <div className="mt-3 flex items-center gap-3 rounded-2xl border border-border bg-background p-3">
+        <div className="font-display flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft font-bold text-accent">
+          {session.full_name.slice(0, 2).toUpperCase()}
+        </div>
+        <div>
+          <p className="font-display text-sm font-semibold">{session.full_name}</p>
+          <p className="text-xs text-muted-foreground">{session.region}</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleSignOut}
+        disabled={signOutMutation.isPending}
+        className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/10 text-sm font-semibold text-destructive disabled:opacity-50"
+      >
+        <LogOut size={16} aria-hidden="true" />
+        Se déconnecter
+      </button>
+
+      <div className="mt-6 rounded-2xl border border-border bg-background p-3">
+        <p className="flex items-center gap-2 font-display text-sm font-semibold">
+          <RotateCcw size={16} className="text-accent" aria-hidden="true" />
+          Réinitialiser le contenu
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Recharge les modules de formation depuis leur dernière version.
+          Cette action ne touche pas vos séances enregistrées ni vos séances
+          en attente de synchronisation.
+        </p>
+
+        {confirmingReset ? (
+          <div className="mt-3 flex flex-col gap-2">
+            <p className="text-xs font-semibold text-foreground">
+              Confirmer la réinitialisation du contenu ?
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleResetContent}
+                disabled={resetContentMutation.isPending}
+                className="h-11 flex-1 rounded-2xl bg-accent text-sm font-semibold text-accent-foreground disabled:opacity-50"
+              >
+                {resetContentMutation.isPending ? "Réinitialisation…" : "Confirmer"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmingReset(false)}
+                className="h-11 flex-1 rounded-2xl border border-border text-sm font-semibold"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmingReset(true)}
+            className="mt-3 h-11 w-full rounded-2xl border border-border text-sm font-semibold"
+          >
+            Réinitialiser le contenu
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

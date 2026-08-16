@@ -27,7 +27,7 @@ test.describe("Échec de synchronisation", () => {
     await page.getByLabel("Votre nom").fill("Test Échec Sync");
     await page.getByLabel("Code PIN (4 chiffres)").fill("1212");
     await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
     await skipFacilitatorOnboarding(page);
     await page.reload();
 
@@ -42,7 +42,7 @@ test.describe("Échec de synchronisation", () => {
       .click();
     await page.getByRole("button", { name: "Terminer la séance" }).click();
     await page.getByRole("button", { name: "Revenir à l'accueil" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
 
     const syncButton = page.getByRole("button", { name: /Synchroniser/ });
     await expect(syncButton).toBeVisible();

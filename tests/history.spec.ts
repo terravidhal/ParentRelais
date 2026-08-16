@@ -15,7 +15,7 @@ test.describe("Historique des séances (facilitateur)", () => {
     await page.getByLabel("Votre nom").fill("Facilitateur Historique");
     await page.getByLabel("Code PIN (4 chiffres)").fill("4321");
     await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
 
     await page
       .waitForFunction(
@@ -35,7 +35,7 @@ test.describe("Historique des séances (facilitateur)", () => {
     await expect(page.getByText(/Aucune séance animée/)).toBeVisible();
 
     await page.getByRole("button", { name: "Retour" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
 
     // Couper le réseau puis animer une séance complète hors-ligne.
     await context.setOffline(true);
@@ -61,7 +61,7 @@ test.describe("Historique des séances (facilitateur)", () => {
     await expect(page.getByText("Séance enregistrée")).toBeVisible();
 
     await page.getByRole("button", { name: "Revenir à l'accueil" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
 
     // /history doit refléter la séance tout juste écrite, toujours hors-ligne.
     await page.getByRole("button", { name: /Mes séances/ }).click();

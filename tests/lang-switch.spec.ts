@@ -11,7 +11,7 @@ test.describe("Changement de langue", () => {
     await page.getByLabel("Votre nom").fill("Test Langue");
     await page.getByLabel("Code PIN (4 chiffres)").fill("4321");
     await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
     await skipFacilitatorOnboarding(page);
     await page.reload();
   });

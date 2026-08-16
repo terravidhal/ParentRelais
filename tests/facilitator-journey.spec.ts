@@ -19,7 +19,7 @@ test.describe("Parcours facilitateur", () => {
     await page.getByLabel("Code PIN (4 chiffres)").fill("1234");
     await page.getByRole("button", { name: "Se connecter" }).click();
 
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
     await skipFacilitatorOnboarding(page);
     await page.reload();
     await expect(
@@ -62,6 +62,6 @@ test.describe("Parcours facilitateur", () => {
 
     // 5. Retour accueil — la séance doit apparaître comme à synchroniser
     await page.getByRole("button", { name: "Revenir à l'accueil" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
   });
 });

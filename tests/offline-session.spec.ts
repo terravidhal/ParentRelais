@@ -18,7 +18,7 @@ test.describe("Séance complète hors-ligne", () => {
     await page.getByLabel("Votre nom").fill("Facilitateur Offline Séance");
     await page.getByLabel("Code PIN (4 chiffres)").fill("7788");
     await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
 
     await page
       .waitForFunction(
@@ -84,7 +84,7 @@ test.describe("Séance complète hors-ligne", () => {
     // session, qui remonte à l'étape 0 par design (état local du composant)
     // — pas un bug, mais pas ce qu'on veut vérifier.
     await page.getByRole("button", { name: "Revenir à l'accueil" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
     await page.reload();
     await expect(page.getByText("Modules de formation")).toBeVisible({
       timeout: 10_000,

@@ -12,7 +12,7 @@ test.describe("Lecteur audio", () => {
     await page.getByLabel("Votre nom").fill("Test Audio");
     await page.getByLabel("Code PIN (4 chiffres)").fill("5566");
     await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
     await skipFacilitatorOnboarding(page);
     await page.reload();
   });

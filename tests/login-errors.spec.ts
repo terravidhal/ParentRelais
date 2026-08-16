@@ -28,7 +28,7 @@ test.describe("Erreurs de connexion facilitateur", () => {
     await page.getByLabel("Votre nom").fill("Test Reconnexion");
     await page.getByLabel("Code PIN (4 chiffres)").fill("1357");
     await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
 
     // Se déconnecter en revenant sur /login (session toujours en Dexie).
     await page.goto("/login");
@@ -46,6 +46,6 @@ test.describe("Erreurs de connexion facilitateur", () => {
     // Le bon PIN doit toujours fonctionner ensuite.
     await page.getByLabel("Code PIN (4 chiffres)").fill("1357");
     await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
   });
 });

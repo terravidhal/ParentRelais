@@ -14,7 +14,7 @@ test.describe("Synchronisation", () => {
     await page.getByLabel("Votre nom").fill("Test Sync Auto");
     await page.getByLabel("Code PIN (4 chiffres)").fill("2468");
     await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
     await skipFacilitatorOnboarding(page);
     await page.reload();
 
@@ -32,7 +32,7 @@ test.describe("Synchronisation", () => {
     await expect(page.getByText("Séance enregistrée")).toBeVisible();
 
     await page.getByRole("button", { name: "Revenir à l'accueil" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
 
     // La bannière doit indiquer une séance en attente de synchronisation.
     await expect(page.getByText(/1 à synchroniser/)).toBeVisible();

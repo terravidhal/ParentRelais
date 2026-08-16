@@ -15,7 +15,7 @@ test.describe("Mode hors-ligne", () => {
     await page.getByLabel("Votre nom").fill("Facilitateur Offline");
     await page.getByLabel("Code PIN (4 chiffres)").fill("5678");
     await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
 
     // Laisser le service worker terminer son installation/activation.
     await page

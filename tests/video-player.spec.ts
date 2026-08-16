@@ -13,7 +13,7 @@ test.describe("Lecteur vidéo", () => {
     await page.getByLabel("Votre nom").fill("Test Vidéo");
     await page.getByLabel("Code PIN (4 chiffres)").fill("9876");
     await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/home");
   });
 
   test("le module avec video_url affiche un vrai lecteur <video> avec sous-titres", async ({

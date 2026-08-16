@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
  * fois en ligne — incompatible avec CLAUDE.md règle 1 (précache intégral).
  */
 const facilitatorPageUrls = [
-  "/",
+  "/home",
   "/login",
   "/history",
   "/profile",

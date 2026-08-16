@@ -73,7 +73,7 @@ export function SessionView({ moduleId }: { moduleId: number }) {
   };
 
   return (
-    <div>
+    <div className="lg:mx-auto lg:max-w-xl">
       <button
         type="button"
         onClick={() => router.push(`/modules/${moduleId}`)}
@@ -173,7 +173,7 @@ export function SessionView({ moduleId }: { moduleId: number }) {
             connexion sera disponible.
           </div>
           <Button
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/home")}
             className="font-display h-11 w-full font-bold"
           >
             Revenir à l&apos;accueil

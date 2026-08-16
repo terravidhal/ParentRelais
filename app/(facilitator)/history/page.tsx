@@ -38,10 +38,10 @@ export default function HistoryPage() {
   );
 
   return (
-    <div>
+    <div className="lg:mx-auto lg:max-w-xl">
       <button
         type="button"
-        onClick={() => router.push("/")}
+        onClick={() => router.push("/home")}
         className="mb-3 flex h-11 items-center gap-1 text-sm font-semibold text-primary"
       >
         <ChevronLeft size={16} aria-hidden="true" /> Retour

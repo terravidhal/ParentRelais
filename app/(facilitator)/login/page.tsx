@@ -56,19 +56,17 @@ export default function LoginPage() {
         region: isFirstLoginForm ? region : existingSession!.region,
         pin,
       });
-      router.push("/");
+      router.push("/home");
     } catch {
       setError("Impossible d'enregistrer la connexion sur cet appareil.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div>
-        <p className="font-display text-xs font-semibold tracking-wide text-accent">
-          PARENTRELAIS
-        </p>
-        <h1 className="font-display text-xl font-bold">Connexion</h1>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 lg:mx-auto lg:max-w-sm">
+      <div className="-mx-5 -mt-5 flex h-30 flex-col items-center justify-center gap-1 bg-primary-dark text-primary-foreground">
+        <p className="font-display text-lg font-bold tracking-wide">PARENTRELAIS</p>
+        <p className="text-xs opacity-80">Connexion facilitateur</p>
       </div>
 
       {recoveryMode && (
@@ -120,7 +118,7 @@ export default function LoginPage() {
           maxLength={4}
           value={pin}
           onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-          className="h-11 text-center text-lg tracking-[0.5em]"
+          className="h-14 text-center text-2xl tracking-[0.5em]"
           required
         />
       </div>

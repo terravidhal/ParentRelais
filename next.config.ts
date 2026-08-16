@@ -17,27 +17,41 @@ const nextConfig: NextConfig = {
 const facilitatorPageUrls = [
   "/",
   "/login",
+  "/history",
   ...SEED_MODULES.flatMap((m) => [`/modules/${m.id}`, `/modules/${m.id}/session`]),
 ];
 
-// Audios de démo référencés par lib/content/seed.ts : mêmes raisons que
-// ci-dessus, /public/audio/*.mp3 ne sont pas des assets webpack et donc pas
-// scannés automatiquement par le manifest de précache.
-const facilitatorAudioUrls = Array.from(
-  new Set(
-    SEED_MODULES.flatMap((m) =>
-      m.translations.map((t) => t.audio_url).filter((url): url is string => !!url),
+// Médias de démo référencés par lib/content/seed.ts : mêmes raisons que
+// ci-dessus, /public/audio|video/* ne sont pas des assets webpack et donc pas
+// scannés automatiquement par le manifest de précache. Sans ceci, la vidéo
+// ne serait précachée qu'après une première visite en ligne — contrairement
+// à l'audio, régression silencieuse pour le mode offline.
+function collectMediaUrls(
+  pick: (t: (typeof SEED_MODULES)[number]["translations"][number]) => string | undefined,
+): string[] {
+  return Array.from(
+    new Set(
+      SEED_MODULES.flatMap((m) =>
+        m.translations.map(pick).filter((url): url is string => !!url),
+      ),
     ),
-  ),
-);
+  );
+}
+
+const facilitatorAudioUrls = collectMediaUrls((t) => t.audio_url);
+const facilitatorVideoUrls = collectMediaUrls((t) => t.video_url);
+const facilitatorSubtitleUrls = collectMediaUrls((t) => t.subtitles_url);
 
 const withSerwist = withSerwistInit({
   swSrc: "sw.ts",
   swDest: "public/sw.js",
   disable: process.env.NODE_ENV === "development",
-  additionalPrecacheEntries: [...facilitatorPageUrls, ...facilitatorAudioUrls].map(
-    (url) => ({ url, revision: null }),
-  ),
+  additionalPrecacheEntries: [
+    ...facilitatorPageUrls,
+    ...facilitatorAudioUrls,
+    ...facilitatorVideoUrls,
+    ...facilitatorSubtitleUrls,
+  ].map((url) => ({ url, revision: null })),
 });
 
 export default withSerwist(nextConfig);

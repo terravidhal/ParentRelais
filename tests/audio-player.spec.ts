@@ -24,8 +24,10 @@ test.describe("Lecteur audio", () => {
     await expect(audio).toHaveCount(1);
 
     // Le fichier référencé doit être réellement accessible (pas un lien mort).
+    // Tous les modules/langues partagent le même fichier de démo (voir
+    // DEMO_AUDIO_URL dans lib/content/seed.ts).
     const src = await audio.getAttribute("src");
-    expect(src).toBe("/audio/module-1-fr.mp3");
+    expect(src).toBe("/audio/module-1-en.mp3");
     const audioResponse = await page.request.get(src!);
     expect(audioResponse.ok()).toBe(true);
 

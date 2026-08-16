@@ -2,8 +2,10 @@ import { test, expect } from "@playwright/test";
 
 /**
  * Flow 9 (FLOW.md) — lecture vidéo avec piste de sous-titres, jamais couvert.
- * Le module 1 a video_url/subtitles_url définis dans lib/content/seed.ts ;
- * le module 2 n'en a pas, pour vérifier le fallback placeholder.
+ * Tous les modules/langues "ready" partagent le même fichier vidéo/sous-titres
+ * de démo (voir DEMO_VIDEO_URL dans lib/content/seed.ts) — le placeholder
+ * statique n'est donc plus atteignable depuis ces données de démo ; il reste
+ * couvert au niveau composant si besoin, pas ici.
  */
 test.describe("Lecteur vidéo", () => {
   test.beforeEach(async ({ page }) => {
@@ -45,13 +47,14 @@ test.describe("Lecteur vidéo", () => {
     expect(vttBody).toContain("WEBVTT");
   });
 
-  test("le module sans video_url affiche toujours le placeholder statique", async ({
+  test("le badge sous-titres n'apparaît que lorsqu'une piste est fournie", async ({
     page,
   }) => {
     await page.getByText("Développement de l'enfant").click();
     await expect(page).toHaveURL(/\/modules\/2$/);
 
-    await expect(page.locator("video")).toHaveCount(0);
-    await expect(page.getByText(/Vidéo d.exemple/)).toBeVisible();
+    // Module 2 partage aussi le fichier vidéo/sous-titres de démo.
+    await expect(page.locator("video")).toBeVisible();
+    await expect(page.getByText("Sous-titres disponibles")).toBeVisible();
   });
 });

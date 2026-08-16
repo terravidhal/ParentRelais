@@ -4,7 +4,17 @@ import type { CachedModule } from "@/lib/db/dexie";
  * Contenu de démonstration en attendant le contenu réel fourni par
  * l'UNICEF/MINPROFF (voir docs/04-SCREENS.md). Repris du prototype de
  * référence ParentRelais_Demo.jsx.
+ *
+ * Médias : un seul jeu de fichiers réels (audio_url/video_url/subtitles_url)
+ * est réutilisé sur tous les modules et langues — répétition assumée pour
+ * que le jury voie le mécanisme fonctionner partout plutôt qu'un module
+ * visiblement vide. À remplacer par le contenu réel sans changement de code
+ * (voir 03-DATA-MODEL.md : "ajouter une langue = insérer des lignes").
  */
+const DEMO_AUDIO_URL = "/audio/module-1-en.mp3";
+const DEMO_VIDEO_URL = "/video/module-1.mp4";
+const DEMO_SUBTITLES_URL = "/video/module-1-fr.vtt";
+
 export const SEED_MODULES: CachedModule[] = [
   {
     id: 1,
@@ -21,9 +31,9 @@ export const SEED_MODULES: CachedModule[] = [
           "La violence éducative laisse des traces",
           "Écouter avant de corriger",
         ],
-        audio_url: "/audio/module-1-fr.mp3",
-        video_url: "/video/module-1.mp4",
-        subtitles_url: "/video/module-1-fr.vtt",
+        audio_url: DEMO_AUDIO_URL,
+        video_url: DEMO_VIDEO_URL,
+        subtitles_url: DEMO_SUBTITLES_URL,
         status: "ready",
       },
       {
@@ -36,7 +46,9 @@ export const SEED_MODULES: CachedModule[] = [
           "Harsh discipline leaves marks",
           "Listen before correcting",
         ],
-        audio_url: "/audio/module-1-en.mp3",
+        audio_url: DEMO_AUDIO_URL,
+        video_url: DEMO_VIDEO_URL,
+        subtitles_url: DEMO_SUBTITLES_URL,
         status: "ready",
       },
       {
@@ -63,7 +75,9 @@ export const SEED_MODULES: CachedModule[] = [
           "Jouer, c'est apprendre",
           "Parler à l'enfant nourrit son cerveau",
         ],
-        audio_url: "/audio/module-2-fr.mp3",
+        audio_url: DEMO_AUDIO_URL,
+        video_url: DEMO_VIDEO_URL,
+        subtitles_url: DEMO_SUBTITLES_URL,
         status: "ready",
       },
       {
@@ -76,7 +90,9 @@ export const SEED_MODULES: CachedModule[] = [
           "Play is learning",
           "Talking to a child feeds the brain",
         ],
-        audio_url: "/audio/module-2-en.mp3",
+        audio_url: DEMO_AUDIO_URL,
+        video_url: DEMO_VIDEO_URL,
+        subtitles_url: DEMO_SUBTITLES_URL,
         status: "ready",
       },
       {

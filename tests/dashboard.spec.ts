@@ -28,7 +28,10 @@ test.describe("Tableau de bord admin", () => {
       page.getByRole("heading", { name: "Couverture du programme" }),
     ).toBeVisible();
 
-    await expect(page.getByText("Familles touchées", { exact: true })).toBeVisible();
+    // .first() : "Familles touchées" apparaît deux fois (StatCard + graphique
+    // de couverture, qui affichent délibérément la même donnée deux fois —
+    // voir le commentaire dans dashboard/page.tsx), seule la présence compte ici.
+    await expect(page.getByText("Familles touchées", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("Séances animées")).toBeVisible();
     await expect(
       page.getByText("Dont en situation de handicap"),

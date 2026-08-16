@@ -159,4 +159,67 @@
   html {
     @apply font-sans;
   }
+  /* Filet de sécurité : tout élément cliquable natif doit avoir un curseur
+     pointer, y compris les <button> ajoutés sans y penser explicitement.
+     Les éléments désactivés (ex. LangPills indisponibles) gardent leur
+     cursor-not-allowed déjà posé, plus spécifique que cette règle. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    @apply cursor-pointer;
+  }
+}
+
+/*
+ * Thème du guide interactif (driver.js) — aligné sur la palette OKLCH du
+ * projet plutôt que le CSS par défaut de la librairie (bleu/blanc générique
+ * déconnecté de l'identité ParentRelais).
+ */
+.driver-popover {
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 50px -24px rgb(8 89 110 / 0.35);
+}
+.driver-popover-title {
+  color: var(--popover-foreground);
+  font-family: var(--font-heading);
+}
+.driver-popover-description {
+  color: var(--muted-foreground);
+}
+.driver-popover-progress-text {
+  color: var(--muted-foreground);
+}
+.driver-popover-footer button {
+  border-radius: var(--radius-md);
+  text-shadow: none;
+  font-family: var(--font-body);
+}
+.driver-popover-footer .driver-popover-next-btn,
+.driver-popover-footer .driver-popover-prev-btn {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+}
+.driver-popover-footer .driver-popover-prev-btn {
+  background: var(--muted);
+  color: var(--foreground);
+}
+.driver-popover-close-btn {
+  color: var(--muted-foreground);
+}
+.driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: var(--popover);
+}
+.driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: var(--popover);
+}
+.driver-popover-arrow-side-left.driver-popover-arrow {
+  border-left-color: var(--popover);
+}
+.driver-popover-arrow-side-right.driver-popover-arrow {
+  border-right-color: var(--popover);
+}
+.driver-overlay {
+  background: var(--foreground);
 }

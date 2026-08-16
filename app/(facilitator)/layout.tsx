@@ -41,8 +41,16 @@ export default function FacilitatorLayout({
   }, [online]);
 
   return (
-    <div className="flex justify-center bg-muted/40 px-4 py-6 lg:items-start lg:px-8 lg:py-10">
-      <div className="w-full max-w-[390px] overflow-hidden rounded-[30px] border border-border bg-card shadow-[0_24px_50px_-24px_rgba(8,89,110,0.35)] lg:max-w-240">
+    <div className="flex flex-col items-center justify-center gap-3 bg-linear-to-br from-muted/40 to-primary/5 px-4 py-6 lg:min-h-screen lg:px-8 lg:py-10">
+      <p className="hidden text-xs font-semibold tracking-wide text-muted-foreground lg:block">
+        Aperçu — usage prévu sur téléphone terrain
+      </p>
+      {/* Le produit est pensé et utilisé exclusivement sur téléphone terrain
+          — la carte garde ses proportions mobile même à lg: plutôt que de
+          simuler un faux layout desktop natif (voir docs/05-DESIGN-SYSTEM.md).
+          max-w-[520px] (au lieu de 960px) pour rester proche d'un vrai
+          téléphone/tablette large et éviter le "gros téléphone étiré". */}
+      <div className="w-full max-w-[390px] overflow-hidden rounded-[30px] border border-border bg-card shadow-[0_24px_50px_-24px_rgba(8,89,110,0.35)] lg:max-w-[520px]">
         {/* Bannière de connectivité et bouton de synchro : pleine largeur à
             tous les breakpoints, c'est l'élément "impossible à manquer" du
             design system (voir 05-DESIGN-SYSTEM.md) — jamais relégué dans un

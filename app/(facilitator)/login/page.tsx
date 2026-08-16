@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -64,9 +65,22 @@ export default function LoginPage() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 lg:mx-auto lg:max-w-sm">
-      <div className="-mx-5 -mt-5 flex h-30 flex-col items-center justify-center gap-1 bg-primary-dark text-primary-foreground">
-        <p className="font-display text-lg font-bold tracking-wide">PARENTRELAIS</p>
-        <p className="text-xs opacity-80">Connexion facilitateur</p>
+      {/* Bandeau de marque illustré — remplace l'aplat de couleur unie par
+          une image contextuelle (terrain hors-ligne), teinté brand-accent
+          conformément à l'usage documenté de ce token dans globals.css
+          ("réservé aux surfaces de marque... bandeaux de connexion"). */}
+      <div className="relative -mx-5 -mt-5 flex h-36 flex-col items-center justify-center gap-1 overflow-hidden text-primary-foreground lg:h-44">
+        <Image
+          src="/images/landing/offline-device.webp"
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 1024px) 384px, 100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-linear-to-t from-brand-accent/90 via-brand-accent/70 to-brand-accent/40" />
+        <p className="font-display relative text-lg font-bold tracking-wide">PARENTRELAIS</p>
+        <p className="relative text-xs opacity-90">Connexion facilitateur</p>
       </div>
 
       {recoveryMode && (
@@ -97,7 +111,7 @@ export default function LoginPage() {
               id="region"
               value={region}
               onChange={(e) => setRegion(e.target.value)}
-              className="h-11 rounded-lg border border-border bg-background px-3 text-sm"
+              className="h-11 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
             >
               {REGIONS.map((r) => (
                 <option key={r} value={r}>

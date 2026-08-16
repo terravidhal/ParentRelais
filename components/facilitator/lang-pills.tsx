@@ -14,6 +14,7 @@ interface Lang {
 const LANGS: Lang[] = [
   { id: "fr", label: "FR", available: true },
   { id: "en", label: "EN", available: true },
+  { id: "sign", label: "LSF", available: true },
   { id: "ff", label: "Fulfulde", available: false },
 ];
 
@@ -24,7 +25,7 @@ interface LangPillsProps {
 
 export function LangPills({ lang, onLangChange }: LangPillsProps) {
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-1.5">
       {LANGS.map((l) => (
         <button
           key={l.id}

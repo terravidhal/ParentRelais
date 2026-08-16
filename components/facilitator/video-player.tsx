@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Captions } from "lucide-react";
 
 interface VideoPlayerProps {
@@ -20,6 +21,8 @@ interface VideoPlayerProps {
  * pas la chercher.
  */
 export function VideoPlayer({ src, lang, subtitlesUrl }: VideoPlayerProps) {
+  const [error, setError] = useState<string | null>(null);
+
   return (
     <div className="mt-3">
       {subtitlesUrl && (
@@ -33,6 +36,7 @@ export function VideoPlayer({ src, lang, subtitlesUrl }: VideoPlayerProps) {
         preload="metadata"
         className="w-full rounded-2xl bg-foreground"
         aria-label="Vidéo d'exemple"
+        onError={() => setError("Vidéo indisponible sur cet appareil.")}
       >
         <source src={src} />
         {subtitlesUrl && (
@@ -46,6 +50,11 @@ export function VideoPlayer({ src, lang, subtitlesUrl }: VideoPlayerProps) {
         )}
         Votre navigateur ne prend pas en charge la lecture vidéo.
       </video>
+      {error && (
+        <p role="alert" className="mt-1 text-xs text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
-import { Globe } from "lucide-react";
+import Link from "next/link";
+import { Globe, Library } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ContentMatrix } from "@/components/dashboard/content-matrix";
 import { MediaUploadCell } from "@/components/dashboard/media-upload-cell";
@@ -34,9 +35,18 @@ export default async function DashboardContentPage() {
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4 lg:max-w-3xl lg:p-6">
-      <h3 className="font-display mb-3 flex items-center gap-2 font-bold">
-        <Globe size={16} aria-hidden="true" /> Contenus & langues
-      </h3>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h3 className="font-display flex items-center gap-2 font-bold">
+          <Globe size={16} aria-hidden="true" /> Contenus & langues
+        </h3>
+        <Link
+          href="/dashboard/content/media"
+          className="flex h-11 items-center gap-1.5 text-sm font-semibold text-primary underline-offset-2 hover:underline"
+        >
+          <Library size={14} aria-hidden="true" />
+          Voir tous les fichiers →
+        </Link>
+      </div>
       <ContentMatrix
         rows={rows}
         renderCellAction={(moduleId, lang) =>

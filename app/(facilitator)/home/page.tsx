@@ -16,6 +16,7 @@ import { ModulePagination } from "@/components/facilitator/module-pagination";
 import { MediaDownloadBanner } from "@/components/facilitator/media-download-banner";
 import { FacilitatorOnboardingTour } from "@/components/facilitator/onboarding-tour";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAutoQueueDownloads } from "@/lib/hooks/use-auto-queue-downloads";
 import type { CachedModule } from "@/lib/db/dexie";
 
 // 2 colonnes × 3 lignes à desktop (lg:), pile de 6 sur mobile — page size
@@ -30,6 +31,7 @@ export default function HomePage() {
   const { data: lang = "fr" } = usePreferredLangQuery();
   const setLangMutation = useSetPreferredLangMutation();
   const [page, setPage] = useState(1);
+  useAutoQueueDownloads(modules);
 
   useEffect(() => {
     if (!sessionLoading && !session) {
@@ -99,7 +101,7 @@ export default function HomePage() {
         </button>
 
         {recentSessions.length > 0 && (
-          <div className="mt-2 hidden flex-col gap-2 lg:flex">
+          <div className="mt-2 flex flex-col gap-2">
             {recentSessions.map((s) => (
               <div
                 key={s.client_uuid}
@@ -134,17 +136,16 @@ export default function HomePage() {
           <BookOpen size={14} aria-hidden="true" /> Modules de formation
         </p>
 
-        {!modulesLoading && <MediaDownloadBanner modules={modules} />}
+        {!modulesLoading && <MediaDownloadBanner />}
 
         <div
           id="module-list"
           className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-4"
         >
           {modulesLoading ? (
-            <>
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-24 w-full" />
-            </>
+            Array.from({ length: PAGE_SIZE }).map((_, i) => (
+              <Skeleton key={i} className="h-24 w-full" />
+            ))
           ) : (
             pagedModules.map((module) => (
               <ModuleCard

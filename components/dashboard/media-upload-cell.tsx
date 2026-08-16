@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Loader2, Upload } from "lucide-react";
+import { RotateCcw, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -38,6 +38,7 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,6 +54,7 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
 
     setIsUploading(true);
     setError(null);
+    setFileName(file.name);
 
     const supabase = createClient();
     const path = `modules/${moduleId}/${lang}/${mediaType}.${extension}`;
@@ -92,22 +94,27 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
       return;
     }
 
+    setFileName(null);
     router.refresh();
   };
 
   return (
-    <div className="flex flex-col items-center gap-0.5">
+    <div className="flex flex-col items-center gap-1">
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isUploading}
-        className="inline-flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
-        aria-label={`Téléverser un fichier — module ${moduleId}, ${lang}`}
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+        aria-label={
+          error
+            ? `Réessayer l'envoi — module ${moduleId}, ${lang}`
+            : `Téléverser un fichier — module ${moduleId}, ${lang}`
+        }
       >
-        {isUploading ? (
-          <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+        {error ? (
+          <RotateCcw size={16} aria-hidden="true" />
         ) : (
-          <Upload size={14} aria-hidden="true" />
+          <Upload size={16} aria-hidden="true" />
         )}
       </button>
       <input
@@ -117,8 +124,21 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
         onChange={handleFileChange}
         className="hidden"
       />
+      {isUploading && (
+        <div className="w-[80px]">
+          <p className="truncate text-center text-[11px] text-muted-foreground" title={fileName ?? undefined}>
+            {fileName}
+          </p>
+          {/* Progression indéterminée honnête : le SDK Supabase Storage
+              n'expose pas de callback onUploadProgress — mieux vaut une
+              animation franchement indéterminée qu'un pourcentage inventé. */}
+          <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
+            <div className="h-full w-1/3 rounded-full bg-accent motion-safe:animate-pulse" />
+          </div>
+        </div>
+      )}
       {error && (
-        <p role="alert" className="max-w-[90px] text-center text-[10px] text-destructive">
+        <p role="alert" className="max-w-[140px] text-center text-xs text-destructive">
           {error}
         </p>
       )}

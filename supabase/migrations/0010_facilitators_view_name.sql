@@ -4,7 +4,15 @@
 -- celui-ci échoue silencieusement (voir lib/sync/engine.ts,
 -- syncFacilitatorIdentity) — le nom doit pouvoir être NULL sans exclure la
 -- ligne.
-create or replace view public.dashboard_facilitators as
+--
+-- DROP puis CREATE (pas CREATE OR REPLACE) : Postgres refuse de réordonner
+-- ou insérer des colonnes au milieu d'une vue existante via REPLACE
+-- (erreur 42P16, "cannot change name of view column"). Sans dépendants
+-- (aucune autre vue/fonction ne référence dashboard_facilitators), le DROP
+-- est sûr.
+drop view if exists public.dashboard_facilitators;
+
+create view public.dashboard_facilitators as
 select
   s.facilitator_id,
   f.full_name,

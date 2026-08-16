@@ -2,11 +2,16 @@ import type { ReactNode } from "react";
 import { CheckCircle2, Clock } from "lucide-react";
 
 const COLUMNS = [
-  { lang: "fr", label: "FR" },
-  { lang: "en", label: "EN" },
-  { lang: "ff", label: "Fulfulde" },
-  { lang: "sign", label: "Langue des signes" },
+  { lang: "fr", label: "FR", fullLabel: "Français" },
+  { lang: "en", label: "EN", fullLabel: "Anglais" },
+  { lang: "ff", label: "Fulfulde", fullLabel: "Fulfulde" },
+  { lang: "sign", label: "LSF", fullLabel: "Langue des signes" },
 ] as const;
+
+// Largeurs minimales par colonne pour rester lisible même en scroll
+// horizontal sur mobile — grid-cols-5 seul débordait/écrasait le texte.
+const GRID_TEMPLATE =
+  "grid-cols-[minmax(80px,1fr)_repeat(4,minmax(90px,1fr))]";
 
 interface ContentMatrixRow {
   moduleId: number;
@@ -26,11 +31,15 @@ interface ContentMatrixProps {
 export function ContentMatrix({ rows, renderCellAction }: ContentMatrixProps) {
   return (
     <div>
-      <div className="overflow-hidden rounded-xl border border-border">
-        <div className="grid grid-cols-5 text-xs font-semibold">
+      <div className="overflow-x-auto rounded-xl border border-border">
+        <div className={`grid ${GRID_TEMPLATE} text-xs font-semibold`}>
           <div className="col-span-1 bg-background p-2">Module</div>
           {COLUMNS.map((c) => (
-            <div key={c.lang} className="bg-background p-2 text-center">
+            <div
+              key={c.lang}
+              className="bg-background p-2 text-center"
+              title={c.fullLabel}
+            >
               {c.label}
             </div>
           ))}
@@ -38,7 +47,7 @@ export function ContentMatrix({ rows, renderCellAction }: ContentMatrixProps) {
         {rows.map((row) => (
           <div
             key={row.moduleId}
-            className="grid grid-cols-5 items-center border-t border-border text-sm"
+            className={`grid ${GRID_TEMPLATE} items-center border-t border-border text-sm`}
           >
             <div className="p-2 font-medium">M{row.moduleId}</div>
             {COLUMNS.map((c) => (

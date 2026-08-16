@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, LogOut, RotateCcw, UserCircle2 } from "lucide-react";
+import { ChevronLeft, HelpCircle, LogOut, RotateCcw, UserCircle2 } from "lucide-react";
 import {
   useFacilitatorSessionQuery,
   useSignOutFacilitatorMutation,
@@ -81,6 +81,15 @@ export default function ProfilePage() {
           Informations complémentaires à venir.
         </p>
       </div>
+
+      <button
+        type="button"
+        onClick={() => router.push("/home?tour=1")}
+        className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-border text-sm font-semibold text-foreground"
+      >
+        <HelpCircle size={16} className="text-accent" aria-hidden="true" />
+        Revoir le guide
+      </button>
 
       <button
         type="button"

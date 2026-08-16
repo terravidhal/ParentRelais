@@ -33,7 +33,7 @@ export default async function DashboardContentPage() {
   });
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="rounded-2xl border border-border bg-card p-4 lg:max-w-3xl lg:p-6">
       <h3 className="font-display mb-3 flex items-center gap-2 font-bold">
         <Globe size={16} aria-hidden="true" /> Contenus & langues
       </h3>

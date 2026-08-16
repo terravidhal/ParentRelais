@@ -65,7 +65,11 @@ export default function DashboardLoginPage() {
 
   if (mode === "reset") {
     return (
-      <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm">
+        <p className="font-display mb-1 text-xs font-semibold tracking-wide text-brand-accent">
+          PARENTRELAIS
+        </p>
         <h1 className="font-display mb-6 text-xl font-bold">
           Mot de passe oublié
         </h1>
@@ -108,12 +112,17 @@ export default function DashboardLoginPage() {
         >
           Retour à la connexion
         </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm">
+      <p className="font-display mb-1 text-xs font-semibold tracking-wide text-brand-accent">
+        PARENTRELAIS
+      </p>
       <h1 className="font-display mb-6 text-xl font-bold">
         Tableau de bord — Connexion
       </h1>
@@ -177,6 +186,7 @@ export default function DashboardLoginPage() {
           Mot de passe oublié ?
         </button>
       </form>
+      </div>
     </div>
   );
 }

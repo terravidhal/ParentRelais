@@ -32,8 +32,8 @@ export function DashboardShell({ userEmail, children }: DashboardShellProps) {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-5xl gap-4 px-4 py-6">
-      <aside className="w-56 shrink-0">
+    <div className="mx-auto flex min-h-screen w-full max-w-[1680px] gap-6 px-4 py-6 lg:px-10 lg:py-8">
+      <aside className="w-56 shrink-0 lg:w-64">
         <div className="rounded-2xl border border-border bg-card p-3">
           <p className="font-display px-2 pb-2 text-xs font-semibold tracking-wide text-accent">
             PARENTRELAIS

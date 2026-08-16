@@ -41,8 +41,12 @@ export default function FacilitatorLayout({
   }, [online]);
 
   return (
-    <div className="flex justify-center bg-muted/40 px-4 py-6">
-      <div className="w-full max-w-[390px] overflow-hidden rounded-[30px] border border-border bg-card shadow-[0_24px_50px_-24px_rgba(8,89,110,0.35)]">
+    <div className="flex justify-center bg-muted/40 px-4 py-6 lg:items-start lg:px-8 lg:py-10">
+      <div className="w-full max-w-[390px] overflow-hidden rounded-[30px] border border-border bg-card shadow-[0_24px_50px_-24px_rgba(8,89,110,0.35)] lg:max-w-240">
+        {/* Bannière de connectivité et bouton de synchro : pleine largeur à
+            tous les breakpoints, c'est l'élément "impossible à manquer" du
+            design system (voir 05-DESIGN-SYSTEM.md) — jamais relégué dans un
+            coin même sur grand écran. */}
         <ConnectivityBanner online={online} pendingCount={pendingSessions.length} />
 
         {online && pendingSessions.length > 0 && (
@@ -63,7 +67,7 @@ export default function FacilitatorLayout({
           </button>
         )}
 
-        <div className="min-h-[460px] p-5">
+        <div className="min-h-[460px] p-5 lg:p-8">
           {seedReady ? children : <Skeleton className="h-64 w-full" />}
         </div>
       </div>

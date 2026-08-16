@@ -38,7 +38,7 @@ export default async function DashboardPage() {
         </h1>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatCard
           label="Familles touchées"
           value={totalFamilies}
@@ -59,22 +59,24 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <div className="mt-5 rounded-2xl border border-border bg-card p-4">
-        <h3 className="font-display mb-3 font-bold">
-          Familles touchées par localité
-        </h3>
-        <CoverageBars
-          data={rows.map((r) => ({ label: r.locality, value: r.families_reached }))}
-        />
-      </div>
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <h3 className="font-display mb-3 font-bold">
+            Familles touchées par localité
+          </h3>
+          <CoverageBars
+            data={rows.map((r) => ({ label: r.locality, value: r.families_reached }))}
+          />
+        </div>
 
-      <div className="mt-5 rounded-2xl border border-border bg-card p-4">
-        <h3 className="font-display mb-3 font-bold">
-          Vue graphique — familles touchées par localité
-        </h3>
-        <CoverageChart
-          data={rows.map((r) => ({ label: r.locality, value: r.families_reached }))}
-        />
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <h3 className="font-display mb-3 font-bold">
+            Vue graphique — familles touchées par localité
+          </h3>
+          <CoverageChart
+            data={rows.map((r) => ({ label: r.locality, value: r.families_reached }))}
+          />
+        </div>
       </div>
     </div>
   );

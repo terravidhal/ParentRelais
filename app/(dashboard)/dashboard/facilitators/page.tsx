@@ -27,7 +27,7 @@ export default async function DashboardFacilitatorsPage() {
         <h1 className="font-display text-2xl font-bold">Facilitateurs</h1>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="rounded-2xl border border-border bg-card p-4 lg:p-6">
         <h3 className="font-display mb-3 flex items-center gap-2 font-bold">
           <Users size={16} aria-hidden="true" /> Activité par facilitateur
         </h3>

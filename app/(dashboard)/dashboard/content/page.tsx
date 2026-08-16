@@ -1,10 +1,14 @@
 import { Globe } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ContentMatrix } from "@/components/dashboard/content-matrix";
+import { MediaUploadCell } from "@/components/dashboard/media-upload-cell";
+
+const UPLOADABLE_LANGS = new Set(["fr", "en", "ff"]);
 
 /**
- * Server component, lecture seule stricte (docs/06-BUILD-PLAN.md) : l'upload
- * de contenu vers le bucket `media` est explicitement Phase 1.
+ * Server component pour la lecture ; l'upload lui-même est délégué à
+ * MediaUploadCell (client) qui écrit directement dans Storage + upsert la
+ * ligne module_translations, puis déclenche router.refresh().
  */
 export default async function DashboardContentPage() {
   const supabase = await createClient();
@@ -33,7 +37,14 @@ export default async function DashboardContentPage() {
       <h3 className="font-display mb-3 flex items-center gap-2 font-bold">
         <Globe size={16} aria-hidden="true" /> Contenus & langues
       </h3>
-      <ContentMatrix rows={rows} />
+      <ContentMatrix
+        rows={rows}
+        renderCellAction={(moduleId, lang) =>
+          UPLOADABLE_LANGS.has(lang) ? (
+            <MediaUploadCell moduleId={moduleId} lang={lang} />
+          ) : null
+        }
+      />
     </div>
   );
 }

@@ -65,6 +65,15 @@ export type DashboardCoverageRow = {
   sessions_count: number;
 };
 
+// Vue d'agrégation, voir supabase/migrations/0008_facilitators_view.sql.
+export type DashboardFacilitatorRow = {
+  facilitator_id: string;
+  region: string;
+  sessions_count: number;
+  families_reached: number;
+  last_session_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -96,6 +105,10 @@ export type Database = {
     Views: {
       dashboard_coverage: {
         Row: DashboardCoverageRow;
+        Relationships: [];
+      };
+      dashboard_facilitators: {
+        Row: DashboardFacilitatorRow;
         Relationships: [];
       };
     };

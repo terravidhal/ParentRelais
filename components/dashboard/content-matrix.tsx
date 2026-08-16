@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { CheckCircle2, Clock } from "lucide-react";
 
 const COLUMNS = [
@@ -14,9 +15,15 @@ interface ContentMatrixRow {
 
 interface ContentMatrixProps {
   rows: ContentMatrixRow[];
+  /**
+   * Slot optionnel rendu sous l'icône de statut de chaque cellule — permet
+   * au dashboard d'y injecter un bouton d'upload (voir MediaUploadCell)
+   * sans que ce composant de présentation dépende de Supabase Storage.
+   */
+  renderCellAction?: (moduleId: number, lang: string) => ReactNode;
 }
 
-export function ContentMatrix({ rows }: ContentMatrixProps) {
+export function ContentMatrix({ rows, renderCellAction }: ContentMatrixProps) {
   return (
     <div>
       <div className="overflow-hidden rounded-xl border border-border">
@@ -35,7 +42,7 @@ export function ContentMatrix({ rows }: ContentMatrixProps) {
           >
             <div className="p-2 font-medium">M{row.moduleId}</div>
             {COLUMNS.map((c) => (
-              <div key={c.lang} className="flex justify-center p-2">
+              <div key={c.lang} className="flex flex-col items-center gap-1 p-2">
                 {row.statusByLang[c.lang] === "ready" ? (
                   <CheckCircle2
                     size={16}
@@ -49,6 +56,7 @@ export function ContentMatrix({ rows }: ContentMatrixProps) {
                     aria-label="À venir"
                   />
                 )}
+                {renderCellAction?.(row.moduleId, c.lang)}
               </div>
             ))}
           </div>

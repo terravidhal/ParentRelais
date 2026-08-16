@@ -51,6 +51,14 @@ export default function HomePage() {
         </div>
       </div>
 
+      <button
+        type="button"
+        onClick={() => router.push("/history")}
+        className="mt-1 text-xs font-semibold text-primary underline-offset-2 hover:underline"
+      >
+        Mes séances →
+      </button>
+
       <div className="mt-4 mb-2 flex items-center justify-between">
         <p className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
           <BookOpen size={14} aria-hidden="true" /> Modules de formation

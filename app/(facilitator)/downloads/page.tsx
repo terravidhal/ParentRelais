@@ -145,7 +145,11 @@ export default function DownloadsPage() {
                 {d.total_bytes !== null && d.status !== "failed" && (
                   <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-accent motion-safe:transition-all"
+                      className={
+                        d.status === "done"
+                          ? "h-full rounded-full bg-success motion-safe:transition-all"
+                          : "h-full rounded-full bg-accent motion-safe:transition-all"
+                      }
                       style={{
                         width: `${d.status === "done" ? 100 : (progressPct ?? 0)}%`,
                       }}

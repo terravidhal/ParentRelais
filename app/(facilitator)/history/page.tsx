@@ -6,6 +6,7 @@ import { ChevronLeft, CheckCircle2, Clock, Users } from "lucide-react";
 import { useFacilitatorSessionQuery } from "@/lib/hooks/use-facilitator-session";
 import { useAllSessionsQuery } from "@/lib/hooks/use-outbox-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeading } from "@/components/ui/page-heading";
 
 /**
  * Historique local des séances animées par ce facilitateur — lit
@@ -47,10 +48,7 @@ export default function HistoryPage() {
         <ChevronLeft size={16} aria-hidden="true" /> Retour
       </button>
 
-      <p className="font-display text-xs font-semibold tracking-wide text-accent">
-        PARENTRELAIS
-      </p>
-      <h1 className="font-display text-xl font-bold">Mes séances</h1>
+      <PageHeading>Mes séances</PageHeading>
 
       <div className="mt-3 flex items-center gap-2 rounded-2xl bg-accent-soft p-3">
         <Users size={18} className="text-accent" aria-hidden="true" />

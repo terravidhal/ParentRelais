@@ -10,6 +10,7 @@ import {
 import { useResetContentMutation } from "@/lib/hooks/use-reset-content-mutation";
 import { useAllSessionsQuery } from "@/lib/hooks/use-outbox-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeading } from "@/components/ui/page-heading";
 
 /**
  * Profil facilitateur — déconnexion locale et filet de secours de contenu
@@ -53,10 +54,7 @@ export default function ProfilePage() {
         <ChevronLeft size={16} aria-hidden="true" /> Retour
       </button>
 
-      <p className="font-display text-xs font-semibold tracking-wide text-accent">
-        PARENTRELAIS
-      </p>
-      <h1 className="font-display text-xl font-bold">Mon profil</h1>
+      <PageHeading>Mon profil</PageHeading>
 
       <div className="mt-3 flex items-center gap-3 rounded-2xl border border-border bg-background p-3">
         <div className="font-display flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft font-bold text-accent">

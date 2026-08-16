@@ -16,6 +16,7 @@ import { ModulePagination } from "@/components/facilitator/module-pagination";
 import { MediaDownloadBanner } from "@/components/facilitator/media-download-banner";
 import { FacilitatorOnboardingTour } from "@/components/facilitator/onboarding-tour";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeading } from "@/components/ui/page-heading";
 import { useAutoQueueDownloads } from "@/lib/hooks/use-auto-queue-downloads";
 import type { CachedModule } from "@/lib/db/dexie";
 
@@ -68,12 +69,7 @@ export default function HomePage() {
       <div className="lg:sticky lg:top-8 lg:self-start">
         <div className="mb-1 flex items-center justify-between">
           <div>
-            <p className="font-display text-xs font-semibold tracking-wide text-accent">
-              PARENTRELAIS
-            </p>
-            <h1 className="font-display text-xl font-bold">
-              Bonjour, {session.full_name}
-            </h1>
+            <PageHeading>Bonjour, {session.full_name}</PageHeading>
           </div>
           <button
             type="button"
@@ -128,6 +124,27 @@ export default function HomePage() {
             />
           </div>
         </div>
+
+        {/* Résumé local dérivé de sessions (déjà chargé ci-dessus via
+            useAllSessionsQuery) — aucun nouveau fetch, occupe l'espace
+            disponible de la colonne en desktop sans dépendre du réseau. */}
+        {sessions.length > 0 && (
+          <div className="mt-4 hidden rounded-2xl border border-border bg-background p-3 lg:block">
+            <p className="font-display text-xs font-semibold text-muted-foreground">
+              Résumé local
+            </p>
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Séances enregistrées</span>
+              <span className="font-display font-semibold">{sessions.length}</span>
+            </div>
+            <div className="mt-1 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">En attente de synchro</span>
+              <span className="font-display font-semibold">
+                {sessions.filter((s) => s.status === "pending").length}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Colonne droite : catalogue de modules */}

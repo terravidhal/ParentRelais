@@ -41,47 +41,48 @@ export default function FacilitatorLayout({
   }, [online]);
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3 bg-linear-to-br from-muted/40 to-primary/5 px-4 py-6 lg:min-h-screen lg:px-8 lg:py-10">
-      <p className="hidden text-xs font-semibold tracking-wide text-muted-foreground lg:block">
-        Aperçu — usage prévu sur téléphone terrain
-      </p>
-      {/* Le produit est pensé et utilisé exclusivement sur téléphone terrain
-          — la carte garde ses proportions mobile même à lg: plutôt que de
-          simuler un faux layout desktop natif (voir docs/05-DESIGN-SYSTEM.md).
-          lg:max-w-[720px] : assez large pour loger la colonne identité
-          (280px) + la grille 2 colonnes de modules de home/page.tsx sans
-          déborder du cadre (520px testé et cassé ce contenu — voir capture
-          de débogage), tout en restant nettement plus étroit que l'ancien
-          960px qui laissait un vide excessif. */}
-      <div className="w-full max-w-[390px] overflow-hidden rounded-[30px] border border-border bg-card shadow-[0_24px_50px_-24px_rgba(8,89,110,0.35)] lg:max-w-180">
-        {/* Bannière de connectivité et bouton de synchro : pleine largeur à
-            tous les breakpoints, c'est l'élément "impossible à manquer" du
-            design system (voir 05-DESIGN-SYSTEM.md) — jamais relégué dans un
-            coin même sur grand écran. */}
-        <ConnectivityBanner online={online} pendingCount={pendingSessions.length} />
-
-        {online && pendingSessions.length > 0 && (
-          <button
-            type="button"
-            onClick={() => !syncMutation.isPending && syncMutation.mutate()}
-            disabled={syncMutation.isPending}
-            className="font-display flex h-11 w-full items-center justify-center gap-2 bg-primary text-sm font-semibold text-primary-foreground"
-          >
-            <RefreshCw
-              size={16}
-              aria-hidden="true"
-              className={syncMutation.isPending ? "motion-safe:animate-spin" : ""}
-            />
-            {syncMutation.isPending
-              ? "Synchronisation…"
-              : `Synchroniser ${pendingSessions.length} séance(s)`}
-          </button>
-        )}
-
-        <div className="min-h-[460px] p-5 lg:p-8">
-          {seedReady ? children : <Skeleton className="h-64 w-full" />}
+    <div className="min-h-screen bg-muted/30">
+      {/* Header ancré pleine largeur — remplace la carte "téléphone" centrée,
+          qui laissait un immense vide sur desktop 1440px+. Pas de sidebar
+          (contrairement au dashboard admin) : le facilitateur n'a pas de
+          multi-pages de navigation latérale, juste ce header + le contenu. */}
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
+        <div className="mx-auto flex h-16 max-w-[1100px] items-center px-5 lg:px-8">
+          <p className="font-display text-sm font-bold tracking-wide text-accent">
+            PARENTRELAIS
+          </p>
         </div>
-      </div>
+        {/* Bannière de connectivité en pleine largeur, sous le kicker : c'est
+            l'élément "impossible à manquer" du design system — la garder en
+            bandeau plein plutôt que la réduire à un badge à côté du kicker
+            préserve sa lisibilité. */}
+        <ConnectivityBanner online={online} pendingCount={pendingSessions.length} />
+        {online && pendingSessions.length > 0 && (
+          <div className="border-t border-border bg-primary/5">
+            <div className="mx-auto max-w-[1100px] px-5 py-2 lg:px-8">
+              <button
+                type="button"
+                onClick={() => !syncMutation.isPending && syncMutation.mutate()}
+                disabled={syncMutation.isPending}
+                className="font-display flex h-11 w-full items-center justify-center gap-2 text-sm font-semibold text-primary lg:w-auto lg:px-4"
+              >
+                <RefreshCw
+                  size={16}
+                  aria-hidden="true"
+                  className={syncMutation.isPending ? "motion-safe:animate-spin" : ""}
+                />
+                {syncMutation.isPending
+                  ? "Synchronisation…"
+                  : `Synchroniser ${pendingSessions.length} séance(s)`}
+              </button>
+            </div>
+          </div>
+        )}
+      </header>
+
+      <main className="mx-auto max-w-[1100px] px-5 py-5 lg:px-8 lg:py-8">
+        {seedReady ? children : <Skeleton className="h-64 w-full" />}
+      </main>
     </div>
   );
 }

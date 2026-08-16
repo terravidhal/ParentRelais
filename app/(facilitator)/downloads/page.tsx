@@ -18,6 +18,7 @@ import {
   useRetryDownloadMutation,
 } from "@/lib/hooks/use-media-downloads-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeading } from "@/components/ui/page-heading";
 import type { MediaDownload } from "@/lib/db/dexie";
 
 function formatBytes(bytes: number): string {
@@ -70,10 +71,7 @@ export default function DownloadsPage() {
         <ChevronLeft size={16} aria-hidden="true" /> Retour
       </button>
 
-      <p className="font-display text-xs font-semibold tracking-wide text-accent">
-        PARENTRELAIS
-      </p>
-      <h1 className="font-display text-xl font-bold">Téléchargements</h1>
+      <PageHeading>Téléchargements</PageHeading>
       <p className="mt-1 text-sm text-muted-foreground">
         Rendez vos vidéos et audios disponibles hors-ligne.
       </p>

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { skipFacilitatorOnboarding } from "./helpers";
 
 /**
  * Flow 7 (FLOW.md) — changement de langue via LangPills, jamais couvert :
@@ -11,6 +12,8 @@ test.describe("Changement de langue", () => {
     await page.getByLabel("Code PIN (4 chiffres)").fill("4321");
     await page.getByRole("button", { name: "Se connecter" }).click();
     await expect(page).toHaveURL("/");
+    await skipFacilitatorOnboarding(page);
+    await page.reload();
   });
 
   test("passer de FR à EN change le contenu affiché sur l'accueil", async ({

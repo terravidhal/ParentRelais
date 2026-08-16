@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { skipFacilitatorOnboarding } from "./helpers";
 
 /**
  * Test critique de la Definition of Done (CLAUDE.md) : l'app facilitateur
@@ -27,6 +28,7 @@ test.describe("Mode hors-ligne", () => {
       });
     await page.reload();
     await page.waitForLoadState("networkidle");
+    await skipFacilitatorOnboarding(page);
 
     // 2. Couper le réseau. context.setOffline() bloque les requêtes réseau
     // (niveau CDP) mais ne garantit pas que navigator.onLine bascule à false

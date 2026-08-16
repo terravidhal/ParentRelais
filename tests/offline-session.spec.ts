@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { skipFacilitatorOnboarding } from "./helpers";
 
 /**
  * Complète offline.spec.ts (qui s'arrête à la navigation vers un module) :
@@ -27,6 +28,7 @@ test.describe("Séance complète hors-ligne", () => {
       .catch(() => {});
     await page.reload();
     await page.waitForLoadState("networkidle");
+    await skipFacilitatorOnboarding(page);
 
     // 2. Couper le réseau.
     await context.setOffline(true);

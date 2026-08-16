@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { skipFacilitatorOnboarding } from "./helpers";
 
 /**
  * Flow 2 (FLOW.md) — lecture audio effective, jamais couvert : les tests
@@ -12,6 +13,8 @@ test.describe("Lecteur audio", () => {
     await page.getByLabel("Code PIN (4 chiffres)").fill("5566");
     await page.getByRole("button", { name: "Se connecter" }).click();
     await expect(page).toHaveURL("/");
+    await skipFacilitatorOnboarding(page);
+    await page.reload();
   });
 
   test("cliquer sur play lance réellement la lecture, cliquer à nouveau la met en pause", async ({

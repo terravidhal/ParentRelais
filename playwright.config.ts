@@ -19,6 +19,21 @@ export default defineConfig({
   use: {
     baseURL: BASE_URL,
     trace: "on-first-retry",
+    // Désactive le guide interactif (driver.js) pour la suite existante : son
+    // overlay bloque les clics tant qu'on n'interagit pas avec lui, ce que la
+    // plupart des tests ne testent pas. Un test dédié à l'onboarding peut
+    // toujours l'exercer explicitement en vidant ce flag au préalable.
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: BASE_URL,
+          localStorage: [
+            { name: "parentrelais_dashboard_onboarding_seen", value: "true" },
+          ],
+        },
+      ],
+    },
   },
   projects: [
     {

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { skipFacilitatorOnboarding } from "./helpers";
 
 /**
  * Flow 8 (FLOW.md) — échec de synchronisation, jamais couvert. Intercepte la
@@ -27,6 +28,8 @@ test.describe("Échec de synchronisation", () => {
     await page.getByLabel("Code PIN (4 chiffres)").fill("1212");
     await page.getByRole("button", { name: "Se connecter" }).click();
     await expect(page).toHaveURL("/");
+    await skipFacilitatorOnboarding(page);
+    await page.reload();
 
     await page.getByText("La perception de l'enfance").click();
     await page.getByRole("button", { name: "Animer une séance" }).click();

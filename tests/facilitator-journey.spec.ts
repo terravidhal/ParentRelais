@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { skipFacilitatorOnboarding } from "./helpers";
 
 /**
  * Parcours facilitateur complet — reflète la Definition of Done de CLAUDE.md :
@@ -19,6 +20,8 @@ test.describe("Parcours facilitateur", () => {
     await page.getByRole("button", { name: "Se connecter" }).click();
 
     await expect(page).toHaveURL("/");
+    await skipFacilitatorOnboarding(page);
+    await page.reload();
     await expect(
       page.getByRole("heading", { name: "Bonjour, Aïcha Test" }),
     ).toBeVisible();

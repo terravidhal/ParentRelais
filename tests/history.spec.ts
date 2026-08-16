@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { skipFacilitatorOnboarding } from "./helpers";
 
 /**
  * /history lit uniquement Dexie.outbox (jamais Supabase) — doit rester
@@ -22,6 +23,9 @@ test.describe("Historique des séances (facilitateur)", () => {
         { timeout: 15_000 },
       )
       .catch(() => {});
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+    await skipFacilitatorOnboarding(page);
     await page.reload();
     await page.waitForLoadState("networkidle");
 

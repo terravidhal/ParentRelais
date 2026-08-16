@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { skipFacilitatorOnboarding } from "./helpers";
 
 /**
  * Test de synchronisation réelle contre le vrai Supabase de dev (.env.local).
@@ -14,6 +15,8 @@ test.describe("Synchronisation", () => {
     await page.getByLabel("Code PIN (4 chiffres)").fill("2468");
     await page.getByRole("button", { name: "Se connecter" }).click();
     await expect(page).toHaveURL("/");
+    await skipFacilitatorOnboarding(page);
+    await page.reload();
 
     // Animer une séance complète jusqu'au récap.
     await page.getByText("La perception de l'enfance").click();

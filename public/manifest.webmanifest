@@ -2,11 +2,15 @@
   "name": "ParentRelais",
   "short_name": "ParentRelais",
   "description": "Boîte à outils numérique hors-ligne des facilitateurs de parentalité positive — UNICEF Cameroon × MINPROFF.",
-  "start_url": "/",
+  "start_url": "/home",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#EDF1EF",
   "theme_color": "#0C7C9A",
   "lang": "fr",
+  "dir": "ltr",
+  "categories": ["education", "productivity", "social"],
   "icons": [
     {
       "src": "/icon.svg",
@@ -43,6 +47,52 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile-accueil.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Les modules de formation, disponibles hors-ligne"
+    },
+    {
+      "src": "/screenshots/mobile-module.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Un module avec son audio et sa vidéo sous-titrée"
+    },
+    {
+      "src": "/screenshots/desktop-accueil.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "La boîte à outils du facilitateur"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Animer une séance",
+      "short_name": "Animer",
+      "description": "Ouvrir les modules pour animer une séance",
+      "url": "/home",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mes séances",
+      "short_name": "Séances",
+      "description": "Consulter les séances déjà animées",
+      "url": "/history",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Téléchargements",
+      "short_name": "Médias",
+      "description": "Gérer les médias disponibles hors-ligne",
+      "url": "/downloads",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

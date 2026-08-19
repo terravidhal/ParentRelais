@@ -28,12 +28,25 @@ export const metadata: Metadata = {
     // raster — le SVG seul laissait l'app sans icône fonctionnelle sur iOS.
     apple: "/apple-touch-icon.png",
   },
+  // iOS ignore une grande partie du manifest : sans ces meta, l'app lancée
+  // depuis l'écran d'accueil rouvre dans Safari avec sa barre d'URL au lieu
+  // du mode standalone, et la barre de statut n'est pas thématisée.
+  appleWebApp: {
+    capable: true,
+    title: "ParentRelais",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: "#0C7C9A",
   width: "device-width",
   initialScale: 1,
+  // Sans viewportFit "cover", le contenu s'arrête au-dessus de l'encoche et
+  // des coins arrondis sur iPhone en mode standalone : bandes vides en haut
+  // et en bas. Avec, la page occupe tout l'écran et les zones sûres sont
+  // gérées par les env(safe-area-inset-*) posés dans globals.css.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

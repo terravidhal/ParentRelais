@@ -7,6 +7,7 @@ import { resumeInterruptedDownloads } from "@/lib/downloads/manager";
 import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import { useConnectivityToasts } from "@/lib/hooks/use-connectivity-toasts";
 import { usePendingSessionsQuery } from "@/lib/hooks/use-outbox-query";
+import { usePathname } from "next/navigation";
 import { useSyncOutboxMutation } from "@/lib/hooks/use-sync-outbox-mutation";
 import { ConnectivityBanner } from "@/components/facilitator/connectivity-banner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +17,11 @@ export default function FacilitatorLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  // La page de connexion porte déjà la marque dans son bandeau illustré :
+  // afficher le kicker du header en plus faisait apparaître "PARENTRELAIS"
+  // deux fois à l'écran.
+  const isLoginPage = pathname === "/login";
   const online = useOnlineStatus();
   const { data: pendingSessions = [] } = usePendingSessionsQuery();
   // Retour explicite au changement de réseau : sans lui, l'utilisateur ne
@@ -60,11 +66,13 @@ export default function FacilitatorLayout({
           (contrairement au dashboard admin) : le facilitateur n'a pas de
           multi-pages de navigation latérale, juste ce header + le contenu. */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-[1100px] items-center px-5 lg:px-8">
-          <p className="font-display text-sm font-bold tracking-wide text-accent-ink">
-            PARENTRELAIS
-          </p>
-        </div>
+        {!isLoginPage && (
+          <div className="mx-auto flex h-16 max-w-[1100px] items-center px-5 lg:px-8">
+            <p className="font-display text-sm font-bold tracking-wide text-accent-ink">
+              PARENTRELAIS
+            </p>
+          </div>
+        )}
         {/* Bannière de connectivité en pleine largeur, sous le kicker : c'est
             l'élément "impossible à manquer" du design system — la garder en
             bandeau plein plutôt que la réduire à un badge à côté du kicker

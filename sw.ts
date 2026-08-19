@@ -20,6 +20,17 @@ declare const self: ServiceWorkerGlobalScope;
  */
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
+  // skipWaiting: une nouvelle version du service worker s'active dès son
+  // installation, sans attendre la fermeture des onglets ouverts. Conservé
+  // à `true` : sur un téléphone de terrain que le facilitateur ne ferme
+  // jamais vraiment, une mise à jour de contenu ne doit pas rester bloquée
+  // indéfiniment derrière un onglet dormant.
+  //
+  // Le rechargement de page observé au retour du réseau pendant les tests
+  // s'est révélé indépendant de ce réglage : il se produit aussi sur la
+  // landing publique (hors zone facilitateur, sans aucun de nos hooks) et
+  // avec skipWaiting à false. C'est un artefact de l'environnement de test,
+  // pas un comportement de l'app à corriger ici.
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,

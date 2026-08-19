@@ -101,7 +101,7 @@ export default function HomePage() {
             {recentSessions.map((s) => (
               <div
                 key={s.client_uuid}
-                className="rounded-xl border border-border bg-background p-2.5 text-xs"
+                className="rounded-xl border border-border bg-card p-2.5 text-xs"
               >
                 <p className="font-display font-semibold">{s.locality}</p>
                 <p className="text-muted-foreground">
@@ -129,7 +129,7 @@ export default function HomePage() {
             useAllSessionsQuery) — aucun nouveau fetch, occupe l'espace
             disponible de la colonne en desktop sans dépendre du réseau. */}
         {sessions.length > 0 && (
-          <div className="mt-4 hidden rounded-2xl border border-border bg-background p-3 lg:block">
+          <div className="mt-4 hidden rounded-2xl border border-border bg-card p-3 lg:block">
             <p className="font-display text-xs font-semibold text-muted-foreground">
               Résumé local
             </p>

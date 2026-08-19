@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Loader2, WifiOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -64,7 +65,10 @@ export default function LoginPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 lg:mx-auto lg:max-w-sm">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-4 lg:mx-auto lg:max-w-sm"
+    >
       {/* Bandeau de marque illustré — remplace l'aplat de couleur unie par
           une image contextuelle (terrain hors-ligne), teinté brand-accent
           conformément à l'usage documenté de ce token dans globals.css
@@ -101,7 +105,7 @@ export default function LoginPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Aïcha"
-              className="h-11"
+              className="h-12 bg-card text-base"
               required
             />
           </div>
@@ -111,7 +115,7 @@ export default function LoginPage() {
               id="region"
               value={region}
               onChange={(e) => setRegion(e.target.value)}
-              className="h-11 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+              className="h-12 w-full rounded-lg border border-input bg-card px-3 text-base outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               {REGIONS.map((r) => (
                 <option key={r} value={r}>
@@ -132,20 +136,54 @@ export default function LoginPage() {
           maxLength={4}
           value={pin}
           onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-          className="h-14 text-center text-2xl tracking-[0.5em]"
+          className="h-16 bg-card text-center text-2xl tracking-[0.5em]"
           required
         />
       </div>
 
       {error && (
-        <p role="alert" className="text-sm font-medium text-destructive">
+        <p
+          role="alert"
+          className="rounded-xl border border-destructive/40 bg-destructive-soft px-3 py-2.5 text-sm font-semibold text-destructive"
+        >
           {error}
         </p>
       )}
 
-      <Button type="submit" className="h-11 font-display font-semibold">
-        Se connecter
+      {/* État de chargement explicite : sans lui, le bouton restait inerte
+          pendant le traitement et l'app paraissait figée (constat terrain
+          sur réseau lent). Le bouton est aussi désactivé pour empêcher une
+          double soumission. */}
+      <Button
+        type="submit"
+        disabled={saveMutation.isPending}
+        className="h-12 font-display text-base font-semibold"
+      >
+        {saveMutation.isPending ? (
+          <>
+            <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden="true" />
+            Connexion en cours…
+          </>
+        ) : (
+          "Se connecter"
+        )}
       </Button>
+
+      {/* Rappel de ce que l'app fait : le grand vide sous le bouton n'aidait
+          personne, et un facilitateur qui se connecte pour la première fois
+          ignore qu'il pourra travailler sans réseau. */}
+      {isFirstLoginForm && !saveMutation.isPending && (
+        <div className="mt-1 rounded-2xl border border-border bg-card p-3">
+          <p className="flex items-center gap-2 text-sm font-semibold">
+            <WifiOff size={16} className="text-primary" aria-hidden="true" />
+            Fonctionne sans réseau
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Vos modules et vos séances restent sur l&apos;appareil. Tout part
+            automatiquement dès que la connexion revient.
+          </p>
+        </div>
+      )}
 
       {existingSession && (
         <button
@@ -155,7 +193,7 @@ export default function LoginPage() {
             setError(null);
             setPin("");
           }}
-          className="h-11 text-xs font-semibold text-primary underline-offset-2 hover:underline"
+          className="h-12 text-sm font-semibold text-primary underline-offset-2 hover:underline"
         >
           {recoveryMode ? "Annuler et revenir à la connexion" : "PIN oublié ?"}
         </button>

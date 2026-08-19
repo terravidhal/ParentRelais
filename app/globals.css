@@ -119,7 +119,10 @@
   --success: oklch(0.480 0.119 155.0); /* success #157A47 assombri */
   --success-foreground: oklch(1.000 0.000 89.9);
   --success-soft: oklch(0.890 0.058 158.2); /* successSoft renforcé */
-  --border: oklch(0.912 0.009 171.8); /* line #DCE4E1 */
+  /* Renforcée : à L .912 la bordure ne se détachait quasi pas du fond
+     (1.137), et les cartes utilisant bg-background étaient carrément
+     invisibles (ratio 1.000). Portée à 1.359 d'écart. */
+  --border: oklch(0.855 0.014 171.8); /* line #DCE4E1 renforcée */
   --input: oklch(0.912 0.009 171.8);
   --ring: oklch(0.545 0.099 223.1);
   --chart-1: oklch(0.545 0.099 223.1);

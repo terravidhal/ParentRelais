@@ -23,7 +23,7 @@ export function ModuleCard({ module, lang, onOpen, className }: ModuleCardProps)
       type="button"
       onClick={() => onOpen(module)}
       className={cn(
-        "rounded-2xl border border-border bg-background p-4 text-left motion-safe:transition motion-safe:active:scale-[0.99]",
+        "rounded-2xl border border-border bg-card p-4 text-left motion-safe:transition motion-safe:active:scale-[0.99]",
         className,
       )}
     >

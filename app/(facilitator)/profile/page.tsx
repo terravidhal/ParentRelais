@@ -57,7 +57,7 @@ export default function ProfilePage() {
 
       <PageHeading>Mon profil</PageHeading>
 
-      <div className="mt-3 flex items-center gap-3 rounded-2xl border border-border bg-background p-3">
+      <div className="mt-3 flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
         <div className="font-display flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft font-bold text-accent-ink">
           {session.full_name.slice(0, 2).toUpperCase()}
         </div>
@@ -67,7 +67,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="mt-3 rounded-2xl border border-border bg-background p-3">
+      <div className="mt-3 rounded-2xl border border-border bg-card p-3">
         <p className="flex items-center gap-2 font-display text-sm font-semibold">
           <UserCircle2 size={16} className="text-accent-ink" aria-hidden="true" />
           Informations
@@ -108,7 +108,7 @@ export default function ProfilePage() {
         Se déconnecter
       </button>
 
-      <div className="mt-6 rounded-2xl border border-border bg-background p-3">
+      <div className="mt-6 rounded-2xl border border-border bg-card p-3">
         <p className="flex items-center gap-2 font-display text-sm font-semibold">
           <RotateCcw size={16} className="text-accent-ink" aria-hidden="true" />
           Réinitialiser le contenu

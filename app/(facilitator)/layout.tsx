@@ -48,7 +48,7 @@ export default function FacilitatorLayout({
           multi-pages de navigation latérale, juste ce header + le contenu. */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-[1100px] items-center px-5 lg:px-8">
-          <p className="font-display text-sm font-bold tracking-wide text-accent">
+          <p className="font-display text-sm font-bold tracking-wide text-accent-ink">
             PARENTRELAIS
           </p>
         </div>

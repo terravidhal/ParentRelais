@@ -43,7 +43,7 @@ export default async function DashboardContentPage() {
   return (
     <div>
       <div className="mb-6">
-        <p className="font-display text-xs font-semibold tracking-wide text-accent">
+        <p className="font-display text-xs font-semibold tracking-wide text-accent-ink">
           PILOTAGE NATIONAL
         </p>
         <h1 className="font-display text-2xl font-bold">Contenus & langues</h1>

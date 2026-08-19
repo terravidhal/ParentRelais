@@ -35,7 +35,7 @@ export default async function MediaLibraryPage() {
       </Link>
 
       <div className="mb-6">
-        <p className="font-display text-xs font-semibold tracking-wide text-accent">
+        <p className="font-display text-xs font-semibold tracking-wide text-accent-ink">
           PILOTAGE NATIONAL
         </p>
         <h1 className="font-display text-2xl font-bold">

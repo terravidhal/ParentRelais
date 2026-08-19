@@ -17,7 +17,7 @@ export function Kicker({ children, variant = "accent", className }: KickerProps)
     <p
       className={cn(
         "font-display text-xs font-semibold tracking-wide",
-        variant === "brand" ? "text-brand-accent" : "text-accent",
+        variant === "brand" ? "text-brand-accent-ink" : "text-accent-ink",
         className,
       )}
     >

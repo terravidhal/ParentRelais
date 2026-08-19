@@ -104,7 +104,7 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isUploading}
-        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-accent hover:text-accent-ink disabled:opacity-50"
         aria-label={
           error
             ? `Réessayer l'envoi — module ${moduleId}, ${lang}`

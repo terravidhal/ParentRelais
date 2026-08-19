@@ -168,7 +168,7 @@ export function SessionView({ moduleId }: { moduleId: number }) {
             {village} · {total} parents · {disability} en situation de handicap
             · quiz {score}/{DEMO_QUIZ.length}
           </p>
-          <div className="w-full rounded-2xl bg-accent-soft p-3 text-sm text-accent">
+          <div className="w-full rounded-2xl bg-accent-soft p-3 text-sm text-accent-ink">
             Enregistré sur l&apos;appareil. La séance sera envoyée dès qu&apos;une
             connexion sera disponible.
           </div>

@@ -76,7 +76,7 @@ export default function HomePage() {
             onClick={() => router.push("/profile")}
             aria-label="Profil et paramètres"
             id="profile-button"
-            className="font-display relative flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft font-bold text-accent lg:order-first lg:mb-4"
+            className="font-display relative flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft font-bold text-accent-ink lg:order-first lg:mb-4"
           >
             {session.full_name.slice(0, 2).toUpperCase()}
             <span

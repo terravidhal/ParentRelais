@@ -30,6 +30,7 @@
   --color-destructive-soft: var(--destructive-soft);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
@@ -39,6 +40,7 @@
   --color-primary: var(--primary);
   --color-primary-dark: var(--primary-dark);
   --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-ink: var(--brand-accent-ink);
   --color-brand-accent-foreground: var(--brand-accent-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
@@ -75,7 +77,11 @@
   --card-foreground: oklch(0.246 0.022 170.3);
   --popover: oklch(1.000 0.000 89.9);
   --popover-foreground: oklch(0.246 0.022 170.3);
-  --primary: oklch(0.545 0.115 223.1); /* primary #0C7C9A, chroma nudgée vers le bleu UNICEF */
+  /* Assombri de L .545 → .520 : à .545 le texte primaire sur --background
+     tombait à 4.13 (liens "Retour", "Mes séances →", boutons ghost), sous le
+     seuil AA. À .520 les trois usages passent : lien sur fond (4.56), lien
+     sur carte (5.19), et texte blanc sur bouton plein (5.19). */
+  --primary: oklch(0.520 0.115 223.1); /* primary #0C7C9A, chroma nudgée vers le bleu UNICEF */
   --primary-foreground: oklch(1.000 0.000 89.9);
   --primary-dark: oklch(0.431 0.077 221.8); /* primaryDark #08596E */
   /* Bleu institutionnel plus affirmé (proche #1CABE2) — réservé aux surfaces
@@ -83,14 +89,29 @@
      reste sur --primary (voir 05-DESIGN-SYSTEM.md). */
   --brand-accent: oklch(0.720 0.130 226.0);
   --brand-accent-foreground: oklch(1.000 0.000 89.9);
+  /* Variante lisible en TEXTE sur fond clair : --brand-accent mesuré à 2.40
+     sur --card (titre du login admin), échec AA. Mesuré à .515 : 4.59/5.22.
+     --brand-accent reste réservé aux surfaces de marque (bandeaux pleins). */
+  --brand-accent-ink: oklch(0.515 0.130 226.0);
   --secondary: oklch(0.955 0.005 165.0);
   --secondary-foreground: oklch(0.246 0.022 170.3);
   --muted: oklch(0.912 0.009 171.8); /* line #DCE4E1 */
-  --muted-foreground: oklch(0.569 0.020 178.8); /* muted #6B7B77 */
+  /* Assombri de L .569 → .53 : à .569 le ratio tombait à 3.90 sur --background
+     et 4.44 sur --card, sous le seuil AA corps de 4.5 (05-DESIGN-SYSTEM.md,
+     exigence n°2). Mesuré à .53 : 4.59 / 5.22. */
+  --muted-foreground: oklch(0.530 0.020 178.8); /* muted #6B7B77 assombri */
+  /* --accent reste la couleur de SURFACE (bg-accent + accent-foreground =
+     6.54, conforme). Il ne doit jamais porter du texte sur fond clair :
+     mesuré 2.16 sur background, 2.45 sur card, 2.15 sur accent-soft — échec
+     même du seuil "grand texte" (3.0). Utiliser --accent-ink pour le texte. */
   --accent: oklch(0.730 0.150 72.6); /* ochre #E0961A */
   --accent-foreground: oklch(0.246 0.022 170.3);
+  --accent-ink: oklch(0.540 0.150 72.6); /* ocre lisible : 4.55/5.18/4.54 */
   --accent-soft: oklch(0.955 0.035 85.4); /* ochreSoft #FBEFD6 */
-  --destructive: oklch(0.553 0.174 38.4); /* danger #C2410C */
+  /* Assombri de L .553 → .54 : le bandeau HORS-LIGNE (destructive sur
+     destructive-soft) était à 4.31, sous le seuil. C'est l'information n°1
+     du produit, lue en plein soleil. Mesuré à .54 : 4.56 sur destructive-soft. */
+  --destructive: oklch(0.540 0.174 38.4); /* danger #C2410C assombri */
   --destructive-soft: oklch(0.939 0.027 47.2); /* dangerSoft #FBE6DC */
   --success: oklch(0.512 0.119 155.0); /* success #157A47 */
   --success-foreground: oklch(1.000 0.000 89.9);
@@ -126,12 +147,16 @@
   --primary-dark: oklch(0.545 0.099 223.1);
   --brand-accent: oklch(0.760 0.130 226.0);
   --brand-accent-foreground: oklch(0.192 0.012 167.1);
+  /* En thème sombre les fonds sont foncés : la variante lisible doit être
+     plus CLAIRE que le token de surface, inverse du thème clair. */
+  --brand-accent-ink: oklch(0.780 0.110 226.0);
   --secondary: oklch(0.248 0.018 172.2);
   --secondary-foreground: oklch(0.955 0.005 165.0);
   --muted: oklch(0.315 0.020 165.3);
   --muted-foreground: oklch(0.742 0.020 176.2);
   --accent: oklch(0.730 0.150 72.6);
   --accent-foreground: oklch(0.192 0.012 167.1);
+  --accent-ink: oklch(0.800 0.120 72.6);
   --accent-soft: oklch(0.308 0.043 84.2);
   --destructive: oklch(0.654 0.163 40.1);
   --destructive-soft: oklch(0.278 0.043 42.4);

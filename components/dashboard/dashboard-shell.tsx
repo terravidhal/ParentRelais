@@ -74,7 +74,7 @@ export function DashboardShell({ userEmail, children }: DashboardShellProps) {
         )}
       >
         <div className="flex h-16 items-center justify-between px-5">
-          <p className="font-display text-sm font-bold tracking-wide text-accent">
+          <p className="font-display text-sm font-bold tracking-wide text-accent-ink">
             PARENTRELAIS
           </p>
           <button

@@ -12,7 +12,7 @@ interface StatCardProps {
 const COLOR_CLASSES: Record<NonNullable<StatCardProps["color"]>, string> = {
   primary: "bg-primary/10 text-primary",
   success: "bg-success-soft text-success",
-  accent: "bg-accent-soft text-accent",
+  accent: "bg-accent-soft text-accent-ink",
 };
 
 export function StatCard({ label, value, icon, color = "primary" }: StatCardProps) {

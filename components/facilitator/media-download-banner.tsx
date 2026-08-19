@@ -37,7 +37,7 @@ export function MediaDownloadBanner() {
   return (
     <Link
       href="/downloads"
-      className="mb-4 flex h-11 w-full items-center justify-between gap-2 rounded-2xl border border-accent/30 bg-accent-soft px-3 text-sm font-semibold text-accent motion-safe:transition"
+      className="mb-4 flex h-11 w-full items-center justify-between gap-2 rounded-2xl border border-accent/30 bg-accent-soft px-3 text-sm font-semibold text-accent-ink motion-safe:transition"
     >
       <span className="flex items-center gap-2">
         <DownloadCloud size={18} aria-hidden="true" className="motion-safe:animate-pulse" />

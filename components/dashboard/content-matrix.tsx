@@ -61,7 +61,7 @@ export function ContentMatrix({ rows, renderCellAction }: ContentMatrixProps) {
                 ) : (
                   <Clock
                     size={15}
-                    className="text-accent"
+                    className="text-accent-ink"
                     aria-label="À venir"
                   />
                 )}
@@ -74,7 +74,7 @@ export function ContentMatrix({ rows, renderCellAction }: ContentMatrixProps) {
       <p className="mt-2 text-xs text-muted-foreground">
         <CheckCircle2 size={11} className="inline text-success" aria-hidden="true" />{" "}
         prêt ·{" "}
-        <Clock size={11} className="inline text-accent" aria-hidden="true" /> case
+        <Clock size={11} className="inline text-accent-ink" aria-hidden="true" /> case
         prête, en attente de contenu. Ajouter une langue = déposer un fichier,
         sans retoucher l&apos;application.
       </p>

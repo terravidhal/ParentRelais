@@ -128,7 +128,7 @@ export default function DownloadsPage() {
                     </span>
                   )}
                   {(d.status === "queued" || d.status === "downloading") && (
-                    <span className="flex items-center gap-1 text-xs font-semibold text-accent">
+                    <span className="flex items-center gap-1 text-xs font-semibold text-accent-ink">
                       <DownloadCloud size={16} aria-hidden="true" />
                       {d.status === "downloading" ? "En cours" : "En attente"}
                     </span>

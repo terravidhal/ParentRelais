@@ -216,9 +216,9 @@ pairing sur la landing. À trancher visuellement, pas dogmatiquement.
 
 | Lot | État | Commit |
 |---|---|---|
-| 1 — Correctifs immédiats | à faire | — |
-| 2 — Contraste AA | à faire | — |
-| 3 — PWA complète | à faire | — |
+| 1 — Correctifs immédiats | **fait** | `60c7433` |
+| 2 — Contraste AA | **fait** | (ce commit) |
+| 3 — PWA complète | en cours | — |
 | 4 — Premium desktop/tablette | à faire | — |
 | 5 — Landing | à faire | — |
 | 6 — Décisions | à faire | — |

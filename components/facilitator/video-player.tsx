@@ -26,7 +26,7 @@ export function VideoPlayer({ src, lang, subtitlesUrl }: VideoPlayerProps) {
   return (
     <div className="mt-3">
       {subtitlesUrl && (
-        <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent">
+        <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-ink">
           <Captions size={14} aria-hidden="true" />
           Sous-titres disponibles
         </div>

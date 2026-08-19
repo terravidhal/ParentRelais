@@ -51,7 +51,7 @@ export default function HistoryPage() {
       <PageHeading>Mes séances</PageHeading>
 
       <div className="mt-3 flex items-center gap-2 rounded-2xl bg-accent-soft p-3">
-        <Users size={18} className="text-accent" aria-hidden="true" />
+        <Users size={18} className="text-accent-ink" aria-hidden="true" />
         <span className="font-display text-sm font-semibold">
           {totalFamilies} famille{totalFamilies > 1 ? "s" : ""} touchée
           {totalFamilies > 1 ? "s" : ""} (séances synchronisées)
@@ -97,7 +97,7 @@ export default function HistoryPage() {
                 </span>
               ) : (
                 <span
-                  className="flex items-center gap-1 text-xs font-semibold text-accent"
+                  className="flex items-center gap-1 text-xs font-semibold text-accent-ink"
                   title="En attente de synchronisation"
                 >
                   <Clock size={16} aria-hidden="true" /> En attente

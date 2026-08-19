@@ -1,19 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Inter } from "next/font/google";
+// Polices auto-hébergées (@fontsource-variable) plutôt que next/font/google :
+// 1. le build ne dépend plus d'un appel réseau à Google Fonts — il échouait
+//    réellement en `Failed to fetch` quand le CDN était injoignable ;
+// 2. les .woff2 sont servis depuis notre propre origine, donc précachables
+//    par le service worker (règle CacheFirst `destination === "font"` de
+//    sw.ts), ce qui rend la typographie disponible dès le premier chargement
+//    hors-ligne — cohérent avec l'offline-first (CLAUDE.md règle 1) et avec
+//    05-DESIGN-SYSTEM.md qui recommande explicitement l'auto-hébergement.
+// `wght.css` = axe de graisse variable, couvre 400–700 en un seul fichier.
+import "@fontsource-variable/inter/wght.css";
+import "@fontsource-variable/space-grotesk/wght.css";
 import "./globals.css";
 import { Providers } from "./providers";
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
-
-const inter = Inter({
-  variable: "--font-body",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
 
 export const metadata: Metadata = {
   title: "ParentRelais",
@@ -44,10 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="fr"
-      className={`${spaceGrotesk.variable} ${inter.variable} h-full antialiased`}
-    >
+    <html lang="fr" className="h-full antialiased">
       <body className="min-h-full flex flex-col font-sans">
         <Providers>{children}</Providers>
       </body>

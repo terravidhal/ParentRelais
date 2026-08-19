@@ -57,4 +57,60 @@ test.describe("Mode hors-ligne", () => {
 
     await context.setOffline(false);
   });
+
+  /**
+   * Couvre TOUTES les routes de la zone facilitateur, pas seulement le
+   * parcours principal : /downloads avait été créée sans être ajoutée au
+   * précache (next.config.ts, facilitatorPageUrls) et échouait en
+   * net::ERR_FAILED hors-ligne sans qu'aucun test ne le détecte.
+   * Toute nouvelle route facilitateur doit être ajoutée ici ET au précache.
+   */
+  test("toutes les routes facilitateur répondent hors-ligne", async ({
+    page,
+    context,
+  }) => {
+    await page.goto("/login");
+    await page.getByLabel("Votre nom").fill("Offline Routes");
+    await page.getByLabel("Code PIN (4 chiffres)").fill("4321");
+    await page.getByRole("button", { name: "Se connecter" }).click();
+    await expect(page).toHaveURL("/home");
+
+    await page
+      .waitForFunction(() => navigator.serviceWorker?.controller != null, {
+        timeout: 15_000,
+      })
+      .catch(() => {});
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+    await skipFacilitatorOnboarding(page);
+
+    await context.setOffline(true);
+
+    const routes = [
+      "/home",
+      "/login",
+      "/history",
+      "/profile",
+      "/downloads",
+      "/modules/1",
+      "/modules/1/session",
+    ];
+
+    // On vérifie que la page rend réellement du contenu applicatif, plutôt
+    // que le code HTTP : une navigation servie par le service worker vers
+    // l'URL courante peut ne renvoyer aucun objet Response à Playwright,
+    // alors que la page s'affiche parfaitement. Le vrai critère offline est
+    // "l'écran s'affiche", pas "le réseau a répondu 200".
+    for (const route of routes) {
+      await page.goto(route, { waitUntil: "domcontentloaded", timeout: 15_000 });
+      await expect(page.locator("body"), `${route} doit s'afficher hors-ligne`)
+        .not.toBeEmpty();
+      const errorScreen = await page
+        .getByText(/ERR_|Cette page ne fonctionne pas|No internet/i)
+        .count();
+      expect(errorScreen, `${route} affiche une erreur navigateur`).toBe(0);
+    }
+
+    await context.setOffline(false);
+  });
 });

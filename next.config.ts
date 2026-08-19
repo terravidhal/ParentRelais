@@ -19,6 +19,7 @@ const facilitatorPageUrls = [
   "/login",
   "/history",
   "/profile",
+  "/downloads",
   ...SEED_MODULES.flatMap((m) => [`/modules/${m.id}`, `/modules/${m.id}/session`]),
 ];
 

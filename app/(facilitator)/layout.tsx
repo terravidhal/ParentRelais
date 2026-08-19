@@ -5,6 +5,7 @@ import { RefreshCw } from "lucide-react";
 import { ensureSeeded } from "@/lib/db/seedDb";
 import { resumeInterruptedDownloads } from "@/lib/downloads/manager";
 import { useOnlineStatus } from "@/lib/hooks/use-online-status";
+import { useConnectivityToasts } from "@/lib/hooks/use-connectivity-toasts";
 import { usePendingSessionsQuery } from "@/lib/hooks/use-outbox-query";
 import { useSyncOutboxMutation } from "@/lib/hooks/use-sync-outbox-mutation";
 import { ConnectivityBanner } from "@/components/facilitator/connectivity-banner";
@@ -17,6 +18,10 @@ export default function FacilitatorLayout({
 }) {
   const online = useOnlineStatus();
   const { data: pendingSessions = [] } = usePendingSessionsQuery();
+  // Retour explicite au changement de réseau : sans lui, l'utilisateur ne
+  // sait pas si une action a échoué à cause de la connexion. Le second
+  // argument évite un doublon avec le toast de la synchro.
+  useConnectivityToasts(online, pendingSessions.length > 0);
   const syncMutation = useSyncOutboxMutation();
   // Le seed doit être terminé AVANT que la moindre query Dexie enfant ne se
   // monte : compter sur l'ordre de montage + invalidation React Query s'est

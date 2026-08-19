@@ -106,16 +106,19 @@
      même du seuil "grand texte" (3.0). Utiliser --accent-ink pour le texte. */
   --accent: oklch(0.730 0.150 72.6); /* ochre #E0961A */
   --accent-foreground: oklch(0.246 0.022 170.3);
-  --accent-ink: oklch(0.540 0.150 72.6); /* ocre lisible : 4.55/5.18/4.54 */
-  --accent-soft: oklch(0.955 0.035 85.4); /* ochreSoft #FBEFD6 */
+  --accent-ink: oklch(0.505 0.150 72.6); /* ocre lisible sur fond soutenu */
+  /* Fonds d'état renforcés : mesurés à ~1.00 d'écart avec --background,
+     donc invisibles en plein soleil sur écran bas de gamme (constat
+     terrain). Portés à ~1.15-1.23 d'écart, texte réajusté pour rester AA. */
+  --accent-soft: oklch(0.910 0.078 85.4); /* ochreSoft renforcé */
   /* Assombri de L .553 → .54 : le bandeau HORS-LIGNE (destructive sur
      destructive-soft) était à 4.31, sous le seuil. C'est l'information n°1
      du produit, lue en plein soleil. Mesuré à .54 : 4.56 sur destructive-soft. */
-  --destructive: oklch(0.540 0.174 38.4); /* danger #C2410C assombri */
-  --destructive-soft: oklch(0.939 0.027 47.2); /* dangerSoft #FBE6DC */
-  --success: oklch(0.512 0.119 155.0); /* success #157A47 */
+  --destructive: oklch(0.505 0.174 38.4); /* danger #C2410C assombri */
+  --destructive-soft: oklch(0.895 0.062 42.0); /* dangerSoft renforcé */
+  --success: oklch(0.480 0.119 155.0); /* success #157A47 assombri */
   --success-foreground: oklch(1.000 0.000 89.9);
-  --success-soft: oklch(0.938 0.026 158.2); /* successSoft #DDF0E4 */
+  --success-soft: oklch(0.890 0.058 158.2); /* successSoft renforcé */
   --border: oklch(0.912 0.009 171.8); /* line #DCE4E1 */
   --input: oklch(0.912 0.009 171.8);
   --ring: oklch(0.545 0.099 223.1);

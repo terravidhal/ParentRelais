@@ -4,11 +4,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllDownloads } from "@/lib/db/downloads";
 import {
   cancelDownload,
+  deleteDownloadedMedia,
+  getStorageEstimate,
+  pauseAllDownloads,
   pauseDownload,
   queueDownload,
+  resumeAllPaused,
+  retryAllFailed,
   retryDownload,
 } from "@/lib/downloads/manager";
 import type { NewMediaDownload } from "@/lib/db/downloads";
+import type { MediaDownload } from "@/lib/db/dexie";
 
 const QUERY_KEY = ["dexie", "downloads"];
 
@@ -16,44 +22,70 @@ export function useMediaDownloadsQuery() {
   return useQuery({
     queryKey: QUERY_KEY,
     queryFn: getAllDownloads,
-    // Une file de téléchargement progresse en dehors des actions utilisateur
-    // (chunks reçus en arrière-plan) — un court intervalle de refetch reflète
-    // la progression sans dépendre d'un canal de mise à jour dédié.
-    refetchInterval: 1000,
+    // Un téléchargement progresse hors des actions utilisateur : on
+    // rafraîchit pendant qu'il y a du travail, et on s'arrête sinon.
+    // Interroger IndexedDB chaque seconde en permanence était inutile et
+    // pénalisant sur téléphone modeste.
+    refetchInterval: (query) => {
+      const rows = query.state.data as MediaDownload[] | undefined;
+      if (!rows) return false;
+      const busy = rows.some(
+        (d) => d.status === "downloading" || d.status === "queued",
+      );
+      return busy ? 700 : false;
+    },
+  });
+}
+
+export function useStorageEstimateQuery() {
+  return useQuery({
+    queryKey: ["storage", "estimate"],
+    queryFn: getStorageEstimate,
+    staleTime: 30_000,
+  });
+}
+
+function useDownloadMutation<T>(fn: (arg: T) => Promise<void> | void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (arg: T) => {
+      await fn(arg);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["storage", "estimate"] });
+    },
   });
 }
 
 export function useQueueDownloadMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (item: NewMediaDownload) => queueDownload(item),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
-  });
+  return useDownloadMutation<NewMediaDownload>(queueDownload);
 }
 
 export function usePauseDownloadMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (media_url: string) => {
-      pauseDownload(media_url);
-      return Promise.resolve();
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
-  });
+  return useDownloadMutation<string>(pauseDownload);
 }
 
 export function useRetryDownloadMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (media_url: string) => retryDownload(media_url),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
-  });
+  return useDownloadMutation<string>(retryDownload);
 }
 
 export function useCancelDownloadMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (media_url: string) => cancelDownload(media_url),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
-  });
+  return useDownloadMutation<string>(cancelDownload);
+}
+
+export function useDeleteDownloadedMediaMutation() {
+  return useDownloadMutation<string>(deleteDownloadedMedia);
+}
+
+export function usePauseAllMutation() {
+  return useDownloadMutation<void>(pauseAllDownloads);
+}
+
+export function useResumeAllMutation() {
+  return useDownloadMutation<void>(resumeAllPaused);
+}
+
+export function useRetryAllFailedMutation() {
+  return useDownloadMutation<void>(retryAllFailed);
 }

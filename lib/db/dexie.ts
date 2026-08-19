@@ -40,6 +40,13 @@ export type MediaDownloadStatus =
   | "done"
   | "failed";
 
+/** Cause d'échec, pour afficher un message actionnable plutôt qu'un « Échec ». */
+export type MediaDownloadErrorKind =
+  | "network"
+  | "storage_full"
+  | "not_found"
+  | "unknown";
+
 export interface MediaDownload {
   media_url: string;
   module_id: number;
@@ -49,7 +56,30 @@ export interface MediaDownload {
   downloaded_bytes: number;
   status: MediaDownloadStatus;
   error_message: string | null;
+  /** Renseigné avec error_message ; pilote l'action proposée à l'utilisateur. */
+  error_kind?: MediaDownloadErrorKind;
   attempt_count: number;
+  updated_at: string;
+  /**
+   * Marque une interruption subie (fermeture de l'app, perte de réseau) par
+   * opposition à `paused`, qui est un choix explicite de l'utilisateur. Seules
+   * les interruptions sont relancées automatiquement au démarrage.
+   */
+  interrupted?: boolean;
+}
+
+/**
+ * Octets déjà reçus, conservés hors de la ligne de suivi pour ne pas
+ * recharger des mégaoctets à chaque lecture de la file.
+ * Un enregistrement par fichier ; les segments sont concaténés à la fin.
+ * Confirmé par test : Supabase Storage et le serveur local répondent tous
+ * deux `206 Partial Content` avec `accept-ranges: bytes`, la reprise est
+ * donc réellement possible (et non simulée).
+ */
+export interface MediaDownloadChunk {
+  media_url: string;
+  chunks: Blob[];
+  bytes: number;
   updated_at: string;
 }
 
@@ -58,6 +88,7 @@ export class ParentRelaisDB extends Dexie {
   outbox!: Table<OutboxSession, string>;
   meta!: Table<{ key: string; value: string }, string>;
   mediaDownloads!: Table<MediaDownload, string>;
+  mediaChunks!: Table<MediaDownloadChunk, string>;
 
   constructor() {
     super("parentrelais");
@@ -71,6 +102,16 @@ export class ParentRelaisDB extends Dexie {
       outbox: "client_uuid, status",
       meta: "key",
       mediaDownloads: "media_url, status, module_id",
+    });
+    // v3 : stockage des octets déjà reçus pour reprendre un téléchargement
+    // interrompu au lieu de tout recommencer. Ajout additif, aucune perte
+    // sur les tables existantes.
+    this.version(3).stores({
+      modules: "id, position",
+      outbox: "client_uuid, status",
+      meta: "key",
+      mediaDownloads: "media_url, status, module_id",
+      mediaChunks: "media_url",
     });
   }
 }

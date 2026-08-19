@@ -1,4 +1,8 @@
-import { db, type MediaDownload } from "./dexie";
+import {
+  db,
+  type MediaDownload,
+  type MediaDownloadErrorKind,
+} from "./dexie";
 
 export type NewMediaDownload = Pick<
   MediaDownload,
@@ -71,11 +75,13 @@ export async function markDownloadFailed(
   media_url: string,
   error_message: string,
   attempt_count: number,
+  error_kind: MediaDownloadErrorKind = "unknown",
 ): Promise<void> {
   try {
     await db.mediaDownloads.update(media_url, {
       status: "failed",
       error_message,
+      error_kind,
       attempt_count,
       updated_at: new Date().toISOString(),
     });

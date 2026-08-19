@@ -6,24 +6,34 @@ import {
   ChevronLeft,
   CheckCircle2,
   DownloadCloud,
+  HardDrive,
   Pause,
+  Play,
   RotateCcw,
+  Trash2,
   X,
 } from "lucide-react";
 import { useFacilitatorSessionQuery } from "@/lib/hooks/use-facilitator-session";
 import {
   useCancelDownloadMutation,
+  useDeleteDownloadedMediaMutation,
   useMediaDownloadsQuery,
+  usePauseAllMutation,
   usePauseDownloadMutation,
+  useResumeAllMutation,
+  useRetryAllFailedMutation,
   useRetryDownloadMutation,
+  useStorageEstimateQuery,
 } from "@/lib/hooks/use-media-downloads-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
 import type { MediaDownload } from "@/lib/db/dexie";
 
 function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} o`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} Go`;
 }
 
 const MEDIA_TYPE_LABEL: Record<MediaDownload["media_type"], string> = {
@@ -33,19 +43,25 @@ const MEDIA_TYPE_LABEL: Record<MediaDownload["media_type"], string> = {
 };
 
 /**
- * Gestionnaire visuel de la file de téléchargement média (voir
- * lib/downloads/manager.ts) — retry complet depuis le début en cas
- * d'échec (pas de vraie reprise byte-par-byte en V1), file séquentielle
- * (1 fichier à la fois) pour borner la pression mémoire sur téléphone bas
- * de gamme.
+ * Gestionnaire de téléchargements hors-ligne.
+ *
+ * La reprise est réelle (HTTP Range) : un fichier coupé à 90 % repart de
+ * 90 %, pas de zéro — vérifié sur Supabase Storage et sur les médias servis
+ * localement, qui répondent tous deux `206 Partial Content`. Les octets
+ * reçus survivent à la fermeture de l'app (voir lib/downloads/manager.ts).
  */
 export default function DownloadsPage() {
   const router = useRouter();
   const { data: session, isLoading: sessionLoading } = useFacilitatorSessionQuery();
   const { data: downloads = [], isLoading: downloadsLoading } = useMediaDownloadsQuery();
+  const { data: storage } = useStorageEstimateQuery();
   const pauseMutation = usePauseDownloadMutation();
   const retryMutation = useRetryDownloadMutation();
   const cancelMutation = useCancelDownloadMutation();
+  const deleteMutation = useDeleteDownloadedMediaMutation();
+  const pauseAll = usePauseAllMutation();
+  const resumeAll = useResumeAllMutation();
+  const retryAll = useRetryAllFailedMutation();
 
   useEffect(() => {
     if (!sessionLoading && !session) {
@@ -57,41 +73,121 @@ export default function DownloadsPage() {
     return <Skeleton className="h-40 w-full" />;
   }
 
-  const sorted = [...downloads].sort(
-    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+  const active = downloads.filter(
+    (d) => d.status === "downloading" || d.status === "queued",
   );
+  const paused = downloads.filter((d) => d.status === "paused");
+  const failed = downloads.filter((d) => d.status === "failed");
+  const done = downloads.filter((d) => d.status === "done");
+
+  const sorted = [...downloads].sort((a, b) => {
+    // Ce qui demande une action passe devant : échecs, puis en cours.
+    const rank = (d: MediaDownload) =>
+      d.status === "failed" ? 0 : d.status === "downloading" ? 1 : d.status === "queued" ? 2 : d.status === "paused" ? 3 : 4;
+    const diff = rank(a) - rank(b);
+    if (diff !== 0) return diff;
+    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+  });
 
   return (
-    <div className="lg:mx-auto lg:max-w-xl">
+    <div className="lg:mx-auto lg:max-w-2xl">
       <button
         type="button"
         onClick={() => router.push("/home")}
-        className="mb-3 flex h-11 items-center gap-1 text-sm font-semibold text-primary"
+        className="mb-3 flex h-12 items-center gap-1.5 rounded-xl pr-3 text-base font-semibold text-primary"
       >
-        <ChevronLeft size={16} aria-hidden="true" /> Retour
+        <ChevronLeft size={20} aria-hidden="true" /> Retour
       </button>
 
       <PageHeading>Téléchargements</PageHeading>
       <p className="mt-1 text-sm text-muted-foreground">
-        Rendez vos vidéos et audios disponibles hors-ligne.
+        Vos vidéos et audios restent disponibles sans réseau.
       </p>
+
+      {/* Espace disque : un échec par manque de place doit être anticipé,
+          pas subi au milieu d'un fichier de plusieurs centaines de Mo. */}
+      {storage && storage.quotaBytes > 0 && (
+        <div className="mt-4 rounded-2xl border border-border bg-background p-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="flex items-center gap-2 font-semibold">
+              <HardDrive size={16} className="text-primary" aria-hidden="true" />
+              Espace utilisé
+            </span>
+            <span className="font-display font-semibold tabular-nums">
+              {formatBytes(storage.usedBytes)} / {formatBytes(storage.quotaBytes)}
+            </span>
+          </div>
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary"
+              style={{
+                width: `${Math.min(100, Math.round((storage.usedBytes / storage.quotaBytes) * 100))}%`,
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Contrôles globaux : indispensables pour préserver un forfait data. */}
+      {(active.length > 0 || paused.length > 0 || failed.length > 0) && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {active.length > 0 && (
+            <button
+              type="button"
+              onClick={() => pauseAll.mutate()}
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-border bg-background text-sm font-semibold"
+            >
+              <Pause size={16} aria-hidden="true" />
+              Tout mettre en pause
+            </button>
+          )}
+          {paused.length > 0 && (
+            <button
+              type="button"
+              onClick={() => resumeAll.mutate()}
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-primary text-sm font-semibold text-primary-foreground"
+            >
+              <Play size={16} aria-hidden="true" />
+              Tout reprendre
+            </button>
+          )}
+          {failed.length > 0 && (
+            <button
+              type="button"
+              onClick={() => retryAll.mutate()}
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-accent text-sm font-semibold text-accent-foreground"
+            >
+              <RotateCcw size={16} aria-hidden="true" />
+              Réessayer les {failed.length} échecs
+            </button>
+          )}
+        </div>
+      )}
+
+      {done.length > 0 && (
+        <p className="mt-4 flex items-center gap-2 text-sm font-semibold text-success">
+          <CheckCircle2 size={16} aria-hidden="true" />
+          {done.length} fichier{done.length > 1 ? "s" : ""} disponible
+          {done.length > 1 ? "s" : ""} hors-ligne
+        </p>
+      )}
 
       <div className="mt-4 flex flex-col gap-2.5">
         {downloadsLoading ? (
           <>
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
           </>
         ) : sorted.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Aucun téléchargement en cours. Depuis l&apos;accueil, choisissez
-            « Télécharger » quand un média est disponible hors-ligne.
+            Aucun téléchargement. Depuis l&apos;accueil, les médias des modules
+            se téléchargent automatiquement dès qu&apos;ils sont disponibles.
           </p>
         ) : (
           sorted.map((d) => {
-            const progressPct =
+            const pct =
               d.total_bytes && d.total_bytes > 0
-                ? Math.round((d.downloaded_bytes / d.total_bytes) * 100)
+                ? Math.min(100, Math.round((d.downloaded_bytes / d.total_bytes) * 100))
                 : null;
 
             return (
@@ -99,42 +195,36 @@ export default function DownloadsPage() {
                 key={d.media_url}
                 className="rounded-2xl border border-border bg-background p-3"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
                     <p className="font-display text-sm font-semibold">
                       Module {d.module_id} · {MEDIA_TYPE_LABEL[d.media_type]} ({d.lang})
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {progressPct !== null
-                        ? `${formatBytes(d.downloaded_bytes)} / ${formatBytes(d.total_bytes as number)} (${progressPct}%)`
+                    <p className="text-xs tabular-nums text-muted-foreground">
+                      {pct !== null
+                        ? `${formatBytes(d.downloaded_bytes)} / ${formatBytes(d.total_bytes as number)} · ${pct} %`
                         : formatBytes(d.downloaded_bytes)}
                     </p>
                   </div>
 
                   {d.status === "done" && (
-                    <span
-                      className="flex items-center gap-1 text-xs font-semibold text-success"
-                      title="Disponible hors-ligne"
-                    >
+                    <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-success">
                       <CheckCircle2 size={16} aria-hidden="true" /> Prêt
                     </span>
                   )}
                   {d.status === "failed" && (
-                    <span
-                      className="text-xs font-semibold text-destructive"
-                      title={d.error_message ?? "Échec"}
-                    >
+                    <span className="shrink-0 text-xs font-semibold text-destructive">
                       Échec
                     </span>
                   )}
                   {(d.status === "queued" || d.status === "downloading") && (
-                    <span className="flex items-center gap-1 text-xs font-semibold text-accent-ink">
+                    <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-accent-ink">
                       <DownloadCloud size={16} aria-hidden="true" />
                       {d.status === "downloading" ? "En cours" : "En attente"}
                     </span>
                   )}
                   {d.status === "paused" && (
-                    <span className="text-xs font-semibold text-muted-foreground">
+                    <span className="shrink-0 text-xs font-semibold text-muted-foreground">
                       En pause
                     </span>
                   )}
@@ -148,15 +238,19 @@ export default function DownloadsPage() {
                           ? "h-full rounded-full bg-success motion-safe:transition-all"
                           : "h-full rounded-full bg-accent motion-safe:transition-all"
                       }
-                      style={{
-                        width: `${d.status === "done" ? 100 : (progressPct ?? 0)}%`,
-                      }}
+                      style={{ width: `${d.status === "done" ? 100 : (pct ?? 0)}%` }}
                     />
                   </div>
                 )}
 
+                {/* Message actionnable : la cause réelle, pas un « Échec » nu. */}
                 {d.status === "failed" && d.error_message && (
                   <p className="mt-2 text-xs text-destructive">{d.error_message}</p>
+                )}
+                {d.status === "paused" && d.downloaded_bytes > 0 && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Reprendra à {pct !== null ? `${pct} %` : formatBytes(d.downloaded_bytes)}.
+                  </p>
                 )}
 
                 <div className="mt-2 flex gap-2">
@@ -164,7 +258,7 @@ export default function DownloadsPage() {
                     <button
                       type="button"
                       onClick={() => pauseMutation.mutate(d.media_url)}
-                      className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border border-border text-sm font-semibold"
+                      className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-border text-sm font-semibold"
                     >
                       <Pause size={16} aria-hidden="true" /> Pause
                     </button>
@@ -173,17 +267,34 @@ export default function DownloadsPage() {
                     <button
                       type="button"
                       onClick={() => retryMutation.mutate(d.media_url)}
-                      className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-accent text-sm font-semibold text-accent-foreground"
+                      className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl bg-accent text-sm font-semibold text-accent-foreground"
                     >
-                      <RotateCcw size={16} aria-hidden="true" /> Réessayer
+                      {d.status === "paused" ? (
+                        <>
+                          <Play size={16} aria-hidden="true" /> Reprendre
+                        </>
+                      ) : (
+                        <>
+                          <RotateCcw size={16} aria-hidden="true" /> Réessayer
+                        </>
+                      )}
                     </button>
                   )}
-                  {d.status !== "done" && (
+                  {d.status === "done" ? (
+                    <button
+                      type="button"
+                      onClick={() => deleteMutation.mutate(d.media_url)}
+                      aria-label="Supprimer ce média téléchargé"
+                      className="flex h-12 w-12 items-center justify-center rounded-xl border border-border text-muted-foreground"
+                    >
+                      <Trash2 size={16} aria-hidden="true" />
+                    </button>
+                  ) : (
                     <button
                       type="button"
                       onClick={() => cancelMutation.mutate(d.media_url)}
                       aria-label="Annuler ce téléchargement"
-                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-destructive/30 text-destructive"
+                      className="flex h-12 w-12 items-center justify-center rounded-xl border border-destructive/30 text-destructive"
                     >
                       <X size={16} aria-hidden="true" />
                     </button>

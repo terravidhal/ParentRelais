@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { ensureSeeded } from "@/lib/db/seedDb";
+import { resumeInterruptedDownloads } from "@/lib/downloads/manager";
 import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import { usePendingSessionsQuery } from "@/lib/hooks/use-outbox-query";
 import { useSyncOutboxMutation } from "@/lib/hooks/use-sync-outbox-mutation";
@@ -23,6 +24,13 @@ export default function FacilitatorLayout({
   // de la redirection /login → /). On bloque le rendu des enfants tant que
   // ce n'est pas confirmé, pattern plus robuste qu'une invalidation a posteriori.
   const [seedReady, setSeedReady] = useState(false);
+
+  // Un téléchargement coupé par la fermeture de l'app reste bloqué en
+  // "downloading" : sans cette reprise, il ne repartirait jamais. Les
+  // fichiers mis en pause volontairement ne sont pas touchés.
+  useEffect(() => {
+    void resumeInterruptedDownloads();
+  }, []);
 
   useEffect(() => {
     ensureSeeded()

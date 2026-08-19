@@ -11,6 +11,7 @@ import { useResetContentMutation } from "@/lib/hooks/use-reset-content-mutation"
 import { useAllSessionsQuery } from "@/lib/hooks/use-outbox-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
+import { InstallButton } from "@/components/facilitator/install-button";
 
 /**
  * Profil facilitateur — déconnexion locale et filet de secours de contenu
@@ -88,6 +89,14 @@ export default function ProfilePage() {
         <HelpCircle size={16} className="text-accent-ink" aria-hidden="true" />
         Revoir le guide
       </button>
+
+      {/* Le navigateur ne propose l'installation qu'une seule fois et ne
+          revient pas dessus pendant des mois : sans ce bouton, un
+          facilitateur qui rate la bannière ne peut plus jamais installer
+          l'app. Ne s'affiche que si l'installation est possible. */}
+      <div className="mt-3">
+        <InstallButton />
+      </div>
 
       <button
         type="button"

@@ -249,11 +249,26 @@
 }
 .driver-popover-progress-text {
   color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  /* Sans cette marge, "Étape 1 sur 3" se colle au bouton "Passer". */
+  margin-right: 0.75rem;
+}
+/* Le footer par défaut tasse les boutons : on force un espacement net et on
+   laisse "Passer" à gauche, les actions de navigation à droite. */
+.driver-popover-footer {
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 .driver-popover-footer button {
   border-radius: var(--radius-md);
   text-shadow: none;
   font-family: var(--font-body);
+  /* Cibles tactiles ≥44px (05-DESIGN-SYSTEM.md, exigence n°3) : les boutons
+     natifs de driver.js font 32px de haut, difficiles à viser au doigt. */
+  min-height: 44px;
+  padding-inline: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 .driver-popover-footer .driver-popover-next-btn,
 .driver-popover-footer .driver-popover-prev-btn {
@@ -264,6 +279,36 @@
 .driver-popover-footer .driver-popover-prev-btn {
   background: var(--muted);
   color: var(--foreground);
+}
+/* "Passer" doit se lire comme une vraie porte de sortie : tant que le guide
+   est actif, driver.js bloque tous les autres clics de la page. */
+.driver-popover-footer .driver-popover-skip-btn {
+  margin-right: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  cursor: pointer;
+}
+.driver-popover-footer .driver-popover-skip-btn:hover {
+  background: var(--muted);
+}
+/* Sur téléphone étroit, "Étape X sur Y" + 3 boutons de 44px ne tiennent pas
+   sur une ligne : "Suivant" sortait du popover. On empile proprement. */
+@media (max-width: 480px) {
+  .driver-popover {
+    max-width: calc(100vw - 2rem);
+  }
+  .driver-popover-footer {
+    flex-wrap: wrap;
+  }
+  .driver-popover-progress-text {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 0.25rem;
+  }
+  .driver-popover-footer .driver-popover-skip-btn {
+    margin-right: auto;
+  }
 }
 .driver-popover-close-btn {
   color: var(--muted-foreground);

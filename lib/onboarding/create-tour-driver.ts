@@ -26,15 +26,22 @@ export function createTourDriver({ steps, onDone }: CreateTourDriverOptions) {
     nextBtnText: "Suivant",
     prevBtnText: "Précédent",
     doneBtnText: "Terminer",
+    // "1 of 3" par défaut : driver.js n'est pas traduit, et le libellé se
+    // collait au bouton "Passer" faute d'espacement dans le footer.
+    progressText: "Étape {{current}} sur {{total}}",
     onDestroyed: onDone,
     onPopoverRender: (popover: PopoverDOM, { driver: tourDriver }) => {
+      // Bouton "Passer" explicite : la croix de fermeture de driver.js est
+      // trop discrète pour un facilitateur peu à l'aise avec le numérique,
+      // et tant que le guide est actif, driver.js pose
+      // `.driver-active * { pointer-events: none }` — tous les autres clics
+      // de la page sont bloqués. Sans porte de sortie évidente, l'app paraît
+      // figée (constaté en test réel sur téléphone).
       const skipBtn = document.createElement("button");
       skipBtn.type = "button";
-      skipBtn.textContent = "Passer le guide";
-      skipBtn.className =
-        "driver-popover-skip-btn font-display text-xs font-semibold text-muted-foreground underline-offset-2 hover:underline";
-      skipBtn.style.cssText =
-        "margin-right:auto;padding:0.5rem 0;cursor:pointer;background:none;border:none;";
+      skipBtn.textContent = "Passer";
+      skipBtn.setAttribute("aria-label", "Passer le guide");
+      skipBtn.className = "driver-popover-skip-btn";
       skipBtn.addEventListener("click", () => tourDriver.destroy());
       popover.footerButtons.prepend(skipBtn);
     },

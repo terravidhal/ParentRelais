@@ -37,12 +37,18 @@ export default async function DashboardFacilitatorsPage() {
           value={rows.length}
           icon={<Users size={18} aria-hidden="true" />}
           color="primary"
+          hint="Ont synchronisé au moins une séance"
         />
         <StatCard
           label="Séances animées au total"
           value={totalSessions}
           icon={<BookOpen size={18} aria-hidden="true" />}
           color="success"
+          hint={
+            rows.length > 0
+              ? `${Math.round(totalSessions / rows.length)} en moyenne par facilitateur`
+              : undefined
+          }
         />
         <StatCard
           label="Régions couvertes"

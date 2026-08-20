@@ -34,7 +34,9 @@ export function LangPills({ lang, onLangChange }: LangPillsProps) {
           disabled={!l.available}
           title={l.available ? undefined : "Contenu à venir — case prête, en attente de traduction"}
           className={cn(
-            "flex h-11 items-center gap-1 rounded-full border px-3 text-xs font-semibold motion-safe:transition",
+            // min-w-11 : "FR" et "EN" tombaient à 40 et 42px de large (mesuré), sous
+            // le seuil de 44px du design system — la hauteur seule ne suffit pas.
+            "flex h-11 min-w-11 items-center justify-center gap-1 rounded-full border px-3 text-sm font-semibold motion-safe:transition",
             l.available
               ? lang === l.id
                 ? "border-primary bg-primary text-primary-foreground"

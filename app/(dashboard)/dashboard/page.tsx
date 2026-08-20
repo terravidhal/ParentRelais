@@ -50,18 +50,25 @@ export default async function DashboardPage() {
           value={totalFamilies}
           icon={<Users size={18} aria-hidden="true" />}
           color="primary"
+          hint={`Sur ${rows.length} localité${rows.length > 1 ? "s" : ""}`}
         />
         <StatCard
           label="Séances animées"
           value={totalSessions}
           icon={<BookOpen size={18} aria-hidden="true" />}
           color="success"
+          hint="Séances synchronisées depuis le terrain"
         />
         <StatCard
           label="Dont en situation de handicap"
           value={totalDisability}
           icon={<Accessibility size={18} aria-hidden="true" />}
           color="accent"
+          hint={
+            totalFamilies > 0
+              ? `${Math.round((totalDisability / totalFamilies) * 100)} % des familles touchées`
+              : "Aucune donnée pour l'instant"
+          }
         />
       </div>
 

@@ -46,7 +46,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="lg:mx-auto lg:max-w-xl">
+    <div className="lg:mx-auto lg:max-w-4xl">
       <button
         type="button"
         onClick={() => router.push("/home")}
@@ -57,7 +57,12 @@ export default function ProfilePage() {
 
       <PageHeading>Mon profil</PageHeading>
 
-      <div className="mt-3 flex items-center gap-3 surface">
+      {/* Deux colonnes à lg: : qui je suis à gauche, ce que je peux faire à
+          droite. Avant, tout s'empilait dans une colonne de 576px centrée
+          dans 432px de vide de chaque côté (mesuré). */}
+      <div className="mt-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
+      <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3 surface">
         <div className="font-display flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft font-bold text-accent-ink">
           {session.full_name.slice(0, 2).toUpperCase()}
         </div>
@@ -67,7 +72,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="mt-3 surface">
+      <div className="surface">
         <p className="flex items-center gap-2 font-display text-sm font-semibold">
           <UserCircle2 size={16} className="text-accent-ink" aria-hidden="true" />
           Informations
@@ -81,10 +86,13 @@ export default function ProfilePage() {
         </p>
       </div>
 
+      </div>
+
+      <div className="mt-3 flex flex-col gap-3 lg:mt-0">
       <button
         type="button"
         onClick={() => router.push("/home?tour=1")}
-        className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-border text-sm font-semibold text-foreground"
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-border text-sm font-semibold text-foreground"
       >
         <HelpCircle size={16} className="text-accent-ink" aria-hidden="true" />
         Revoir le guide
@@ -94,21 +102,19 @@ export default function ProfilePage() {
           revient pas dessus pendant des mois : sans ce bouton, un
           facilitateur qui rate la bannière ne peut plus jamais installer
           l'app. Ne s'affiche que si l'installation est possible. */}
-      <div className="mt-3">
-        <InstallButton />
-      </div>
+      <InstallButton />
 
       <button
         type="button"
         onClick={handleSignOut}
         disabled={signOutMutation.isPending}
-        className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/10 text-sm font-semibold text-destructive disabled:opacity-50"
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/10 text-sm font-semibold text-destructive disabled:opacity-50"
       >
         <LogOut size={16} aria-hidden="true" />
         Se déconnecter
       </button>
 
-      <div className="mt-6 surface">
+      <div className="surface">
         <p className="flex items-center gap-2 font-display text-sm font-semibold">
           <RotateCcw size={16} className="text-accent-ink" aria-hidden="true" />
           Réinitialiser le contenu
@@ -151,6 +157,8 @@ export default function ProfilePage() {
             Réinitialiser le contenu
           </button>
         )}
+      </div>
+      </div>
       </div>
     </div>
   );

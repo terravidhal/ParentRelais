@@ -37,9 +37,11 @@ export default function HistoryPage() {
   const sorted = [...sessions].sort(
     (a, b) => new Date(b.held_at).getTime() - new Date(a.held_at).getTime(),
   );
+  const syncedCount = sessions.filter((s) => s.status === "synced").length;
+  const pendingCount = sessions.length - syncedCount;
 
   return (
-    <div className="lg:mx-auto lg:max-w-xl">
+    <div className="lg:mx-auto lg:max-w-5xl">
       <button
         type="button"
         onClick={() => router.push("/home")}
@@ -50,15 +52,43 @@ export default function HistoryPage() {
 
       <PageHeading>Mes séances</PageHeading>
 
-      <div className="mt-3 flex items-center gap-2 rounded-2xl bg-accent-soft p-3">
-        <Users size={18} className="text-accent-ink" aria-hidden="true" />
-        <span className="font-display text-sm font-semibold">
-          {totalFamilies} famille{totalFamilies > 1 ? "s" : ""} touchée
-          {totalFamilies > 1 ? "s" : ""} (séances synchronisées)
-        </span>
-      </div>
+      {/* Deux zones à partir de lg: — un résumé qui tient dans le champ de
+          vision à gauche, la liste à droite. En dessous, tout s'empile.
+          Avant, cette page n'occupait que 40 % de la largeur en 1440px,
+          avec 432px de vide de chaque côté (mesuré). */}
+      <div className="mt-4 lg:grid lg:grid-cols-[260px_1fr] lg:items-start lg:gap-6">
+        <div className="lg:sticky lg:top-24 flex flex-col gap-3">
+          <div className="flex items-center gap-2 rounded-2xl bg-accent-soft p-3">
+            <Users size={18} className="text-accent-ink" aria-hidden="true" />
+            <span className="font-display text-sm font-semibold">
+              {totalFamilies} famille{totalFamilies > 1 ? "s" : ""} touchée
+              {totalFamilies > 1 ? "s" : ""}
+            </span>
+          </div>
+          {sessions.length > 0 && (
+            <div className="surface">
+              <p className="text-xs font-semibold text-muted-foreground">
+                Vos séances
+              </p>
+              <div className="mt-2 flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <CheckCircle2 size={14} className="text-success" aria-hidden="true" />
+                  Synchronisées
+                </span>
+                <span className="font-display font-bold tabular-nums">{syncedCount}</span>
+              </div>
+              <div className="mt-1.5 flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Clock size={14} className="text-accent-ink" aria-hidden="true" />
+                  En attente
+                </span>
+                <span className="font-display font-bold tabular-nums">{pendingCount}</span>
+              </div>
+            </div>
+          )}
+        </div>
 
-      <div className="mt-4 flex flex-col gap-2.5">
+      <div className="mt-4 flex flex-col gap-2.5 lg:mt-0">
         {sessionsLoading ? (
           <>
             <Skeleton className="h-16 w-full" />
@@ -106,6 +136,7 @@ export default function HistoryPage() {
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );

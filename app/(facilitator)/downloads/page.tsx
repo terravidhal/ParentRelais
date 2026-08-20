@@ -90,7 +90,7 @@ export default function DownloadsPage() {
   });
 
   return (
-    <div className="lg:mx-auto lg:max-w-2xl">
+    <div className="lg:mx-auto lg:max-w-5xl">
       <button
         type="button"
         onClick={() => router.push("/home")}
@@ -104,10 +104,14 @@ export default function DownloadsPage() {
         Vos vidéos et audios restent disponibles sans réseau.
       </p>
 
+      {/* Deux zones à lg: : l'état global (espace, contrôles) reste visible
+          à gauche pendant qu'on parcourt la liste à droite. */}
+      <div className="lg:mt-4 lg:grid lg:grid-cols-[280px_1fr] lg:items-start lg:gap-6">
+      <div className="lg:sticky lg:top-24 flex flex-col gap-3">
       {/* Espace disque : un échec par manque de place doit être anticipé,
           pas subi au milieu d'un fichier de plusieurs centaines de Mo. */}
       {storage && storage.quotaBytes > 0 && (
-        <div className="mt-4 surface">
+        <div className="surface">
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-2 font-semibold">
               <HardDrive size={16} className="text-primary" aria-hidden="true" />
@@ -130,7 +134,7 @@ export default function DownloadsPage() {
 
       {/* Contrôles globaux : indispensables pour préserver un forfait data. */}
       {(active.length > 0 || paused.length > 0 || failed.length > 0) && (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
           {active.length > 0 && (
             <button
               type="button"
@@ -165,14 +169,16 @@ export default function DownloadsPage() {
       )}
 
       {done.length > 0 && (
-        <p className="mt-4 flex items-center gap-2 text-sm font-semibold text-success">
+        <p className="flex items-center gap-2 text-sm font-semibold text-success">
           <CheckCircle2 size={16} aria-hidden="true" />
           {done.length} fichier{done.length > 1 ? "s" : ""} disponible
           {done.length > 1 ? "s" : ""} hors-ligne
         </p>
       )}
 
-      <div className="mt-4 flex flex-col gap-2.5">
+      </div>
+
+      <div className="mt-4 flex flex-col gap-2.5 lg:mt-0">
         {downloadsLoading ? (
           <>
             <Skeleton className="h-24 w-full" />
@@ -253,12 +259,12 @@ export default function DownloadsPage() {
                   </p>
                 )}
 
-                <div className="mt-2 flex gap-2">
+                <div className="mt-2 flex justify-end gap-2">
                   {d.status === "downloading" && (
                     <button
                       type="button"
                       onClick={() => pauseMutation.mutate(d.media_url)}
-                      className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-border text-sm font-semibold"
+                      className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border px-4 text-sm font-semibold"
                     >
                       <Pause size={16} aria-hidden="true" /> Pause
                     </button>
@@ -267,7 +273,7 @@ export default function DownloadsPage() {
                     <button
                       type="button"
                       onClick={() => retryMutation.mutate(d.media_url)}
-                      className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-xl bg-accent text-sm font-semibold text-accent-foreground"
+                      className="flex h-11 items-center justify-center gap-1.5 rounded-xl bg-accent px-4 text-sm font-semibold text-accent-foreground"
                     >
                       {d.status === "paused" ? (
                         <>
@@ -285,7 +291,7 @@ export default function DownloadsPage() {
                       type="button"
                       onClick={() => deleteMutation.mutate(d.media_url)}
                       aria-label="Supprimer ce média téléchargé"
-                      className="flex h-12 w-12 items-center justify-center rounded-xl border border-border text-muted-foreground"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-border text-muted-foreground"
                     >
                       <Trash2 size={16} aria-hidden="true" />
                     </button>
@@ -294,7 +300,7 @@ export default function DownloadsPage() {
                       type="button"
                       onClick={() => cancelMutation.mutate(d.media_url)}
                       aria-label="Annuler ce téléchargement"
-                      className="flex h-12 w-12 items-center justify-center rounded-xl border border-destructive/30 text-destructive"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-destructive/30 text-destructive"
                     >
                       <X size={16} aria-hidden="true" />
                     </button>
@@ -304,6 +310,7 @@ export default function DownloadsPage() {
             );
           })
         )}
+      </div>
       </div>
     </div>
   );

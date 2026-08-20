@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   DownloadCloud,
   HardDrive,
+  ShieldCheck,
   Pause,
   Play,
   RotateCcw,
@@ -129,6 +130,20 @@ export default function DownloadsPage() {
               }}
             />
           </div>
+          {/* Sans stockage persistant, le navigateur peut effacer ces médias
+              quand l'espace se réduit. Le dire, plutôt que de laisser
+              découvrir la perte en pleine zone sans réseau. */}
+          {storage.persisted ? (
+            <p className="mt-2 flex items-center gap-1.5 text-xs text-success">
+              <ShieldCheck size={13} aria-hidden="true" />
+              Vos téléchargements sont protégés
+            </p>
+          ) : (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Installez l&apos;application pour que vos téléchargements soient
+              protégés de l&apos;effacement automatique.
+            </p>
+          )}
         </div>
       )}
 

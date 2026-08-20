@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { ensureSeeded } from "@/lib/db/seedDb";
 import { resumeInterruptedDownloads } from "@/lib/downloads/manager";
+import { requestPersistentStorage } from "@/lib/downloads/storage";
 import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import { useConnectivityToasts } from "@/lib/hooks/use-connectivity-toasts";
 import { usePendingSessionsQuery } from "@/lib/hooks/use-outbox-query";
@@ -41,6 +42,11 @@ export default function FacilitatorLayout({
   // fichiers mis en pause volontairement ne sont pas touchés.
   useEffect(() => {
     void resumeInterruptedDownloads();
+    // Sans cette demande, navigator.storage.persisted() reste à false
+    // (vérifié) et le navigateur peut effacer les médias téléchargés quand
+    // l'espace se réduit. Pour un facilitateur qui part en zone sans réseau,
+    // ce serait une perte silencieuse au pire moment.
+    void requestPersistentStorage();
   }, []);
 
   useEffect(() => {

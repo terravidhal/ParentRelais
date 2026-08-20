@@ -3,6 +3,7 @@ import {
   type MediaDownload,
   type MediaDownloadErrorKind,
 } from "@/lib/db/dexie";
+import { readStorageState } from "@/lib/downloads/storage";
 import {
   enqueueDownload,
   markDownloadDone,
@@ -43,19 +44,9 @@ function messageForKind(kind: MediaDownloadErrorKind): string {
   }
 }
 
-/** Espace disponible estimé, `null` si le navigateur ne le fournit pas. */
-export async function getStorageEstimate(): Promise<{
-  usedBytes: number;
-  quotaBytes: number;
-  availableBytes: number;
-} | null> {
-  if (typeof navigator === "undefined" || !navigator.storage?.estimate) return null;
-  try {
-    const { usage = 0, quota = 0 } = await navigator.storage.estimate();
-    return { usedBytes: usage, quotaBytes: quota, availableBytes: quota - usage };
-  } catch {
-    return null;
-  }
+/** Espace disponible estimé et engagement de persistance du navigateur. */
+export async function getStorageEstimate() {
+  return readStorageState();
 }
 
 /** Octets déjà reçus pour ce fichier lors d'une tentative précédente. */

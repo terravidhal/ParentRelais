@@ -73,7 +73,7 @@ export default function HistoryPage() {
           sorted.map((s) => (
             <div
               key={s.client_uuid}
-              className="flex items-center justify-between rounded-2xl border border-border bg-card p-3"
+              className="flex items-center justify-between surface"
             >
               <div>
                 <p className="font-display text-sm font-semibold">

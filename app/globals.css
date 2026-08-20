@@ -236,6 +236,50 @@
 }
 
 /*
+ * Système de surfaces.
+ *
+ * Constat de l'audit : 24 cartes étaient construites à la main avec 8
+ * variantes différentes du même motif (p-2, p-3, p-4, p-5 lg:p-6, p-8, avec
+ * ou sans ombre), contre 2 usages du composant Card. C'est ce qui donnait un
+ * rendu "assemblé de pièces disparates" plutôt que délibéré.
+ *
+ * Trois niveaux, un seul rôle chacun — inspirés des blocks officiels shadcn,
+ * qui privilégient la BORDURE et le fond teinté à l'ombre portée :
+ *   .surface        contenu posé sur le fond de page (cartes, panneaux)
+ *   .surface-raised même chose + légère élévation (blocs de tête, KPI)
+ *   .surface-inset  contenu en retrait DANS une carte (sous-blocs)
+ *
+ * L'échelle de padding vient avec : --surface-pad, ajustée en desktop.
+ */
+.surface,
+.surface-raised,
+.surface-inset {
+  border-radius: var(--radius-xl);
+  --surface-pad: --spacing(4);
+  padding: var(--surface-pad);
+}
+@media (min-width: 1024px) {
+  .surface,
+  .surface-raised {
+    --surface-pad: --spacing(5);
+  }
+}
+.surface {
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+.surface-raised {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px 0 rgb(22 36 31 / 0.05);
+}
+/* Retrait à l'intérieur d'une carte : pas de bordure, un fond légèrement
+   plus sourd suffit à marquer la hiérarchie sans empiler les cadres. */
+.surface-inset {
+  background: var(--muted);
+}
+
+/*
  * Thème du guide interactif (driver.js) — aligné sur la palette OKLCH du
  * projet plutôt que le CSS par défaut de la librairie (bleu/blanc générique
  * déconnecté de l'identité ParentRelais).

@@ -107,7 +107,7 @@ export default function DownloadsPage() {
       {/* Espace disque : un échec par manque de place doit être anticipé,
           pas subi au milieu d'un fichier de plusieurs centaines de Mo. */}
       {storage && storage.quotaBytes > 0 && (
-        <div className="mt-4 rounded-2xl border border-border bg-card p-3">
+        <div className="mt-4 surface">
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-2 font-semibold">
               <HardDrive size={16} className="text-primary" aria-hidden="true" />
@@ -193,7 +193,7 @@ export default function DownloadsPage() {
             return (
               <div
                 key={d.media_url}
-                className="rounded-2xl border border-border bg-card p-3"
+                className="surface"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">

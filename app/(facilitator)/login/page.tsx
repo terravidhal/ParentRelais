@@ -173,7 +173,7 @@ export default function LoginPage() {
           personne, et un facilitateur qui se connecte pour la première fois
           ignore qu'il pourra travailler sans réseau. */}
       {isFirstLoginForm && !saveMutation.isPending && (
-        <div className="mt-1 rounded-2xl border border-border bg-card p-3">
+        <div className="mt-1 surface">
           <p className="flex items-center gap-2 text-sm font-semibold">
             <WifiOff size={16} className="text-primary" aria-hidden="true" />
             Fonctionne sans réseau

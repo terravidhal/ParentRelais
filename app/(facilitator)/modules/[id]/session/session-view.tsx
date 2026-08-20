@@ -72,16 +72,23 @@ export function SessionView({ moduleId }: { moduleId: number }) {
     }
   };
 
+  const STEP_LABELS = ["Présences", "Quiz", "Terminé"] as const;
+
   return (
-    <div className="lg:mx-auto lg:max-w-xl">
+    <div className="lg:mx-auto lg:max-w-4xl">
       <button
         type="button"
         onClick={() => router.push(`/modules/${moduleId}`)}
-        className="mb-3 flex h-11 items-center gap-1 text-sm font-semibold text-primary"
+        className="mb-3 flex h-12 items-center gap-1.5 text-base font-semibold text-primary"
       >
-        <ChevronLeft size={16} aria-hidden="true" /> {translation.title}
+        <ChevronLeft size={20} aria-hidden="true" /> {translation.title}
       </button>
 
+      {/* Le formulaire garde une largeur de lecture confortable : un flux
+          d'étapes étiré sur 1440px devient pénible à remplir. On compose
+          plutôt un rappel de contexte à côté, visible seulement en desktop. */}
+      <div className="lg:grid lg:grid-cols-[1fr_240px] lg:items-start lg:gap-8">
+      <div>
       <div className="mb-4 flex gap-1.5">
         {[0, 1, 2].map((i) => (
           <div
@@ -180,6 +187,48 @@ export function SessionView({ moduleId }: { moduleId: number }) {
           </Button>
         </div>
       )}
+      </div>
+
+      {/* Rappel du module animé et de l'étape en cours : pendant une séance,
+          le facilitateur parle aux parents et perd facilement le fil. */}
+      <aside className="mt-6 hidden lg:mt-0 lg:block">
+        <div className="surface">
+          <p className="text-xs font-semibold text-muted-foreground">
+            Séance en cours
+          </p>
+          <p className="font-display mt-1 text-sm font-semibold">
+            {translation.title}
+          </p>
+          <ol className="mt-3 flex flex-col gap-2">
+            {STEP_LABELS.map((label, i) => (
+              <li
+                key={label}
+                className={`flex items-center gap-2 text-sm ${
+                  i === step
+                    ? "font-semibold text-foreground"
+                    : i < step
+                      ? "text-success"
+                      : "text-muted-foreground"
+                }`}
+              >
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                    i === step
+                      ? "bg-primary text-primary-foreground"
+                      : i < step
+                        ? "bg-success-soft text-success"
+                        : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {i < step ? "✓" : i + 1}
+                </span>
+                {label}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </aside>
+      </div>
     </div>
   );
 }

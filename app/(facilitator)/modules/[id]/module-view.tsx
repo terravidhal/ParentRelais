@@ -38,7 +38,7 @@ export function ModuleView({ id }: { id: number }) {
     : translation;
 
   return (
-    <div className="lg:mx-auto lg:max-w-xl">
+    <div className="lg:mx-auto lg:max-w-5xl">
       <button
         type="button"
         onClick={() => router.push("/home")}
@@ -57,8 +57,14 @@ export function ModuleView({ id }: { id: number }) {
         />
       </div>
 
+      {/* Deux zones à lg: : le contenu à consulter à gauche, le guide et
+          l'action à droite. Le lecteur vidéo n'est volontairement pas
+          étiré à toute la largeur — au-delà de ~700px, les proportions
+          deviennent inconfortables. */}
+      <div className="mt-2 lg:grid lg:grid-cols-[1.25fr_1fr] lg:items-start lg:gap-8">
+      <div>
       <div lang={displayTranslation.lang}>
-        <h2 className="font-display mt-2 text-xl font-bold">
+        <h2 className="font-display text-xl font-bold">
           {displayTranslation.title}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -85,38 +91,50 @@ export function ModuleView({ id }: { id: number }) {
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={() => setGuideOpen((g) => !g)}
-        className="mt-3 flex h-11 w-full items-center justify-between rounded-2xl border border-border bg-background px-3"
-      >
-        <span className="font-display text-sm font-semibold">
-          Guide d&apos;animation
-        </span>
-        <ChevronRight
-          size={16}
-          aria-hidden="true"
-          className="motion-safe:transition-transform"
-          style={{ transform: guideOpen ? "rotate(90deg)" : "none" }}
-        />
-      </button>
-      {guideOpen && (
-        <ul lang={displayTranslation.lang} className="mt-2 flex flex-col gap-2">
-          {displayTranslation.key_points.map((point, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm">
-              <span className="mt-0.5 text-success">✓</span>
-              <span>{point}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      </div>
 
-      <Button
-        onClick={() => router.push(`/modules/${module.id}/session`)}
-        className="font-display mt-5 h-11 w-full gap-2 font-bold"
-      >
-        <Users size={18} aria-hidden="true" /> Animer une séance
-      </Button>
+      <div className="mt-4 flex flex-col gap-3 lg:mt-0">
+        {/* Sur mobile le guide reste repliable pour ne pas noyer l'écran ;
+            en desktop la colonne existe pour ça, on l'affiche d'emblée. */}
+        <button
+          type="button"
+          onClick={() => setGuideOpen((g) => !g)}
+          aria-expanded={guideOpen}
+          className="flex h-12 w-full items-center justify-between rounded-2xl border border-border bg-card px-3 lg:hidden"
+        >
+          <span className="font-display text-sm font-semibold">
+            Guide d&apos;animation
+          </span>
+          <ChevronRight
+            size={16}
+            aria-hidden="true"
+            className="motion-safe:transition-transform"
+            style={{ transform: guideOpen ? "rotate(90deg)" : "none" }}
+          />
+        </button>
+
+        <div className={guideOpen ? "surface" : "hidden surface lg:block"}>
+          <p className="font-display mb-2 hidden text-sm font-semibold lg:block">
+            Guide d&apos;animation
+          </p>
+          <ul lang={displayTranslation.lang} className="flex flex-col gap-2">
+            {displayTranslation.key_points.map((point, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm">
+                <span className="mt-0.5 text-success">✓</span>
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <Button
+          onClick={() => router.push(`/modules/${module.id}/session`)}
+          className="font-display h-12 w-full gap-2 text-base font-bold"
+        >
+          <Users size={18} aria-hidden="true" /> Animer une séance
+        </Button>
+      </div>
+      </div>
     </div>
   );
 }

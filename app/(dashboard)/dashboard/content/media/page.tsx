@@ -43,7 +43,7 @@ export default async function MediaLibraryPage() {
         </h1>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm lg:p-6">
+      <div className="surface-raised">
         <h3 className="font-display mb-4 flex items-center gap-2 font-bold">
           <Library size={16} aria-hidden="true" /> Bibliothèque média
         </h3>

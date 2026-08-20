@@ -55,22 +55,29 @@ export default async function DashboardContentPage() {
           value={rows.length}
           icon={<Globe size={18} aria-hidden="true" />}
           color="primary"
+          hint="Publiés dans l'app facilitateur"
         />
         <StatCard
           label="Cases prêtes"
           value={readyCells}
           icon={<CheckCircle2 size={18} aria-hidden="true" />}
           color="success"
+          hint={
+            totalCells > 0
+              ? `${Math.round((readyCells / totalCells) * 100)} % des ${totalCells} cases`
+              : undefined
+          }
         />
         <StatCard
           label="En attente de contenu"
           value={totalCells - readyCells}
           icon={<Clock size={18} aria-hidden="true" />}
           color="accent"
+          hint="Déposer un fichier suffit à les remplir"
         />
       </div>
 
-      <div className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-sm lg:p-6">
+      <div className="mt-6 surface-raised">
         <div className="mb-4 flex items-center justify-between gap-2">
           <h3 className="font-display flex items-center gap-2 font-bold">
             <Globe size={16} aria-hidden="true" /> Matrice module × langue

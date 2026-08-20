@@ -37,7 +37,7 @@ export default async function DashboardReportsPage() {
         <ExportButton rows={rows} />
       </div>
 
-      <div className="rounded-2xl border border-border bg-card shadow-sm">
+      <div className="surface-raised surface-flush">
         <div className="flex items-center gap-2 border-b border-border px-5 py-4">
           <FileDown size={16} className="text-muted-foreground" aria-hidden="true" />
           <h3 className="font-display font-bold">

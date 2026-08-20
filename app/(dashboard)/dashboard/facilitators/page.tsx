@@ -58,7 +58,7 @@ export default async function DashboardFacilitatorsPage() {
         />
       </div>
 
-      <div className="mt-6 rounded-2xl border border-border bg-card shadow-sm">
+      <div className="mt-6 surface-raised surface-flush">
         <div className="flex items-center gap-2 border-b border-border px-5 py-4">
           <Users size={16} className="text-muted-foreground" aria-hidden="true" />
           <h3 className="font-display font-bold">Activité par facilitateur</h3>

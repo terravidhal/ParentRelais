@@ -99,7 +99,7 @@ export default function DashboardLoginPage() {
       <div className="lg:grid lg:min-h-screen lg:grid-cols-2">
         <BrandPanel />
         <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10 lg:min-h-0 lg:bg-background">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm">
+          <div className="w-full max-w-md surface-raised">
             <p className="font-display mb-1 text-xs font-semibold tracking-wide text-brand-accent">
               PARENTRELAIS
             </p>
@@ -155,7 +155,7 @@ export default function DashboardLoginPage() {
     <div className="lg:grid lg:min-h-screen lg:grid-cols-2">
       <BrandPanel />
       <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10 lg:min-h-0 lg:bg-background">
-        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm">
+        <div className="w-full max-w-md surface-raised">
           <p className="font-display mb-1 text-xs font-semibold tracking-wide text-brand-accent">
             PARENTRELAIS
           </p>

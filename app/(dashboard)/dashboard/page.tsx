@@ -73,7 +73,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm lg:p-6">
+        <div className="surface-raised">
           <h3 className="font-display mb-4 font-bold">
             Familles touchées par localité
           </h3>
@@ -82,7 +82,7 @@ export default async function DashboardPage() {
           />
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm lg:p-6">
+        <div className="surface-raised">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-display font-bold">Facilitateurs actifs</h3>
             <Link

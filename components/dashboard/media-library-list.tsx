@@ -51,7 +51,7 @@ export function MediaLibraryList({ entries }: MediaLibraryListProps) {
             {moduleEntries.map((entry) => (
               <div
                 key={entry.lang}
-                className="rounded-2xl border border-border bg-background p-3"
+                className="surface"
               >
                 <p className="mb-2 text-xs font-semibold text-muted-foreground">
                   {LANG_LABEL[entry.lang] ?? entry.lang}

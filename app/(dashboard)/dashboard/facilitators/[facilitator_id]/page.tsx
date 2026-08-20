@@ -73,16 +73,18 @@ export default async function FacilitatorDetailPage({
           value={totalFamilies}
           icon={<Users size={18} aria-hidden="true" />}
           color="success"
+          hint={facilitator?.region ?? undefined}
         />
         <StatCard
-          label="Score moyen au quiz"
+          label="Score moyen au quiz (%)"
           value={avgQuiz}
           icon={<Award size={18} aria-hidden="true" />}
           color="accent"
+          hint={rows.length > 0 ? `Sur ${rows.length} séance${rows.length > 1 ? "s" : ""}` : undefined}
         />
       </div>
 
-      <div className="mt-6 rounded-2xl border border-border bg-card shadow-sm">
+      <div className="mt-6 surface-raised surface-flush">
         <div className="flex items-center gap-2 border-b border-border px-5 py-4">
           <BookOpen size={16} className="text-muted-foreground" aria-hidden="true" />
           <h3 className="font-display font-bold">Historique des séances</h3>

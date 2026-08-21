@@ -41,17 +41,27 @@ function collectMediaUrls(
 }
 
 const facilitatorAudioUrls = collectMediaUrls((t) => t.audio_url);
-const facilitatorVideoUrls = collectMediaUrls((t) => t.video_url);
 const facilitatorSubtitleUrls = collectMediaUrls((t) => t.subtitles_url);
 
 const withSerwist = withSerwistInit({
   swSrc: "sw.ts",
   swDest: "public/sw.js",
   disable: process.env.NODE_ENV === "development",
+  // Les VIDÉOS sont volontairement absentes du précache obligatoire.
+  //
+  // Mesuré en production : avec elles, le service worker restait bloqué en
+  // "installing" pendant 30 s sur une connexion rapide (31 Mo à télécharger
+  // avant de pouvoir s'activer) — soit plusieurs minutes en 3G. Pendant tout
+  // ce temps, aucune installation de la PWA n'est possible (un SW actif est
+  // requis), le mode hors-ligne ne fonctionne pas, et l'app paraît inerte.
+  //
+  // Les pages, l'audio (1,5 Mo) et les sous-titres restent précachés : ils
+  // sont légers et garantissent une app utilisable immédiatement hors-ligne.
+  // Les vidéos passent par le gestionnaire de téléchargement, où
+  // l'utilisateur décide et suit la progression (lib/downloads/manager.ts).
   additionalPrecacheEntries: [
     ...facilitatorPageUrls,
     ...facilitatorAudioUrls,
-    ...facilitatorVideoUrls,
     ...facilitatorSubtitleUrls,
   ].map((url) => ({ url, revision: null })),
 });

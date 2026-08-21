@@ -264,6 +264,27 @@ export default function DownloadsPage() {
                   </div>
                 )}
 
+                {/* Lecture directe : un média téléchargé doit pouvoir être
+                    écouté ou visionné ici, sans avoir à retrouver son module.
+                    Le service worker sert le fichier depuis le cache, donc
+                    la lecture fonctionne sans réseau. */}
+                {d.status === "done" && d.media_type === "audio" && (
+                  <audio
+                    controls
+                    preload="none"
+                    src={d.media_url}
+                    className="mt-2 h-11 w-full"
+                  />
+                )}
+                {d.status === "done" && d.media_type === "video" && (
+                  <video
+                    controls
+                    preload="metadata"
+                    src={d.media_url}
+                    className="mt-2 w-full rounded-xl bg-foreground"
+                  />
+                )}
+
                 {/* Message actionnable : la cause réelle, pas un « Échec » nu. */}
                 {d.status === "failed" && d.error_message && (
                   <p className="mt-2 text-xs text-destructive">{d.error_message}</p>

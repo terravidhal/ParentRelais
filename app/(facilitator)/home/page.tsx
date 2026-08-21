@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, History, Settings2 } from "lucide-react";
+import { BookOpen, CheckCircle2, Clock, History, Settings2 } from "lucide-react";
 import { useModulesQuery } from "@/lib/hooks/use-modules-query";
 import { useFacilitatorSessionQuery } from "@/lib/hooks/use-facilitator-session";
 import { useAllSessionsQuery } from "@/lib/hooks/use-outbox-query";
@@ -17,7 +17,6 @@ import { MediaDownloadBanner } from "@/components/facilitator/media-download-ban
 import { FacilitatorOnboardingTour } from "@/components/facilitator/onboarding-tour";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
-import { useAutoQueueDownloads } from "@/lib/hooks/use-auto-queue-downloads";
 import type { CachedModule } from "@/lib/db/dexie";
 
 // 2 colonnes × 3 lignes à desktop (lg:), pile de 6 sur mobile — page size
@@ -32,7 +31,6 @@ export default function HomePage() {
   const { data: lang = "fr" } = usePreferredLangQuery();
   const setLangMutation = useSetPreferredLangMutation();
   const [page, setPage] = useState(1);
-  useAutoQueueDownloads(modules);
 
   useEffect(() => {
     if (!sessionLoading && !session) {
@@ -54,6 +52,8 @@ export default function HomePage() {
     currentPage * PAGE_SIZE,
   );
 
+  const syncedCount = sessions.filter((s) => s.status === "synced").length;
+  const pendingCount = sessions.length - syncedCount;
   const recentSessions = [...sessions]
     .sort((a, b) => new Date(b.held_at).getTime() - new Date(a.held_at).getTime())
     .slice(0, 3);
@@ -88,33 +88,91 @@ export default function HomePage() {
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={() => router.push("/history")}
-          className="mt-1 flex h-11 items-center gap-1.5 text-sm font-semibold text-primary underline-offset-2 hover:underline"
-        >
-          <History size={16} aria-hidden="true" /> Mes séances →
-        </button>
-
-        {recentSessions.length > 0 && (
-          <div className="mt-2 flex flex-col gap-2">
-            {recentSessions.map((s) => (
-              <div
-                key={s.client_uuid}
-                className="surface text-xs"
-              >
-                <p className="font-display font-semibold">{s.locality}</p>
-                <p className="text-muted-foreground">
-                  {new Date(s.held_at).toLocaleDateString("fr-FR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                  })}{" "}
-                  · Module {s.module_id}
-                </p>
-              </div>
-            ))}
+        {/* Bloc d'historique réel plutôt qu'un simple lien : le facilitateur
+            doit voir son activité d'un coup d'œil, avec l'état de synchro de
+            chaque séance. Le lien seul ne représentait rien. */}
+        <div className="surface mt-3">
+          <div className="mb-2 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => router.push("/history")}
+              className="flex items-center gap-1.5 font-display text-sm font-semibold underline-offset-2 hover:underline"
+            >
+              <History size={15} className="text-primary" aria-hidden="true" />
+              Mes séances
+            </button>
+            {sessions.length > 0 && (
+              <span className="font-display rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold tabular-nums text-primary">
+                {sessions.length}
+              </span>
+            )}
           </div>
-        )}
+
+          {sessions.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Aucune séance pour l&apos;instant. Ouvrez un module puis
+              « Animer une séance ».
+            </p>
+          ) : (
+            <>
+              <div className="mb-2 flex gap-3 text-xs">
+                <span className="flex items-center gap-1 text-success">
+                  <CheckCircle2 size={13} aria-hidden="true" />
+                  {syncedCount} synchronisée{syncedCount > 1 ? "s" : ""}
+                </span>
+                {pendingCount > 0 && (
+                  <span className="flex items-center gap-1 text-accent-ink">
+                    <Clock size={13} aria-hidden="true" />
+                    {pendingCount} en attente
+                  </span>
+                )}
+              </div>
+              <ul className="flex flex-col divide-y divide-border">
+                {recentSessions.map((s) => (
+                  <li
+                    key={s.client_uuid}
+                    className="flex items-center justify-between gap-2 py-2 text-xs first:pt-0"
+                  >
+                    <span className="min-w-0">
+                      <span className="font-display block truncate font-semibold">
+                        {s.locality}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {new Date(s.held_at).toLocaleDateString("fr-FR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                        })}{" "}
+                        · {s.parents_total} parents
+                      </span>
+                    </span>
+                    {s.status === "synced" ? (
+                      <CheckCircle2
+                        size={14}
+                        className="shrink-0 text-success"
+                        aria-label="Synchronisée"
+                      />
+                    ) : (
+                      <Clock
+                        size={14}
+                        className="shrink-0 text-accent-ink"
+                        aria-label="En attente de synchronisation"
+                      />
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {sessions.length > recentSessions.length && (
+                <button
+                  type="button"
+                  onClick={() => router.push("/history")}
+                  className="mt-2 flex h-11 w-full items-center justify-center rounded-xl border border-border text-xs font-semibold text-primary"
+                >
+                  Voir les {sessions.length} séances
+                </button>
+              )}
+            </>
+          )}
+        </div>
 
         <div className="mt-4 lg:mt-6">
           <div id="lang-pills">
@@ -125,26 +183,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Résumé local dérivé de sessions (déjà chargé ci-dessus via
-            useAllSessionsQuery) — aucun nouveau fetch, occupe l'espace
-            disponible de la colonne en desktop sans dépendre du réseau. */}
-        {sessions.length > 0 && (
-          <div className="mt-4 hidden surface lg:block">
-            <p className="font-display text-xs font-semibold text-muted-foreground">
-              Résumé local
-            </p>
-            <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Séances enregistrées</span>
-              <span className="font-display font-semibold">{sessions.length}</span>
-            </div>
-            <div className="mt-1 flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">En attente de synchro</span>
-              <span className="font-display font-semibold">
-                {sessions.filter((s) => s.status === "pending").length}
-              </span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Colonne droite : catalogue de modules */}
@@ -153,7 +191,7 @@ export default function HomePage() {
           <BookOpen size={14} aria-hidden="true" /> Modules de formation
         </p>
 
-        {!modulesLoading && <MediaDownloadBanner />}
+        {!modulesLoading && <MediaDownloadBanner modules={modules} />}
 
         <div
           id="module-list"

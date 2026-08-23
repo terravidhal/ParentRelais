@@ -39,7 +39,7 @@ export default function HomePage() {
   }, [sessionLoading, session, router]);
 
   const handleOpen = (module: CachedModule) => {
-    router.push(`/modules/${module.id}`);
+    router.push(`/module?id=${module.id}`);
   };
 
   const pageCount = Math.max(1, Math.ceil(modules.length / PAGE_SIZE));

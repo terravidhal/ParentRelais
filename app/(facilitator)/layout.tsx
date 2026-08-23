@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { RefreshCw } from "lucide-react";
-import { ensureSeeded } from "@/lib/db/seedDb";
+import { useContentBootstrap } from "@/lib/hooks/use-content-bootstrap";
 import { resumeInterruptedDownloads } from "@/lib/downloads/manager";
 import { requestPersistentStorage } from "@/lib/downloads/storage";
 import { useOnlineStatus } from "@/lib/hooks/use-online-status";
@@ -11,6 +11,7 @@ import { usePendingSessionsQuery } from "@/lib/hooks/use-outbox-query";
 import { usePathname } from "next/navigation";
 import { useSyncOutboxMutation } from "@/lib/hooks/use-sync-outbox-mutation";
 import { ConnectivityBanner } from "@/components/facilitator/connectivity-banner";
+import { ContentBootstrapScreen } from "@/components/facilitator/content-bootstrap-screen";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function FacilitatorLayout({
@@ -30,12 +31,13 @@ export default function FacilitatorLayout({
   // argument évite un doublon avec le toast de la synchro.
   useConnectivityToasts(online, pendingSessions.length > 0);
   const syncMutation = useSyncOutboxMutation();
-  // Le seed doit être terminé AVANT que la moindre query Dexie enfant ne se
-  // monte : compter sur l'ordre de montage + invalidation React Query s'est
-  // révélé fragile (course entre ensureSeeded() et useModulesQuery() lors
-  // de la redirection /login → /). On bloque le rendu des enfants tant que
-  // ce n'est pas confirmé, pattern plus robuste qu'une invalidation a posteriori.
-  const [seedReady, setSeedReady] = useState(false);
+  // Le contenu doit être disponible AVANT que la moindre query Dexie enfant
+  // ne se monte : compter sur l'ordre de montage + invalidation React Query
+  // s'est révélé fragile (course lors de la redirection /login → /). On
+  // bloque le rendu des enfants tant que ce n'est pas confirmé, pattern plus
+  // robuste qu'une invalidation a posteriori.
+  const { state: contentState, retry: retryContent } = useContentBootstrap();
+  const contentReady = contentState === "ready";
 
   // Un téléchargement coupé par la fermeture de l'app reste bloqué en
   // "downloading" : sans cette reprise, il ne repartirait jamais. Les
@@ -50,27 +52,24 @@ export default function FacilitatorLayout({
   }, []);
 
   useEffect(() => {
-    ensureSeeded()
-      .then(() => setSeedReady(true))
-      .catch((error: unknown) => {
-        console.error("[facilitator layout] seed initial échoué:", error);
-        setSeedReady(true); // ne pas bloquer l'app indéfiniment si le seed échoue
-      });
-  }, []);
-
-  useEffect(() => {
     if (online && pendingSessions.length > 0 && !syncMutation.isPending) {
       syncMutation.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [online]);
 
-  // La page de connexion occupe l'écran entier (split-screen illustré,
-  // comme côté pilotage). Le seed reste bloquant, mais ni l'en-tête ni le
-  // conteneur applicatif ne s'appliquent : ils n'ont de sens qu'une fois
-  // connecté.
+  // La page de connexion occupe l'écran entier (split-screen illustré, comme
+  // côté pilotage) : ni l'en-tête ni le conteneur applicatif ne s'appliquent,
+  // ils n'ont de sens qu'une fois connecté.
+  //
+  // Elle ne dépend PAS du contenu : la connexion n'écrit que l'identité
+  // locale et ne lit aucun module. L'ancien seed était une copie locale
+  // instantanée, on pouvait la rendre bloquante sans conséquence ; une
+  // récupération réseau, elle, peut être lente ou échouer — bloquer la
+  // connexion dessus laisserait le facilitateur devant un écran vide sans
+  // même pouvoir se connecter.
   if (isLoginPage) {
-    return <>{seedReady ? children : <Skeleton className="h-screen w-full" />}</>;
+    return <>{children}</>;
   }
 
   return (
@@ -114,7 +113,16 @@ export default function FacilitatorLayout({
       </header>
 
       <main className="mx-auto max-w-[1100px] px-5 py-5 lg:px-8 lg:py-8">
-        {seedReady ? children : <Skeleton className="h-64 w-full" />}
+        {contentReady ? (
+          children
+        ) : contentState === "checking" ? (
+          <Skeleton className="h-64 w-full" />
+        ) : (
+          <ContentBootstrapScreen
+            failed={contentState === "failed"}
+            onRetry={retryContent}
+          />
+        )}
       </main>
     </div>
   );

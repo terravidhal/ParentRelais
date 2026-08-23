@@ -92,8 +92,8 @@ test.describe("Mode hors-ligne", () => {
       "/history",
       "/profile",
       "/downloads",
-      "/modules/1",
-      "/modules/1/session",
+      "/module?id=1",
+      "/module/session?id=1",
     ];
 
     // On vérifie que la page rend réellement du contenu applicatif, plutôt

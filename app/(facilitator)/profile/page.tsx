@@ -8,6 +8,7 @@ import {
   useSignOutFacilitatorMutation,
 } from "@/lib/hooks/use-facilitator-session";
 import { useResetContentMutation } from "@/lib/hooks/use-reset-content-mutation";
+import { useContentFreshnessQuery } from "@/lib/hooks/use-content-freshness";
 import { useAllSessionsQuery } from "@/lib/hooks/use-outbox-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
@@ -15,13 +16,15 @@ import { InstallButton } from "@/components/facilitator/install-button";
 
 /**
  * Profil facilitateur — déconnexion locale et filet de secours de contenu
- * (jamais le mécanisme principal, voir lib/db/seedDb.ts ensureSeeded).
+ * (jamais le mécanisme principal : la descente automatique à chaque cycle de
+ * synchro, voir syncContent dans lib/sync/engine.ts).
  */
 export default function ProfilePage() {
   const router = useRouter();
   const { data: session, isLoading: sessionLoading } = useFacilitatorSessionQuery();
   const signOutMutation = useSignOutFacilitatorMutation();
   const resetContentMutation = useResetContentMutation();
+  const { data: contentSyncedAt } = useContentFreshnessQuery();
   const { data: sessions = [] } = useAllSessionsQuery();
   const [confirmingReset, setConfirmingReset] = useState(false);
 
@@ -41,8 +44,13 @@ export default function ProfilePage() {
   };
 
   const handleResetContent = async () => {
-    await resetContentMutation.mutateAsync();
-    setConfirmingReset(false);
+    try {
+      await resetContentMutation.mutateAsync();
+      setConfirmingReset(false);
+    } catch {
+      // Message d'erreur rendu sous le bouton : on garde la confirmation
+      // ouverte pour que « Réessayer » soit à portée de doigt.
+    }
   };
 
   return (
@@ -124,6 +132,24 @@ export default function ProfilePage() {
           Cette action ne touche pas vos séances enregistrées ni vos séances
           en attente de synchronisation.
         </p>
+
+        {/* Fraîcheur du contenu : sans cette date, rien ne distingue un
+            contenu à jour d'un contenu reçu il y a trois semaines. */}
+        <p className="mt-2 text-xs font-semibold text-foreground">
+          {contentSyncedAt
+            ? `Contenu mis à jour le ${contentSyncedAt.toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}`
+            : "Contenu jamais mis à jour depuis le serveur"}
+        </p>
+
+        {resetContentMutation.isError && (
+          <p className="mt-2 text-xs font-semibold text-destructive">
+            Échec : contenu inchangé. Vérifiez votre connexion et réessayez.
+          </p>
+        )}
 
         {confirmingReset ? (
           <div className="mt-3 flex flex-col gap-2">

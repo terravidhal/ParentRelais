@@ -128,7 +128,7 @@ export function ModuleView({ id }: { id: number }) {
         </div>
 
         <Button
-          onClick={() => router.push(`/modules/${module.id}/session`)}
+          onClick={() => router.push(`/module/session?id=${module.id}`)}
           className="font-display h-12 w-full gap-2 text-base font-bold"
         >
           <Users size={18} aria-hidden="true" /> Animer une séance

@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, Circle } from "lucide-react";
-import type { QuizQuestion } from "@/lib/content/seed";
+import type { QuizQuestion } from "@/lib/content/session-data";
 
 interface QuizStepProps {
   question: QuizQuestion;

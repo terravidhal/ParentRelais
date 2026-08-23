@@ -18,10 +18,16 @@ export type Profile = {
   created_at: string;
 };
 
+/** Un module en brouillon reste invisible du terrain (migration 0014). */
+export type ModuleStatus = "draft" | "published";
+
 export type ModuleRow = {
   id: number;
   position: number;
   duration_min: number;
+  status: ModuleStatus;
+  /** Retrait par archivage, jamais suppression : les séances référencent module_id. */
+  archived_at: string | null;
   created_at: string;
 };
 
@@ -102,7 +108,8 @@ export type Database = {
       };
       modules: {
         Row: ModuleRow;
-        Insert: Omit<ModuleRow, "created_at">;
+        Insert: Omit<ModuleRow, "created_at" | "status" | "archived_at"> &
+          Partial<Pick<ModuleRow, "status" | "archived_at">>;
         Update: Partial<ModuleRow>;
         Relationships: [];
       };

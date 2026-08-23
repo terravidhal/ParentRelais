@@ -1,6 +1,8 @@
 import type { createClient } from "@/lib/supabase/client";
 import { getPendingSessions, markSessionsSynced } from "@/lib/db/outbox";
 import { readFacilitatorSession } from "@/lib/db/meta";
+import { fetchPublishedModules } from "@/lib/content/fetch-content";
+import { replaceModules } from "@/lib/db/content-store";
 
 type SupabaseClient = ReturnType<typeof createClient>;
 
@@ -37,6 +39,27 @@ async function syncFacilitatorIdentity(supabase: SupabaseClient): Promise<void> 
 }
 
 /**
+ * Descente du contenu : récupère le catalogue publié et met à jour Dexie.
+ *
+ * C'est ce qui rend vraie la promesse « ajouter un module sans toucher au
+ * code » : le contenu ne vit plus dans le bundle mais dans Supabase, et
+ * chaque passage en ligne le rafraîchit.
+ *
+ * Comme l'upsert d'identité ci-dessus, un échec est loggé mais ne bloque
+ * JAMAIS la montée des séances : le facilitateur garde le dernier contenu
+ * reçu, et la descente est retentée au cycle suivant. L'outbox n'est jamais
+ * touchée ici (CLAUDE.md règle 4).
+ */
+export async function syncContent(supabase: SupabaseClient): Promise<void> {
+  try {
+    const modules = await fetchPublishedModules(supabase);
+    await replaceModules(modules);
+  } catch (error: unknown) {
+    console.error("[sync] descente du contenu échouée:", error);
+  }
+}
+
+/**
  * Synchronise l'outbox vers Supabase. Fonction pure, découplée de React,
  * pour rester testable indépendamment du hook qui l'appelle.
  *
@@ -54,6 +77,7 @@ export async function syncOutbox(
   supabase: SupabaseClient,
 ): Promise<SyncResult> {
   await syncFacilitatorIdentity(supabase);
+  await syncContent(supabase);
 
   const pending = await getPendingSessions();
   if (pending.length === 0) {

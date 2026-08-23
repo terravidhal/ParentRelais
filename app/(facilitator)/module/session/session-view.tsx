@@ -11,7 +11,7 @@ import { Stepper } from "@/components/facilitator/stepper";
 import { QuizStep } from "@/components/facilitator/quiz-step";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { VILLAGES, DEMO_QUIZ } from "@/lib/content/seed";
+import { VILLAGES, DEMO_QUIZ } from "@/lib/content/session-data";
 
 type Step = 0 | 1 | 2;
 
@@ -78,7 +78,7 @@ export function SessionView({ moduleId }: { moduleId: number }) {
     <div className="lg:mx-auto lg:max-w-4xl">
       <button
         type="button"
-        onClick={() => router.push(`/modules/${moduleId}`)}
+        onClick={() => router.push(`/module?id=${moduleId}`)}
         className="mb-3 flex h-12 items-center gap-1.5 text-base font-semibold text-primary"
       >
         <ChevronLeft size={20} aria-hidden="true" /> {translation.title}

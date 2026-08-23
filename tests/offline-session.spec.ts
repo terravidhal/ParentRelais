@@ -13,7 +13,7 @@ test.describe("Séance complète hors-ligne", () => {
     context,
   }) => {
     // 1. Premier chargement en ligne : précache le service worker et les
-    // routes /modules/1 et /modules/1/session.
+    // routes /module?id=1 et /module/session?id=1.
     await page.goto("/login");
     await page.getByLabel("Votre nom").fill("Facilitateur Offline Séance");
     await page.getByLabel("Code PIN (4 chiffres)").fill("7788");
@@ -80,7 +80,7 @@ test.describe("Séance complète hors-ligne", () => {
 
     // 5. Retour accueil puis rechargement, toujours hors-ligne : la séance
     // ne doit pas disparaître (persistance IndexedDB indépendante du service
-    // worker/réseau). Un simple page.reload() ici rechargerait /modules/1/
+    // worker/réseau). Un simple page.reload() ici rechargerait /module/session
     // session, qui remonte à l'étape 0 par design (état local du composant)
     // — pas un bug, mais pas ce qu'on veut vérifier.
     await page.getByRole("button", { name: "Revenir à l'accueil" }).click();

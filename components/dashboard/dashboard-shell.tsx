@@ -136,7 +136,12 @@ export function DashboardShell({ userEmail, children }: DashboardShellProps) {
             >
               <Menu size={18} aria-hidden="true" />
             </button>
-            <span className="truncate text-sm text-muted-foreground">{userEmail}</span>
+            <Link
+              href="/dashboard/profile"
+              className="flex h-11 items-center truncate rounded-xl px-2 text-sm text-muted-foreground hover:bg-muted"
+            >
+              {userEmail}
+            </Link>
           </div>
           <button
             type="button"

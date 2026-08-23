@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Loader2, WifiOff } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, Loader2, WifiOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -120,6 +121,16 @@ export default function LoginPage() {
           onSubmit={handleSubmit}
           className="flex w-full max-w-md flex-col gap-4"
         >
+          {/* Retour vers la landing : sans ce lien, l'écran de connexion est
+              une impasse — le seul moyen d'en sortir était le bouton retour
+              du navigateur. */}
+          <Link
+            href="/"
+            className="flex h-11 items-center gap-1 self-start text-sm font-semibold text-primary"
+          >
+            <ChevronLeft size={16} aria-hidden="true" /> Accueil
+          </Link>
+
           {/* Bandeau condensé sur mobile, où le panneau latéral n'existe pas. */}
           <div className="relative -mx-4 mb-5 flex h-44 flex-col items-center justify-center gap-1 overflow-hidden text-primary-foreground lg:hidden">
             <Image

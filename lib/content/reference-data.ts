@@ -78,12 +78,21 @@ export async function fetchReferenceData(
   };
 }
 
-/** Repli utilisé tant qu'aucun référentiel n'a été reçu du serveur. */
+/**
+ * Repli utilisé tant qu'aucun référentiel n'a été reçu du serveur.
+ *
+ * Le français seul : c'est la langue socle, garantie par
+ * fetchPublishedModules (un module sans traduction française est écarté).
+ * Lister les autres ici recréerait le codage en dur que le référentiel
+ * supprime.
+ *
+ * Ce repli est volontairement minimal, mais il ne doit JAMAIS devenir un
+ * état durable : un appareil bloqué dessus perdrait silencieusement les
+ * autres langues. C'est exactement ce qui s'était produit sur les appareils
+ * seedés avant l'arrivée du référentiel — d'où le rattrapage dans
+ * use-content-bootstrap et la descente systématique au retour du réseau.
+ */
 const FALLBACK: ReferenceData = {
-  // Le français seul : c'est la langue socle, celle dont l'existence est
-  // garantie par fetchPublishedModules (un module sans traduction française
-  // est écarté). Lister les autres ici recréerait le codage en dur que
-  // cette migration supprime.
   languages: [{ code: "fr", label: "Français", short_label: "FR" }],
   regions: [],
 };

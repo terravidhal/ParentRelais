@@ -4,7 +4,7 @@ import { ExportButton } from "@/components/dashboard/export-button";
 import { TableToolbar } from "@/components/dashboard/table-toolbar";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 
 /** Bornes de la période demandée, ou null si aucune. */
 function periodStart(period: string): string | null {

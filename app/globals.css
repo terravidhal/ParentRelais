@@ -372,6 +372,21 @@
   background: var(--muted);
   color: var(--foreground);
 }
+/* Sans :hover explicite, le style natif de driver.js (fond blanc) reprenait
+   la main au survol : le bouton "Suivant" devenait illisible, texte blanc sur
+   fond blanc. Constaté en test réel sur les deux espaces, le thème étant
+   partagé. */
+.driver-popover-footer .driver-popover-next-btn:hover,
+.driver-popover-footer .driver-popover-next-btn:focus-visible {
+  background: var(--primary-dark);
+  color: var(--primary-foreground);
+}
+.driver-popover-footer .driver-popover-prev-btn:hover,
+.driver-popover-footer .driver-popover-prev-btn:focus-visible {
+  background: var(--border);
+  color: var(--foreground);
+}
+
 /* "Passer" doit se lire comme une vraie porte de sortie : tant que le guide
    est actif, driver.js bloque tous les autres clics de la page. */
 .driver-popover-footer .driver-popover-skip-btn {

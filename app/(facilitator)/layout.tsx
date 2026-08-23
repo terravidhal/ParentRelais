@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import { useSyncOutboxMutation } from "@/lib/hooks/use-sync-outbox-mutation";
 import { ConnectivityBanner } from "@/components/facilitator/connectivity-banner";
 import { ContentBootstrapScreen } from "@/components/facilitator/content-bootstrap-screen";
+import { FacilitatorSignOutButton } from "@/components/facilitator/sign-out-button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function FacilitatorLayout({
@@ -51,8 +52,13 @@ export default function FacilitatorLayout({
     void requestPersistentStorage();
   }, []);
 
+  // Au retour du réseau, on synchronise TOUJOURS — pas seulement quand des
+  // séances attendent. La condition portait sur l'outbox, alors que le même
+  // cycle fait aussi DESCENDRE le contenu et le référentiel : un appareil
+  // sans séance en attente ne recevait donc jamais de mise à jour, et
+  // restait bloqué sur une seule langue.
   useEffect(() => {
-    if (online && pendingSessions.length > 0 && !syncMutation.isPending) {
+    if (online && !syncMutation.isPending) {
       syncMutation.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,10 +85,13 @@ export default function FacilitatorLayout({
           (contrairement au dashboard admin) : le facilitateur n'a pas de
           multi-pages de navigation latérale, juste ce header + le contenu. */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-[1100px] items-center px-5 lg:px-8">
+        <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5 lg:px-8">
           <p className="font-display text-sm font-bold tracking-wide text-accent-ink">
             PARENTRELAIS
           </p>
+          {/* Déconnexion à portée : elle n'existait que dans le profil, ce
+              qui obligeait à y entrer pour changer d'utilisateur. */}
+          <FacilitatorSignOutButton />
         </div>
         {/* Bannière de connectivité en pleine largeur, sous le kicker : c'est
             l'élément "impossible à manquer" du design system — la garder en

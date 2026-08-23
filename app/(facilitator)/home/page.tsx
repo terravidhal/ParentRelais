@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, CheckCircle2, Clock, History, Settings2 } from "lucide-react";
+import { BookOpen, Search, CheckCircle2, Clock, History, Settings2 } from "lucide-react";
 import { useModulesQuery } from "@/lib/hooks/use-modules-query";
 import { useFacilitatorSessionQuery } from "@/lib/hooks/use-facilitator-session";
 import { useAllSessionsQuery } from "@/lib/hooks/use-outbox-query";
@@ -50,6 +50,8 @@ export default function HomePage() {
   const { data: lang = "fr" } = usePreferredLangQuery();
   const setLangMutation = useSetPreferredLangMutation();
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"position" | "duree">("position");
 
   useEffect(() => {
     if (!sessionLoading && !session) {
@@ -61,12 +63,30 @@ export default function HomePage() {
     router.push(`/module?id=${module.id}`);
   };
 
-  const pageCount = Math.max(1, Math.ceil(modules.length / PAGE_SIZE));
+  // Recherche et tri : avec 8 modules et plus à venir, parcourir deux pages
+  // pour retrouver un titre précis devient pénible sur un petit écran.
+  // Le tri par durée sert le terrain : un facilitateur qui n'a que 40 minutes
+  // doit pouvoir repérer un module court.
+  const visibleModules = modules
+    .filter((m) => {
+      if (!search.trim()) return true;
+      const needle = search.trim().toLowerCase();
+      return m.translations.some(
+        (t) =>
+          t.title.toLowerCase().includes(needle) ||
+          t.summary.toLowerCase().includes(needle),
+      );
+    })
+    .sort((a, b) =>
+      sortBy === "duree" ? a.duration_min - b.duration_min : a.position - b.position,
+    );
+
+  const pageCount = Math.max(1, Math.ceil(visibleModules.length / PAGE_SIZE));
   // Dérivé plutôt que corrigé via un effet : si le nombre de modules baisse
   // (ex. après un reset de contenu), la page courante peut dépasser le
   // nouveau pageCount le temps d'un rendu — on la ramène ici, sans setState.
   const currentPage = Math.min(page, pageCount);
-  const pagedModules = modules.slice(
+  const pagedModules = visibleModules.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE,
   );
@@ -246,6 +266,52 @@ export default function HomePage() {
             à télécharger » l'un sous l'autre (constaté en capture). */}
         {!modulesLoading && missingMediaCount === 0 && (
           <MediaDownloadBanner modules={modules} />
+        )}
+
+        {/* Recherche et tri — masqués tant qu'il y a peu de modules : sur un
+            petit écran, une barre inutile coûte de la place au contenu. */}
+        {!modulesLoading && modules.length > PAGE_SIZE && (
+          <div className="mb-3 flex flex-wrap items-end gap-2">
+            <label className="flex min-w-[180px] flex-1 flex-col gap-1 text-xs font-semibold">
+              Rechercher un module
+              <span className="relative">
+                <Search
+                  size={16}
+                  aria-hidden="true"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
+                <input
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  placeholder="Titre ou sujet"
+                  className="h-12 w-full rounded-2xl border border-border bg-background pl-10 pr-3 text-base font-normal"
+                />
+              </span>
+            </label>
+            <label className="flex flex-col gap-1 text-xs font-semibold">
+              Trier par
+              <select
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value as "position" | "duree");
+                  setPage(1);
+                }}
+                className="h-12 rounded-2xl border border-border bg-background px-3 text-base font-normal"
+              >
+                <option value="position">Ordre du programme</option>
+                <option value="duree">Durée (du plus court)</option>
+              </select>
+            </label>
+          </div>
+        )}
+
+        {!modulesLoading && search.trim() && visibleModules.length === 0 && (
+          <p className="mb-3 rounded-2xl border border-border bg-background p-3 text-sm text-muted-foreground">
+            Aucun module ne correspond à «&nbsp;{search.trim()}&nbsp;».
+          </p>
         )}
 
         <div

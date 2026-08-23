@@ -1,13 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { DemoCredentialsBanner } from "@/components/facilitator/demo-credentials-banner";
+import {
+  DEMO_ADMIN_EMAIL,
+  DEMO_ADMIN_PASSWORD,
+} from "@/lib/auth/demo-accounts";
 
 /**
  * Panneau de marque illustré — visible seulement à lg: (split-screen desktop,
@@ -164,12 +170,35 @@ export default function DashboardLoginPage() {
       <BrandPanel />
       <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10 lg:min-h-0 lg:bg-background">
         <div className="w-full max-w-md surface-raised">
+          {/* Sans ce lien, l'écran de connexion est une impasse. */}
+          <Link
+            href="/"
+            className="mb-3 flex h-11 items-center gap-1 self-start text-sm font-semibold text-primary"
+          >
+            <ChevronLeft size={16} aria-hidden="true" /> Accueil
+          </Link>
+
           <p className="font-display mb-1 text-xs font-semibold tracking-wide text-brand-accent">
             PARENTRELAIS
           </p>
-          <h1 className="font-display mb-6 text-xl font-bold">
+          <h1 className="font-display mb-4 text-xl font-bold">
             Tableau de bord — Connexion
           </h1>
+
+          {/* Le même bandeau que côté facilitateur : le jury teste les deux
+              espaces, et n'avoir les identifiants que d'un seul côté était
+              une asymétrie gênante. */}
+          <div className="mb-4">
+            <DemoCredentialsBanner
+              email={DEMO_ADMIN_EMAIL}
+              password={DEMO_ADMIN_PASSWORD}
+              onFill={() => {
+                setEmail(DEMO_ADMIN_EMAIL);
+                setPassword(DEMO_ADMIN_PASSWORD);
+              }}
+            />
+          </div>
+
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="email">Email</Label>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -200,10 +201,24 @@ export default function DownloadsPage() {
             <Skeleton className="h-24 w-full" />
           </>
         ) : sorted.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Aucun téléchargement. Depuis l&apos;accueil, les médias des modules
-            se téléchargent automatiquement dès qu&apos;ils sont disponibles.
-          </p>
+          /* Ce texte annonçait un téléchargement « automatique » qui n'existe
+             plus — retiré pour ne pas consommer le forfait sans accord. Il
+             contredisait l'accueil, qui annonce au même moment « N fichiers à
+             télécharger ». On renvoie désormais vers l'action. */
+          <div className="flex flex-col items-start gap-3">
+            <p className="text-sm text-muted-foreground">
+              Aucun fichier téléchargé sur cet appareil. Les médias ne se
+              téléchargent pas tout seuls : c&apos;est vous qui décidez quand,
+              pour ne pas consommer votre forfait à votre insu.
+            </p>
+            <Link
+              href="/home"
+              className="font-display flex h-12 items-center gap-2 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
+            >
+              <DownloadCloud size={17} aria-hidden="true" />
+              Choisir les fichiers depuis l&apos;accueil
+            </Link>
+          </div>
         ) : (
           sorted.map((d) => {
             const pct =

@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { fetchPublishedModules } from "@/lib/content/fetch-content";
 import { hasLocalContent, replaceModules } from "@/lib/db/content-store";
+import { db } from "@/lib/db/dexie";
 import {
   fetchReferenceData,
   saveReferenceData,
@@ -34,6 +35,29 @@ export type ContentBootstrapState =
  * facilitateur hors-ligne ne doit jamais attendre le réseau. Le
  * rafraîchissement se fait alors en arrière-plan via le moteur de synchro.
  */
+/**
+ * Récupère le référentiel s'il est absent localement.
+ *
+ * Silencieux et non bloquant : l'app reste utilisable sans lui (le repli
+ * fournit le français). Mais sans ce rattrapage, un appareil déjà seedé
+ * n'obtenait jamais les autres langues, quel que soit le temps d'attente.
+ */
+async function ensureReferenceData(
+  queryClient: ReturnType<typeof useQueryClient>,
+): Promise<void> {
+  try {
+    const existing = await db.meta.get("reference_data");
+    if (existing?.value) return;
+
+    await saveReferenceData(await fetchReferenceData(createClient()));
+    await queryClient.invalidateQueries({ queryKey: ["dexie", "reference-data"] });
+  } catch (error: unknown) {
+    // Hors-ligne au premier lancement : le repli s'applique, et la synchro
+    // réessaiera au retour du réseau.
+    console.error("[contenu] rattrapage du référentiel échoué:", error);
+  }
+}
+
 export function useContentBootstrap() {
   const [state, setState] = useState<ContentBootstrapState>("checking");
   const queryClient = useQueryClient();
@@ -42,6 +66,11 @@ export function useContentBootstrap() {
     // Du contenu local suffit : on affiche sans attendre le réseau.
     if (await hasLocalContent()) {
       setState("ready");
+      // Mais on RATTRAPE le référentiel en arrière-plan s'il manque : un
+      // appareil déjà utilisé avant l'arrivée des langues en base n'en avait
+      // aucun, et ce chemin était le seul à pouvoir le lui donner. Symptôme
+      // constaté : une seule pastille de langue (« FR »), définitivement.
+      void ensureReferenceData(queryClient);
       return;
     }
 
@@ -59,6 +88,9 @@ export function useContentBootstrap() {
       // lui, l'écran de connexion n'aurait aucune région à proposer.
       try {
         await saveReferenceData(await fetchReferenceData(createClient()));
+        await queryClient.invalidateQueries({
+          queryKey: ["dexie", "reference-data"],
+        });
       } catch (error: unknown) {
         console.error("[contenu] référentiel initial non reçu:", error);
       }

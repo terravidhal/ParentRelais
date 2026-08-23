@@ -157,7 +157,26 @@ export default async function DashboardContentPage({
         />
       </div>
 
-      <div id="tour-matrice" className="mt-6 surface-raised">
+      {/* Recherche commune aux deux blocs ci-dessous. */}
+      <div className="mt-6 surface-raised surface-flush">
+        <TableToolbar
+          searchLabel="Rechercher un module"
+          placeholder="Titre du module"
+          filters={[
+            {
+              name: "statut",
+              label: "Statut",
+              options: [
+                { value: "publie", label: "Publiés" },
+                { value: "brouillon", label: "Brouillons" },
+                { value: "archive", label: "Archivés" },
+              ],
+            },
+          ]}
+        />
+      </div>
+
+      <div id="tour-matrice" className="mt-4 surface-raised">
         <div className="mb-4 flex items-center justify-between gap-2">
           <h3 className="font-display flex items-center gap-2 font-bold">
             <Globe size={16} aria-hidden="true" /> Matrice module × langue
@@ -170,13 +189,21 @@ export default async function DashboardContentPage({
             Voir tous les fichiers →
           </Link>
         </div>
+        {/* La matrice suit la MÊME recherche que la liste de publication :
+            deux barres distinctes sur la même page auraient été un piège —
+            filtrer d'un côté sans comprendre pourquoi l'autre ne bouge pas. */}
         <ContentMatrix
-          rows={rows}
+          rows={visibleRows}
           columns={columns}
           renderCellAction={(moduleId, lang) => (
             <MediaUploadCell moduleId={moduleId} lang={lang} />
           )}
         />
+        {visibleRows.length === 0 && rows.length > 0 && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Aucun module ne correspond à cette recherche.
+          </p>
+        )}
       </div>
 
       {/* Publication : c'est ici, et nulle part ailleurs, que se décide ce
@@ -189,23 +216,6 @@ export default async function DashboardContentPage({
           reste lisible dans les rapports et les historiques.
         </p>
 
-        <div className="-mx-5 mb-4">
-          <TableToolbar
-            searchLabel="Rechercher un module"
-            placeholder="Titre du module"
-            filters={[
-              {
-                name: "statut",
-                label: "Statut",
-                options: [
-                  { value: "publie", label: "Publiés" },
-                  { value: "brouillon", label: "Brouillons" },
-                  { value: "archive", label: "Archivés" },
-                ],
-              },
-            ]}
-          />
-        </div>
 
         <ul className="flex flex-col gap-3">
           {visibleRows.map((row) => {

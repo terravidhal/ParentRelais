@@ -12,12 +12,9 @@ import {
   Pause,
   Play,
   RotateCcw,
-  Trash2,
-  X,
 } from "lucide-react";
 import { useFacilitatorSessionQuery } from "@/lib/hooks/use-facilitator-session";
 import {
-  useCancelDownloadMutation,
   useDeleteDownloadedMediaMutation,
   useMediaDownloadsQuery,
   usePauseAllMutation,
@@ -27,9 +24,14 @@ import {
   useRetryDownloadMutation,
   useStorageEstimateQuery,
 } from "@/lib/hooks/use-media-downloads-query";
+import { useModulesQuery } from "@/lib/hooks/use-modules-query";
+import { usePreferredLangQuery } from "@/lib/hooks/use-preferred-lang";
+import { useQueueDownloadMutation } from "@/lib/hooks/use-media-downloads-query";
+import { buildModuleStatuses } from "@/lib/downloads/module-status";
+import type { ModuleMediaEntry } from "@/lib/downloads/module-status";
+import { ModuleDownloadCard } from "@/components/facilitator/module-download-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
-import type { MediaDownload } from "@/lib/db/dexie";
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} o`;
@@ -37,12 +39,6 @@ function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} Go`;
 }
-
-const MEDIA_TYPE_LABEL: Record<MediaDownload["media_type"], string> = {
-  audio: "Audio",
-  video: "Vidéo",
-  subtitles: "Sous-titres",
-};
 
 /**
  * Gestionnaire de téléchargements hors-ligne.
@@ -59,11 +55,13 @@ export default function DownloadsPage() {
   const { data: storage } = useStorageEstimateQuery();
   const pauseMutation = usePauseDownloadMutation();
   const retryMutation = useRetryDownloadMutation();
-  const cancelMutation = useCancelDownloadMutation();
   const deleteMutation = useDeleteDownloadedMediaMutation();
   const pauseAll = usePauseAllMutation();
   const resumeAll = useResumeAllMutation();
   const retryAll = useRetryAllFailedMutation();
+  const queueMutation = useQueueDownloadMutation();
+  const { data: modules = [], isLoading: modulesLoading } = useModulesQuery();
+  const { data: lang = "fr" } = usePreferredLangQuery();
 
   useEffect(() => {
     if (!sessionLoading && !session) {
@@ -82,14 +80,25 @@ export default function DownloadsPage() {
   const failed = downloads.filter((d) => d.status === "failed");
   const done = downloads.filter((d) => d.status === "done");
 
-  const sorted = [...downloads].sort((a, b) => {
-    // Ce qui demande une action passe devant : échecs, puis en cours.
-    const rank = (d: MediaDownload) =>
-      d.status === "failed" ? 0 : d.status === "downloading" ? 1 : d.status === "queued" ? 2 : d.status === "paused" ? 3 : 4;
-    const diff = rank(a) - rank(b);
-    if (diff !== 0) return diff;
-    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-  });
+  // Vue PAR MODULE : le facilitateur se demande si une séance est animable
+  // hors réseau, pas s'il possède tel fichier. La liste plate montrait en
+  // plus des doublons, plusieurs modules partageant le même média de démo.
+  const moduleStatuses = buildModuleStatuses(modules, downloads, lang);
+  const ready = moduleStatuses.filter((m) => m.availability === "complet").length;
+  const withMedia = moduleStatuses.filter((m) => m.availability !== "sans-media");
+
+  const handleDownload = (entries: ModuleMediaEntry[]) => {
+    for (const entry of entries) {
+      queueMutation.mutate({
+        media_url: entry.media_url,
+        module_id: entry.module_id,
+        lang: entry.lang,
+        media_type: entry.media_type,
+      });
+    }
+  };
+
+  const busy = queueMutation.isPending;
 
   return (
     <div className="lg:mx-auto lg:max-w-5xl">
@@ -195,171 +204,53 @@ export default function DownloadsPage() {
       </div>
 
       <div className="mt-4 flex flex-col gap-2.5 lg:mt-0">
-        {downloadsLoading ? (
+        {downloadsLoading || modulesLoading ? (
           <>
             <Skeleton className="h-24 w-full" />
             <Skeleton className="h-24 w-full" />
           </>
-        ) : sorted.length === 0 ? (
-          /* Ce texte annonçait un téléchargement « automatique » qui n'existe
-             plus — retiré pour ne pas consommer le forfait sans accord. Il
-             contredisait l'accueil, qui annonce au même moment « N fichiers à
-             télécharger ». On renvoie désormais vers l'action. */
-          <div className="flex flex-col items-start gap-3">
+        ) : withMedia.length === 0 ? (
+          <div className="flex flex-col items-start gap-3 rounded-2xl border border-border bg-background p-4">
             <p className="text-sm text-muted-foreground">
-              Aucun fichier téléchargé sur cet appareil. Les médias ne se
-              téléchargent pas tout seuls : c&apos;est vous qui décidez quand,
-              pour ne pas consommer votre forfait à votre insu.
+              Aucun module ne contient encore de média dans cette langue. Les
+              contenus restent consultables en texte.
             </p>
             <Link
               href="/home"
               className="font-display flex h-12 items-center gap-2 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
             >
               <DownloadCloud size={17} aria-hidden="true" />
-              Choisir les fichiers depuis l&apos;accueil
+              Revenir aux modules
             </Link>
           </div>
         ) : (
-          sorted.map((d) => {
-            const pct =
-              d.total_bytes && d.total_bytes > 0
-                ? Math.min(100, Math.round((d.downloaded_bytes / d.total_bytes) * 100))
-                : null;
-
-            return (
-              <div
-                key={d.media_url}
-                className="surface"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="font-display text-sm font-semibold">
-                      Module {d.module_id} · {MEDIA_TYPE_LABEL[d.media_type]} ({d.lang})
-                    </p>
-                    <p className="text-xs tabular-nums text-muted-foreground">
-                      {pct !== null
-                        ? `${formatBytes(d.downloaded_bytes)} / ${formatBytes(d.total_bytes as number)} · ${pct} %`
-                        : formatBytes(d.downloaded_bytes)}
-                    </p>
-                  </div>
-
-                  {d.status === "done" && (
-                    <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-success">
-                      <CheckCircle2 size={16} aria-hidden="true" /> Prêt
-                    </span>
-                  )}
-                  {d.status === "failed" && (
-                    <span className="shrink-0 text-xs font-semibold text-destructive">
-                      Échec
-                    </span>
-                  )}
-                  {(d.status === "queued" || d.status === "downloading") && (
-                    <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-accent-ink">
-                      <DownloadCloud size={16} aria-hidden="true" />
-                      {d.status === "downloading" ? "En cours" : "En attente"}
-                    </span>
-                  )}
-                  {d.status === "paused" && (
-                    <span className="shrink-0 text-xs font-semibold text-muted-foreground">
-                      En pause
-                    </span>
-                  )}
-                </div>
-
-                {d.total_bytes !== null && d.status !== "failed" && (
-                  <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
-                    <div
-                      className={
-                        d.status === "done"
-                          ? "h-full rounded-full bg-success motion-safe:transition-all"
-                          : "h-full rounded-full bg-accent motion-safe:transition-all"
-                      }
-                      style={{ width: `${d.status === "done" ? 100 : (pct ?? 0)}%` }}
-                    />
-                  </div>
-                )}
-
-                {/* Lecture directe : un média téléchargé doit pouvoir être
-                    écouté ou visionné ici, sans avoir à retrouver son module.
-                    Le service worker sert le fichier depuis le cache, donc
-                    la lecture fonctionne sans réseau. */}
-                {d.status === "done" && d.media_type === "audio" && (
-                  <audio
-                    controls
-                    preload="none"
-                    src={d.media_url}
-                    className="mt-2 h-11 w-full"
-                  />
-                )}
-                {d.status === "done" && d.media_type === "video" && (
-                  <video
-                    controls
-                    preload="metadata"
-                    src={d.media_url}
-                    className="mt-2 w-full rounded-xl bg-foreground"
-                  />
-                )}
-
-                {/* Message actionnable : la cause réelle, pas un « Échec » nu. */}
-                {d.status === "failed" && d.error_message && (
-                  <p className="mt-2 text-xs text-destructive">{d.error_message}</p>
-                )}
-                {d.status === "paused" && d.downloaded_bytes > 0 && (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Reprendra à {pct !== null ? `${pct} %` : formatBytes(d.downloaded_bytes)}.
-                  </p>
-                )}
-
-                <div className="mt-2 flex justify-end gap-2">
-                  {d.status === "downloading" && (
-                    <button
-                      type="button"
-                      onClick={() => pauseMutation.mutate(d.media_url)}
-                      className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border px-4 text-sm font-semibold"
-                    >
-                      <Pause size={16} aria-hidden="true" /> Pause
-                    </button>
-                  )}
-                  {(d.status === "failed" || d.status === "paused") && (
-                    <button
-                      type="button"
-                      onClick={() => retryMutation.mutate(d.media_url)}
-                      className="flex h-11 items-center justify-center gap-1.5 rounded-xl bg-accent px-4 text-sm font-semibold text-accent-foreground"
-                    >
-                      {d.status === "paused" ? (
-                        <>
-                          <Play size={16} aria-hidden="true" /> Reprendre
-                        </>
-                      ) : (
-                        <>
-                          <RotateCcw size={16} aria-hidden="true" /> Réessayer
-                        </>
-                      )}
-                    </button>
-                  )}
-                  {d.status === "done" ? (
-                    <button
-                      type="button"
-                      onClick={() => deleteMutation.mutate(d.media_url)}
-                      aria-label="Supprimer ce média téléchargé"
-                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-border text-muted-foreground"
-                    >
-                      <Trash2 size={16} aria-hidden="true" />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => cancelMutation.mutate(d.media_url)}
-                      aria-label="Annuler ce téléchargement"
-                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-destructive/30 text-destructive"
-                    >
-                      <X size={16} aria-hidden="true" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })
+          <>
+            <p className="text-sm text-muted-foreground">
+              {ready} module{ready > 1 ? "s" : ""} sur {withMedia.length}{" "}
+              disponible{ready > 1 ? "s" : ""} hors-ligne.
+            </p>
+            {/* Un même fichier peut servir à plusieurs modules : le dire
+                évite qu'un module devenu disponible « tout seul » paraisse
+                suspect. */}
+            <p className="text-xs text-muted-foreground">
+              Un fichier partagé par plusieurs modules n’est téléchargé
+              qu’une fois.
+            </p>
+            <ul className="flex flex-col gap-2.5">
+              {moduleStatuses.map((status) => (
+                <ModuleDownloadCard
+                  key={status.module.id}
+                  status={status}
+                  formatBytes={formatBytes}
+                  onDownload={handleDownload}
+                  onPause={(url) => pauseMutation.mutate(url)}
+                  onResume={(url) => retryMutation.mutate(url)}
+                  onDelete={(url) => deleteMutation.mutate(url)}
+                  busy={busy}
+                />
+              ))}
+            </ul>
+          </>
         )}
       </div>
       </div>

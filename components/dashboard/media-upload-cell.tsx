@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { RotateCcw, Upload } from "lucide-react";
+import { RotateCcw, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
 const MEDIA_TYPE_BY_EXTENSION: Record<string, "audio" | "video" | "subtitles"> = {
@@ -38,6 +39,9 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Progression réelle en pourcentage, alimentée par XMLHttpRequest.
+  const [progress, setProgress] = useState(0);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
 
   /**
@@ -79,17 +83,63 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
     setIsUploading(true);
     setError(null);
     setFileName(file.name);
+    const fileNameForToast = file.name;
 
+    setProgress(0);
     const supabase = createClient();
     const path = `modules/${moduleId}/${lang}/${mediaType}.${extension}`;
 
-    const { error: uploadError } = await supabase.storage
+    // URL signée + XMLHttpRequest : c'est le seul moyen d'obtenir une VRAIE
+    // progression. `storage.upload()` du SDK n'expose aucun callback, d'où
+    // l'ancienne barre animée qui ne bougeait jamais — elle donnait
+    // l'impression d'un envoi figé.
+    const { data: signed, error: signedError } = await supabase.storage
       .from("media")
-      .upload(path, file, { upsert: true });
+      .createSignedUploadUrl(path, { upsert: true });
+
+    if (signedError || !signed) {
+      setError(describeError(signedError?.message ?? "URL d'envoi indisponible"));
+      setIsUploading(false);
+      return;
+    }
+
+    const uploadError = await new Promise<string | null>((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhrRef.current = xhr;
+      xhr.open("PUT", signed.signedUrl, true);
+      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      xhr.setRequestHeader("x-upsert", "true");
+
+      xhr.upload.onprogress = (ev) => {
+        if (ev.lengthComputable) {
+          setProgress(Math.round((ev.loaded / ev.total) * 100));
+        }
+      };
+      xhr.onload = () =>
+        resolve(
+          xhr.status >= 200 && xhr.status < 300
+            ? null
+            : `${xhr.status} ${xhr.responseText.slice(0, 120)}`,
+        );
+      xhr.onerror = () => resolve("network");
+      xhr.onabort = () => resolve("__annule__");
+      xhr.send(file);
+    });
+
+    xhrRef.current = null;
+
+    // Annulation demandée : on sort sans message d'erreur, ce n'est pas un échec.
+    if (uploadError === "__annule__") {
+      setIsUploading(false);
+      setFileName(null);
+      setProgress(0);
+      return;
+    }
 
     if (uploadError) {
-      setError(describeError(uploadError.message));
+      setError(describeError(uploadError));
       setIsUploading(false);
+      toast.error(`Envoi échoué — module ${moduleId}, ${lang}`);
       return;
     }
 
@@ -121,7 +171,14 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
       return;
     }
 
+    // Le toast porte la confirmation. Un état "Déposé" local avait été
+    // essayé, mais router.refresh() remonte le composant et l'efface avant
+    // qu'il soit lu — le toast, lui, survit au rafraîchissement.
+    toast.success(`Fichier déposé — module ${moduleId}, ${lang}`, {
+      description: fileNameForToast,
+    });
     setFileName(null);
+    setProgress(0);
     router.refresh();
   };
 
@@ -152,15 +209,33 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
         className="hidden"
       />
       {isUploading && (
-        <div className="w-[80px]">
-          <p className="truncate text-center text-[11px] text-muted-foreground" title={fileName ?? undefined}>
+        <div className="w-[92px]">
+          <p
+            className="truncate text-center text-[11px] text-muted-foreground"
+            title={fileName ?? undefined}
+          >
             {fileName}
           </p>
-          {/* Progression indéterminée honnête : le SDK Supabase Storage
-              n'expose pas de callback onUploadProgress — mieux vaut une
-              animation franchement indéterminée qu'un pourcentage inventé. */}
-          <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
-            <div className="h-full w-1/3 rounded-full bg-accent motion-safe:animate-pulse" />
+          {/* Progression réelle : XMLHttpRequest.upload.onprogress donne le
+              rapport octets envoyés / total. */}
+          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-accent motion-safe:transition-all"
+              style={{ width: `${Math.max(progress, 2)}%` }}
+            />
+          </div>
+          <div className="mt-1 flex items-center justify-center gap-1.5">
+            <span className="text-[11px] font-semibold tabular-nums text-muted-foreground">
+              {progress}&nbsp;%
+            </span>
+            <button
+              type="button"
+              onClick={() => xhrRef.current?.abort()}
+              aria-label={`Annuler l'envoi — module ${moduleId}, ${lang}`}
+              className="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
+            >
+              <X size={12} aria-hidden="true" />
+            </button>
           </div>
         </div>
       )}

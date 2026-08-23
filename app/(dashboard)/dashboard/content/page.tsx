@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { ContentMatrix } from "@/components/dashboard/content-matrix";
 import { MediaUploadCell } from "@/components/dashboard/media-upload-cell";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { CreateModuleForm } from "@/components/dashboard/create-module-form";
+import { ModulePublicationControls } from "@/components/dashboard/module-publication-controls";
 
 const UPLOADABLE_LANGS = new Set(["fr", "en", "ff", "sign"]);
 
@@ -17,22 +19,36 @@ export default async function DashboardContentPage() {
 
   const { data: modules } = await supabase
     .from("modules")
-    .select("id")
+    .select("id, position, duration_min, status, archived_at")
     .order("position");
 
   const { data: translations } = await supabase
     .from("module_translations")
-    .select("module_id, lang, status");
+    .select("module_id, lang, title, status");
 
   const rows = (modules ?? []).map((m) => {
     const statusByLang: Record<string, "ready" | "pending"> = {};
+    let frenchTitle = "";
     for (const t of translations ?? []) {
       if (t.module_id === m.id) {
         statusByLang[t.lang] = t.status;
+        if (t.lang === "fr") frenchTitle = t.title;
       }
     }
-    return { moduleId: m.id, statusByLang };
+    return {
+      moduleId: m.id,
+      statusByLang,
+      title: frenchTitle,
+      position: m.position,
+      durationMin: m.duration_min,
+      published: m.status === "published",
+      archived: m.archived_at !== null,
+    };
   });
+
+  const nextPosition =
+    rows.reduce((max, r) => Math.max(max, r.position), 0) + 1;
+  const publishedCount = rows.filter((r) => r.published && !r.archived).length;
 
   const totalCells = rows.length * 4;
   const readyCells = rows.reduce(
@@ -42,11 +58,16 @@ export default async function DashboardContentPage() {
 
   return (
     <div>
+      {/* Le formulaire s'ouvre SOUS l'en-tête, en pleine largeur : logé dans
+          la rangée du titre, il s'étirait vers la droite en laissant le
+          titre seul dans un grand vide (constaté en capture). */}
       <div className="mb-6">
-        <p className="font-display text-xs font-semibold tracking-wide text-accent-ink">
-          PILOTAGE NATIONAL
-        </p>
-        <h1 className="font-display text-2xl font-bold">Contenus & langues</h1>
+        <CreateModuleForm nextPosition={nextPosition}>
+          <p className="font-display text-xs font-semibold tracking-wide text-accent-ink">
+            PILOTAGE NATIONAL
+          </p>
+          <h1 className="font-display text-2xl font-bold">Contenus & langues</h1>
+        </CreateModuleForm>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -55,7 +76,7 @@ export default async function DashboardContentPage() {
           value={rows.length}
           icon={<Globe size={18} aria-hidden="true" />}
           color="primary"
-          hint="Publiés dans l'app facilitateur"
+          hint={`${publishedCount} publié(s) sur le terrain`}
         />
         <StatCard
           label="Cases prêtes"
@@ -98,6 +119,70 @@ export default async function DashboardContentPage() {
             ) : null
           }
         />
+      </div>
+
+      {/* Publication : c'est ici, et nulle part ailleurs, que se décide ce
+          qui descend vers les téléphones. */}
+      <div className="mt-6 surface-raised">
+        <h3 className="font-display mb-1 font-bold">Publication des modules</h3>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Un module publié est téléchargé par les facilitateurs à leur
+          prochaine synchronisation. Un module archivé en disparaît, mais
+          reste lisible dans les rapports et les historiques.
+        </p>
+
+        <ul className="flex flex-col gap-3">
+          {rows.map((row) => {
+            const pendingLangs = ["fr", "en", "ff", "sign"].filter(
+              (lang) => row.statusByLang[lang] !== "ready",
+            );
+            return (
+              <li
+                key={row.moduleId}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-3"
+              >
+                <div className="min-w-[200px] flex-1">
+                  <p className="font-semibold">
+                    M{row.moduleId} — {row.title || "Sans titre"}
+                  </p>
+                  <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span>
+                      Position {row.position} · {row.durationMin} min
+                    </span>
+                    <span
+                      className={
+                        row.archived
+                          ? "rounded-full bg-muted px-2 py-0.5 font-semibold text-muted-foreground"
+                          : row.published
+                            ? "rounded-full bg-success-soft px-2 py-0.5 font-semibold text-success"
+                            : "rounded-full bg-accent/15 px-2 py-0.5 font-semibold text-accent-ink"
+                      }
+                    >
+                      {row.archived
+                        ? "Archivé"
+                        : row.published
+                          ? "Publié"
+                          : "Brouillon"}
+                    </span>
+                  </p>
+                </div>
+                <ModulePublicationControls
+                  moduleId={row.moduleId}
+                  published={row.published}
+                  archived={row.archived}
+                  pendingLangs={pendingLangs}
+                />
+              </li>
+            );
+          })}
+        </ul>
+
+        {rows.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            Aucun module pour l&apos;instant. Créez le premier avec
+            « Nouveau module ».
+          </p>
+        )}
       </div>
     </div>
   );

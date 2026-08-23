@@ -28,8 +28,8 @@ export function ContentBootstrapScreen({
             Contenu non reçu
           </h1>
           <p className="mt-2 text-base text-muted-foreground">
-            Les modules n&apos;ont pas pu être téléchargés. Vérifiez votre
-            connexion, puis réessayez.
+            Le serveur n&apos;a pas répondu, ou n&apos;a encore aucun module
+            publié. Réessayez dans un instant.
           </p>
           <button
             type="button"

@@ -11,11 +11,13 @@ const COLUMNS = [
 // Largeurs minimales par colonne pour rester lisible même en scroll
 // horizontal sur mobile — grid-cols-5 seul débordait/écrasait le texte.
 const GRID_TEMPLATE =
-  "grid-cols-[minmax(80px,1fr)_repeat(4,minmax(90px,1fr))]";
+  "grid-cols-[minmax(140px,1.4fr)_repeat(4,minmax(90px,1fr))]";
 
 interface ContentMatrixRow {
   moduleId: number;
   statusByLang: Record<string, "ready" | "pending">;
+  /** Titre français, pour repérer un module autrement que par son numéro. */
+  title?: string;
 }
 
 interface ContentMatrixProps {
@@ -49,7 +51,14 @@ export function ContentMatrix({ rows, renderCellAction }: ContentMatrixProps) {
             key={row.moduleId}
             className={`grid ${GRID_TEMPLATE} items-center border-t border-border text-sm`}
           >
-            <div className="p-2 font-medium">M{row.moduleId}</div>
+            <div className="p-2">
+              <span className="font-medium">M{row.moduleId}</span>
+              {row.title && (
+                <span className="block truncate text-xs text-muted-foreground">
+                  {row.title}
+                </span>
+              )}
+            </div>
             {COLUMNS.map((c) => (
               <div key={c.lang} className="flex flex-col items-center gap-1 p-2">
                 {row.statusByLang[c.lang] === "ready" ? (

@@ -108,14 +108,24 @@ export type Database = {
       };
       modules: {
         Row: ModuleRow;
-        Insert: Omit<ModuleRow, "created_at" | "status" | "archived_at"> &
-          Partial<Pick<ModuleRow, "status" | "archived_at">>;
+        // `id` est auto-généré depuis la migration 0015 (identity) : une
+        // création depuis le tableau de bord ne le fournit pas.
+        Insert: Omit<ModuleRow, "id" | "created_at" | "status" | "archived_at"> &
+          Partial<Pick<ModuleRow, "id" | "status" | "archived_at">>;
         Update: Partial<ModuleRow>;
         Relationships: [];
       };
       module_translations: {
         Row: ModuleTranslationRow;
-        Insert: Omit<ModuleTranslationRow, "id">;
+        // Les URL de médias sont nullables et remplies plus tard, par
+        // l'upload depuis la matrice — jamais à la création.
+        Insert: Omit<
+          ModuleTranslationRow,
+          "id" | "audio_url" | "video_url" | "subtitles_url"
+        > &
+          Partial<
+            Pick<ModuleTranslationRow, "audio_url" | "video_url" | "subtitles_url">
+          >;
         Update: Partial<ModuleTranslationRow>;
         Relationships: [];
       };

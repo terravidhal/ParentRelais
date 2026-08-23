@@ -112,7 +112,7 @@ export function DashboardShell({ userEmail, children }: DashboardShellProps) {
         <div className="border-t border-sidebar-border p-3">
           <button
             type="button"
-            onClick={() => runDashboardTour()}
+            onClick={() => runDashboardTour(router, pathname)}
             className="flex h-11 w-full items-center gap-2.5 rounded-xl px-3 text-sm font-semibold text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
           >
             <HelpCircle size={16} aria-hidden="true" />

@@ -3,6 +3,13 @@ import { driver, type Config, type PopoverDOM } from "driver.js";
 interface CreateTourDriverOptions {
   steps: Config["steps"];
   onDone: () => void;
+  /**
+   * Clic sur « Terminer », c'est-à-dire fin des étapes de ce tour. Distinct
+   * de `onDone` (déclenché aussi par un abandon), ce qui permet au guide du
+   * dashboard d'enchaîner sur la page suivante uniquement quand l'utilisateur
+   * est allé au bout.
+   */
+  onFinished?: () => void;
 }
 
 /**
@@ -12,7 +19,11 @@ interface CreateTourDriverOptions {
  * Injecte un bouton "Passer" explicite (driver.js n'en a pas nativement,
  * seulement une croix de fermeture peu visible) via onPopoverRender.
  */
-export function createTourDriver({ steps, onDone }: CreateTourDriverOptions) {
+export function createTourDriver({
+  steps,
+  onDone,
+  onFinished,
+}: CreateTourDriverOptions) {
   const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
@@ -30,6 +41,10 @@ export function createTourDriver({ steps, onDone }: CreateTourDriverOptions) {
     // collait au bouton "Passer" faute d'espacement dans le footer.
     progressText: "Étape {{current}} sur {{total}}",
     onDestroyed: onDone,
+    onDoneClick: (_el, _step, { driver: d }) => {
+      onFinished?.();
+      d.destroy();
+    },
     onPopoverRender: (popover: PopoverDOM, { driver: tourDriver }) => {
       // Bouton "Passer" explicite : la croix de fermeture de driver.js est
       // trop discrète pour un facilitateur peu à l'aise avec le numérique,

@@ -44,7 +44,7 @@ export default async function DashboardPage() {
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div id="tour-kpis" className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Familles touchées"
           value={totalFamilies}
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
-        <div className="surface-raised">
+        <div id="tour-localites" className="surface-raised">
           <h3 className="font-display mb-4 font-bold">
             Familles touchées par localité
           </h3>
@@ -82,7 +82,7 @@ export default async function DashboardPage() {
           />
         </div>
 
-        <div className="surface-raised">
+        <div id="tour-facilitateurs-actifs" className="surface-raised">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-display font-bold">Facilitateurs actifs</h3>
             <Link

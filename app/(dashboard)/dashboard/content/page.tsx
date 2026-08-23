@@ -77,7 +77,7 @@ export default async function DashboardContentPage() {
         />
       </div>
 
-      <div className="mt-6 surface-raised">
+      <div id="tour-matrice" className="mt-6 surface-raised">
         <div className="mb-4 flex items-center justify-between gap-2">
           <h3 className="font-display flex items-center gap-2 font-bold">
             <Globe size={16} aria-hidden="true" /> Matrice module × langue

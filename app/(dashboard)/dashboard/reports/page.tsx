@@ -34,7 +34,9 @@ export default async function DashboardReportsPage() {
               : `${rows.length} séance${rows.length > 1 ? "s" : ""} agrégée${rows.length > 1 ? "s" : ""}, prête${rows.length > 1 ? "s" : ""} à exporter pour les bilans UNICEF/MINPROFF.`}
           </p>
         </div>
-        <ExportButton rows={rows} />
+        <span id="tour-export">
+          <ExportButton rows={rows} />
+        </span>
       </div>
 
       <div className="surface-raised surface-flush">

@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, HelpCircle, LogOut, RotateCcw, UserCircle2 } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronLeft,
+  HelpCircle,
+  LogOut,
+  RotateCcw,
+  UserCircle2,
+} from "lucide-react";
 import {
   useFacilitatorSessionQuery,
   useSignOutFacilitatorMutation,
@@ -121,6 +128,21 @@ export default function ProfilePage() {
         <LogOut size={16} aria-hidden="true" />
         Se déconnecter
       </button>
+
+      {/* Le risque le plus concret de perte de données, et le seul contre
+          lequel l'application ne peut rien : « effacer les données de
+          navigation » supprime Dexie, donc les séances non synchronisées. */}
+      <div className="surface border-accent/40 bg-accent/10">
+        <p className="flex items-center gap-2 font-display text-sm font-semibold text-accent-ink">
+          <AlertTriangle size={16} aria-hidden="true" />
+          Ne videz pas les données du navigateur
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Vos séances en attente sont stockées sur l&apos;appareil. Effacer les
+          données de navigation ou désinstaller l&apos;application les
+          supprimerait définitivement. Synchronisez avant toute manipulation.
+        </p>
+      </div>
 
       <div className="surface">
         <p className="flex items-center gap-2 font-display text-sm font-semibold">

@@ -78,6 +78,17 @@ export function LandingPage() {
         UNICEF Cameroun × MINPROFF — outil de terrain pour la parentalité positive
       </div>
 
+      {/* Rappel des identifiants dans le bandeau : mesuré, l'encart complet
+          se trouve à 870px, sous la ligne de flottaison d'un écran de 720px.
+          Un jury qui ne défile pas ne le verrait jamais. */}
+      <button
+        type="button"
+        onClick={() => scrollTo("demo-access")}
+        className="w-full bg-[#E0961A] px-4 py-2 text-center text-xs font-bold text-[#16241F] underline-offset-4 hover:underline"
+      >
+        Jury : comptes de démonstration et test hors-ligne — voir les accès
+      </button>
+
       <header className="relative z-20 border-b border-[#DCE4E1] bg-[#EDF1EF]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
           <button
@@ -218,6 +229,37 @@ export function LandingPage() {
                 Espace de pilotage <ArrowRight className="ml-2 inline h-5 w-5" />
               </Link>
             </div>
+            {/* Identifiants visibles : le dossier de candidature ne transmet
+                que le dépôt et cette URL. Sans eux, le jury ne peut pas
+                essayer l'application — un risque bien moindre que celui
+                d'une démonstration inaccessible. */}
+            <div
+              id="demo-access"
+              className="mt-5 scroll-mt-24 rounded-2xl border border-[#DCE4E1] bg-[#EDF1EF] p-4"
+            >
+              <p className="text-sm font-bold text-[#16241F]">
+                Comptes de démonstration
+              </p>
+              <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm text-[#4A5B57]">
+                <dt className="font-semibold">Facilitateur</dt>
+                <dd className="break-all font-mono text-xs">
+                  facilitateur.demo@parentrelais.app · DemoTerrain2026!
+                </dd>
+                <dt className="font-semibold">Pilotage</dt>
+                <dd className="break-all font-mono text-xs">
+                  demo@parentrelais.app · ParentRelais2026!
+                </dd>
+              </dl>
+              <p className="mt-3 text-sm text-[#4A5B57]">
+                <strong className="font-bold text-[#16241F]">
+                  Installez l&apos;application
+                </strong>{" "}
+                depuis l&apos;espace facilitateur (Profil → Installer) pour la
+                tester hors connexion : une fois installée, coupez le réseau,
+                elle continue de fonctionner.
+              </p>
+            </div>
+
             <button
               onClick={() => scrollTo("solution")}
               className="mt-4 text-sm font-semibold text-[#08596E] underline-offset-4 hover:underline"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen, CheckCircle2, Clock, History, Settings2 } from "lucide-react";
 import { useModulesQuery } from "@/lib/hooks/use-modules-query";
@@ -14,6 +14,10 @@ import { LangPills } from "@/components/facilitator/lang-pills";
 import { ModuleCard } from "@/components/facilitator/module-card";
 import { ModulePagination } from "@/components/facilitator/module-pagination";
 import { MediaDownloadBanner } from "@/components/facilitator/media-download-banner";
+import { FieldReadiness } from "@/components/facilitator/field-readiness";
+import { collectMediaUrls } from "@/lib/downloads/collect-media";
+import { useMediaDownloadsQuery } from "@/lib/hooks/use-media-downloads-query";
+import { useOnlineStatus } from "@/lib/hooks/use-online-status";
 import { FacilitatorOnboardingTour } from "@/components/facilitator/onboarding-tour";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeading } from "@/components/ui/page-heading";
@@ -22,6 +26,21 @@ import type { CachedModule } from "@/lib/db/dexie";
 // 2 colonnes × 3 lignes à desktop (lg:), pile de 6 sur mobile — page size
 // fixe plutôt que dépendante du viewport pour rester simple côté offline.
 const PAGE_SIZE = 6;
+
+/** L'app tourne-t-elle en mode installé (PWA) plutôt que dans un onglet ? */
+function readIsInstalled(): boolean {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    // Safari iOS expose l'état standalone hors standard.
+    (window.navigator as { standalone?: boolean }).standalone === true
+  );
+}
+
+function subscribeToDisplayMode(onChange: () => void): () => void {
+  const query = window.matchMedia("(display-mode: standalone)");
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
 
 export default function HomePage() {
   const router = useRouter();
@@ -54,6 +73,27 @@ export default function HomePage() {
 
   const syncedCount = sessions.filter((s) => s.status === "synced").length;
   const pendingCount = sessions.length - syncedCount;
+
+  // Préparation au terrain : ce qui manque encore sur l'appareil avant de
+  // partir en zone sans réseau.
+  const online = useOnlineStatus();
+  const { data: downloads = [] } = useMediaDownloadsQuery();
+  const downloadedUrls = new Set(
+    downloads.filter((d) => d.status === "done").map((d) => d.media_url),
+  );
+  const missingMediaCount = new Set(
+    collectMediaUrls(modules)
+      .map((m) => m.media_url)
+      .filter((url) => !downloadedUrls.has(url)),
+  ).size;
+  // `useSyncExternalStore` plutôt qu'un effet : conçu exactement pour lire
+  // une valeur extérieure à React sans incohérence d'hydratation (le
+  // troisième argument fournit la valeur côté serveur) ni cascade de rendus.
+  const installed = useSyncExternalStore(
+    subscribeToDisplayMode,
+    readIsInstalled,
+    () => false,
+  );
   const recentSessions = [...sessions]
     .sort((a, b) => new Date(b.held_at).getTime() - new Date(a.held_at).getTime())
     .slice(0, 3);
@@ -191,7 +231,22 @@ export default function HomePage() {
           <BookOpen size={14} aria-hidden="true" /> Modules de formation
         </p>
 
-        {!modulesLoading && <MediaDownloadBanner modules={modules} />}
+        {!modulesLoading && (
+          <div className="mb-3">
+            <FieldReadiness
+              pendingCount={pendingCount}
+              missingMediaCount={missingMediaCount}
+              installed={installed}
+              online={online}
+            />
+          </div>
+        )}
+        {/* La bannière de téléchargement ne s'affiche QUE si la préparation
+            au terrain n'en parle pas déjà : les deux annonçaient « 9 fichiers
+            à télécharger » l'un sous l'autre (constaté en capture). */}
+        {!modulesLoading && missingMediaCount === 0 && (
+          <MediaDownloadBanner modules={modules} />
+        )}
 
         <div
           id="module-list"

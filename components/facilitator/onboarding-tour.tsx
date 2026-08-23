@@ -12,6 +12,18 @@ import {
 
 const FACILITATOR_TOUR_STEPS = [
   {
+    // Première étape volontairement consacrée au hors-ligne : c'est la
+    // promesse centrale du produit, et rien dans l'interface ne l'expliquait.
+    // Un facilitateur qui l'ignore n'installe pas l'app et se retrouve
+    // bloqué en brousse.
+    element: "#field-readiness-title",
+    popover: {
+      title: "Préparez-vous avant de partir",
+      description:
+        "Installez l'application et téléchargez les vidéos tant que vous avez du réseau. Ensuite, tout fonctionne sans connexion : vos modules, vos séances, votre historique.",
+    },
+  },
+  {
     element: "#module-list",
     popover: {
       title: "Modules de formation",
@@ -31,7 +43,7 @@ const FACILITATOR_TOUR_STEPS = [
     popover: {
       title: "Votre profil",
       description:
-        "Accédez à votre profil pour vous déconnecter ou réinitialiser le contenu.",
+        "Installez l'application, vérifiez la date de votre contenu, ou déconnectez-vous.",
     },
   },
 ];

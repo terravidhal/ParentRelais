@@ -1,16 +1,21 @@
 import { test, expect } from "@playwright/test";
-import { loginAsDemoFacilitator } from "./helpers";
+import { loginAsDemoFacilitator, skipFacilitatorOnboarding } from "./helpers";
 
 /**
  * Flow 9 (FLOW.md) — lecture vidéo avec piste de sous-titres, jamais couvert.
  * Tous les modules/langues "ready" partagent le même fichier vidéo/sous-titres
- * de démo (voir DEMO_VIDEO_URL dans lib/content/seed.ts) — le placeholder
+ * de démo — le placeholder
  * statique n'est donc plus atteignable depuis ces données de démo ; il reste
  * couvert au niveau composant si besoin, pas ici.
  */
 test.describe("Lecteur vidéo", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsDemoFacilitator(page, "9876");
+    // Sans ceci, l'overlay du guide intercepte les clics sur les modules.
+    // Il ne s'est mis à bloquer qu'avec l'ajout d'une étape supplémentaire :
+    // le test dépendait en réalité du nombre d'étapes, jamais de leur absence.
+    await skipFacilitatorOnboarding(page);
+    await page.reload();
   });
 
   test("le module avec video_url affiche un vrai lecteur <video> avec sous-titres", async ({

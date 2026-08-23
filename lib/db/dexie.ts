@@ -11,11 +11,33 @@ export interface CachedModuleTranslation {
   status: "ready" | "pending";
 }
 
+/** Une question de quiz, avec ses libellés par langue. */
+export interface CachedQuizQuestion {
+  id: number;
+  position: number;
+  correct_index: number;
+  translations: {
+    lang: string;
+    question: string;
+    options: string[];
+  }[];
+}
+
 export interface CachedModule {
   id: number;
   position: number;
   duration_min: number;
   translations: CachedModuleTranslation[];
+  /**
+   * Le quiz voyage AVEC son module plutôt que dans sa propre table Dexie :
+   * il n'a aucun sens hors de son module, et l'embarquer évite une seconde
+   * lecture locale à chaque ouverture de séance.
+   *
+   * Optionnel : les appareils seedés avant l'arrivée du quiz en base ont des
+   * modules sans ce champ, et un module peut légitimement ne pas avoir de
+   * quiz.
+   */
+  quiz?: CachedQuizQuestion[];
 }
 
 export interface OutboxSession {

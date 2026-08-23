@@ -33,6 +33,23 @@ export type ModuleRow = {
 
 export type TranslationStatus = "ready" | "pending";
 
+export type QuizQuestionRow = {
+  id: number;
+  module_id: number;
+  position: number;
+  /** Index de la bonne réponse dans `options` — identique quelle que soit la langue. */
+  correct_index: number;
+  created_at: string;
+};
+
+export type QuizQuestionTranslationRow = {
+  id: string;
+  question_id: number;
+  lang: string;
+  question: string;
+  options: string[];
+};
+
 export type ModuleTranslationRow = {
   id: string;
   module_id: number;
@@ -127,6 +144,19 @@ export type Database = {
             Pick<ModuleTranslationRow, "audio_url" | "video_url" | "subtitles_url">
           >;
         Update: Partial<ModuleTranslationRow>;
+        Relationships: [];
+      };
+      quiz_questions: {
+        Row: QuizQuestionRow;
+        Insert: Omit<QuizQuestionRow, "id" | "created_at"> &
+          Partial<Pick<QuizQuestionRow, "id">>;
+        Update: Partial<QuizQuestionRow>;
+        Relationships: [];
+      };
+      quiz_question_translations: {
+        Row: QuizQuestionTranslationRow;
+        Insert: Omit<QuizQuestionTranslationRow, "id">;
+        Update: Partial<QuizQuestionTranslationRow>;
         Relationships: [];
       };
       sessions: {

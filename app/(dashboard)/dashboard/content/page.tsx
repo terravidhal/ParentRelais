@@ -7,6 +7,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { CreateModuleForm } from "@/components/dashboard/create-module-form";
 import { ModulePublicationControls } from "@/components/dashboard/module-publication-controls";
 import { TableToolbar } from "@/components/dashboard/table-toolbar";
+import { QuizEditor, type QuizEditorQuestion } from "@/components/dashboard/quiz-editor";
 
 const UPLOADABLE_LANGS = new Set(["fr", "en", "ff", "sign"]);
 
@@ -34,6 +35,18 @@ export default async function DashboardContentPage({
     .from("module_translations")
     .select("module_id, lang, title, status");
 
+  // Le quiz de chaque module, pour que l'admin puisse le voir et le compléter
+  // sans quitter la page (migration 0019).
+  const { data: quizQuestions } = await supabase
+    .from("quiz_questions")
+    .select("id, module_id, position, correct_index")
+    .order("position");
+
+  const { data: quizTranslations } = await supabase
+    .from("quiz_question_translations")
+    .select("question_id, lang, question, options")
+    .eq("lang", "fr");
+
   const rows = (modules ?? []).map((m) => {
     const statusByLang: Record<string, "ready" | "pending"> = {};
     let frenchTitle = "";
@@ -43,9 +56,22 @@ export default async function DashboardContentPage({
         if (t.lang === "fr") frenchTitle = t.title;
       }
     }
+    const quiz: QuizEditorQuestion[] = (quizQuestions ?? [])
+      .filter((q) => q.module_id === m.id)
+      .map((q) => {
+        const t = (quizTranslations ?? []).find((x) => x.question_id === q.id);
+        return {
+          id: q.id,
+          question: t?.question ?? "(sans libellé)",
+          options: t?.options ?? [],
+          correctIndex: q.correct_index,
+        };
+      });
+
     return {
       moduleId: m.id,
       statusByLang,
+      quiz,
       title: frenchTitle,
       position: m.position,
       durationMin: m.duration_min,
@@ -203,12 +229,19 @@ export default async function DashboardContentPage({
                     </span>
                   </p>
                 </div>
-                <ModulePublicationControls
-                  moduleId={row.moduleId}
-                  published={row.published}
-                  archived={row.archived}
-                  pendingLangs={pendingLangs}
-                />
+                <div className="flex flex-wrap items-center gap-2">
+                  <QuizEditor
+                    moduleId={row.moduleId}
+                    moduleTitle={row.title}
+                    questions={row.quiz}
+                  />
+                  <ModulePublicationControls
+                    moduleId={row.moduleId}
+                    published={row.published}
+                    archived={row.archived}
+                    pendingLangs={pendingLangs}
+                  />
+                </div>
               </li>
             );
           })}

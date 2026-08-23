@@ -1,5 +1,9 @@
 import type { createClient } from "@/lib/supabase/client";
-import type { CachedModule, CachedModuleTranslation } from "@/lib/db/dexie";
+import type {
+  CachedModule,
+  CachedModuleTranslation,
+  CachedQuizQuestion,
+} from "@/lib/db/dexie";
 
 type SupabaseClient = ReturnType<typeof createClient>;
 
@@ -42,6 +46,53 @@ export async function fetchPublishedModules(
     });
   }
 
+  // Le quiz descend AVEC les modules : il vivait auparavant en dur dans le
+  // bundle, sans lien avec module_id, si bien que tout module affichait les
+  // mêmes questions (voir migration 0019).
+  const moduleIds = modules.map((m) => m.id);
+  const { data: questions, error: questionsError } = await supabase
+    .from("quiz_questions")
+    .select("id, module_id, position, correct_index")
+    .in("module_id", moduleIds)
+    .order("position");
+
+  if (questionsError) {
+    throw new Error("Lecture du quiz échouée", { cause: questionsError });
+  }
+
+  const questionIds = (questions ?? []).map((q) => q.id);
+  const { data: questionTranslations, error: quizTradError } =
+    questionIds.length > 0
+      ? await supabase
+          .from("quiz_question_translations")
+          .select("question_id, lang, question, options")
+          .in("question_id", questionIds)
+      : { data: [], error: null };
+
+  if (quizTradError) {
+    throw new Error("Lecture des traductions du quiz échouée", {
+      cause: quizTradError,
+    });
+  }
+
+  const quizByModule = new Map<number, CachedQuizQuestion[]>();
+  for (const q of questions ?? []) {
+    const list = quizByModule.get(q.module_id) ?? [];
+    list.push({
+      id: q.id,
+      position: q.position,
+      correct_index: q.correct_index,
+      translations: (questionTranslations ?? [])
+        .filter((t) => t.question_id === q.id)
+        .map((t) => ({
+          lang: t.lang,
+          question: t.question,
+          options: t.options ?? [],
+        })),
+    });
+    quizByModule.set(q.module_id, list);
+  }
+
   const byModule = new Map<number, CachedModuleTranslation[]>();
   for (const t of translations ?? []) {
     const list = byModule.get(t.module_id) ?? [];
@@ -64,6 +115,7 @@ export async function fetchPublishedModules(
       position: m.position,
       duration_min: m.duration_min,
       translations: byModule.get(m.id) ?? [],
+      quiz: quizByModule.get(m.id) ?? [],
     }))
     // Un module sans aucune traduction serait inaffichable côté facilitateur
     // (module-view retombe sur "fr" et planterait sans elle).

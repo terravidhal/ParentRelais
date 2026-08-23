@@ -1,12 +1,13 @@
 "use client";
 
 import { CheckCircle2, Circle } from "lucide-react";
-import type { QuizQuestion } from "@/lib/content/session-data";
+import type { CachedQuizQuestion } from "@/lib/db/dexie";
 
 interface QuizStepProps {
-  question: QuizQuestion;
+  question: CachedQuizQuestion;
   lang: string;
-  selected: number | null;
+  /** `undefined` tant que la question n'a pas été répondue. */
+  selected: number | undefined;
   onAnswer: (optionIndex: number) => void;
 }
 

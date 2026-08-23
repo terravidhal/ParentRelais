@@ -11,7 +11,7 @@ import { Stepper } from "@/components/facilitator/stepper";
 import { QuizStep } from "@/components/facilitator/quiz-step";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { VILLAGES, DEMO_QUIZ } from "@/lib/content/session-data";
+import { VILLAGES } from "@/lib/content/session-data";
 
 type Step = 0 | 1 | 2;
 
@@ -26,9 +26,11 @@ export function SessionView({ moduleId }: { moduleId: number }) {
   const [total, setTotal] = useState(12);
   const [women, setWomen] = useState(8);
   const [disability, setDisability] = useState(1);
-  const [answers, setAnswers] = useState<(number | null)[]>(
-    DEMO_QUIZ.map(() => null),
-  );
+  // Les réponses ne peuvent pas être dimensionnées ici : le quiz appartient
+  // au module et n'est connu qu'une fois celui-ci chargé depuis Dexie. Un
+  // objet indexé par identifiant de question évite d'avoir à redimensionner
+  // un tableau au chargement.
+  const [answers, setAnswers] = useState<Record<number, number>>({});
   const { data: lang = "fr" } = usePreferredLangQuery();
   const [recorded, setRecorded] = useState(false);
 
@@ -42,11 +44,15 @@ export function SessionView({ moduleId }: { moduleId: number }) {
 
   const translation =
     module.translations.find((t) => t.lang === lang) ?? module.translations[0];
-  const score = answers.reduce<number>(
-    (n, a, i) => n + (a === DEMO_QUIZ[i].correct ? 1 : 0),
+
+  // Le quiz vient du MODULE, plus d'une constante globale : c'est ce qui
+  // faisait afficher les mêmes questions partout (migration 0019).
+  const quiz = module.quiz ?? [];
+  const score = quiz.reduce<number>(
+    (n, q) => n + (answers[q.id] === q.correct_index ? 1 : 0),
     0,
   );
-  const allAnswered = answers.every((a) => a !== null);
+  const allAnswered = quiz.every((q) => answers[q.id] !== undefined);
 
   const enterRecap = async () => {
     setStep(2);
@@ -63,7 +69,7 @@ export function SessionView({ moduleId }: { moduleId: number }) {
         women,
         disability_count: disability,
         quiz_score: score,
-        quiz_max: DEMO_QUIZ.length,
+        quiz_max: quiz.length,
         held_at: new Date().toISOString(),
       });
       setRecorded(true);
@@ -142,19 +148,26 @@ export function SessionView({ moduleId }: { moduleId: number }) {
           <h3 className="font-display flex items-center gap-2 font-bold">
             <GraduationCap size={18} aria-hidden="true" /> Petit quiz de fin
           </h3>
-          {DEMO_QUIZ.map((question, qi) => (
-            <QuizStep
-              key={question.id}
-              question={question}
-              lang={lang}
-              selected={answers[qi]}
-              onAnswer={(optionIndex) =>
-                setAnswers((prev) =>
-                  prev.map((a, i) => (i === qi ? optionIndex : a)),
-                )
-              }
-            />
-          ))}
+          {quiz.length === 0 ? (
+            // Un module sans quiz doit pouvoir se terminer : le facilitateur
+            // ne doit jamais rester bloqué sur une étape vide.
+            <p className="text-sm text-muted-foreground">
+              Ce module n&apos;a pas encore de quiz. Vous pouvez terminer la
+              séance.
+            </p>
+          ) : (
+            quiz.map((question) => (
+              <QuizStep
+                key={question.id}
+                question={question}
+                lang={lang}
+                selected={answers[question.id]}
+                onAnswer={(optionIndex) =>
+                  setAnswers((prev) => ({ ...prev, [question.id]: optionIndex }))
+                }
+              />
+            ))
+          )}
           <Button
             onClick={enterRecap}
             disabled={!allAnswered}
@@ -173,7 +186,7 @@ export function SessionView({ moduleId }: { moduleId: number }) {
           <h3 className="font-display text-lg font-bold">Séance enregistrée</h3>
           <p className="text-sm text-muted-foreground">
             {village} · {total} parents · {disability} en situation de handicap
-            · quiz {score}/{DEMO_QUIZ.length}
+            {quiz.length > 0 && ` · quiz ${score}/${quiz.length}`}
           </p>
           <div className="w-full rounded-2xl bg-accent-soft p-3 text-sm text-accent-ink">
             Enregistré sur l&apos;appareil. La séance sera envoyée dès qu&apos;une

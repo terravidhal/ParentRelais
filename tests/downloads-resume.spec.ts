@@ -25,15 +25,22 @@ test("reprise Range sur un media Supabase (cas reel des videos uploadees)", asyn
   await skipFacilitatorOnboarding(page);
 
   const result = await page.evaluate(async (url) => {
-    const first = await fetch(url, { headers: { Range: "bytes=0-99999" } });
+    // Taille réelle du fichier : ne pas la figer dans le test, le média peut
+    // être remplacé depuis le dashboard (et l'a déjà été).
+    const head = await fetch(url, { method: "HEAD" });
+    const total = Number(head.headers.get("content-length"));
+
+    // On demande un premier tiers, puis le reste à partir de là.
+    const cut = Math.max(1, Math.floor(total / 3));
+    const first = await fetch(url, { headers: { Range: `bytes=0-${cut - 1}` } });
     const firstBytes = (await first.arrayBuffer()).byteLength;
 
     const second = await fetch(url, { headers: { Range: `bytes=${firstBytes}-` } });
     return {
+      total,
       firstStatus: first.status,
       firstBytes,
       secondStatus: second.status,
-      secondRange: second.headers.get("content-range"),
       secondLength: Number(second.headers.get("content-length")),
     };
   }, SUPABASE_MEDIA);
@@ -43,7 +50,9 @@ test("reprise Range sur un media Supabase (cas reel des videos uploadees)", asyn
   // le nombre d'octets restants (total - déjà reçus), qui ne peut être exact
   // que si le serveur a bien repris à l'offset demandé.
   expect(result.secondStatus).toBe(206);
-  expect(result.secondLength).toBe(5365449 - result.firstBytes);
+  // La reprise doit renvoyer exactement ce qui reste — impossible si le
+  // serveur ignorait l'en-tête Range.
+  expect(result.secondLength).toBe(result.total - result.firstBytes);
 });
 
 test("le service worker sert les medias precaches en entier (Range ignore)", async ({

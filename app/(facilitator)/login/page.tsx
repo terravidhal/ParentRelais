@@ -11,8 +11,12 @@ import {
   useFacilitatorSessionQuery,
   useSaveFacilitatorSessionMutation,
 } from "@/lib/hooks/use-facilitator-session";
-
-const REGIONS = ["Extrême-Nord", "Adamaoua", "Nord-Ouest"] as const;
+import { signInFacilitator } from "@/lib/auth/facilitator-signin";
+import { DemoCredentialsBanner } from "@/components/facilitator/demo-credentials-banner";
+import {
+  DEMO_FACILITATOR_EMAIL,
+  DEMO_FACILITATOR_PASSWORD,
+} from "@/lib/auth/demo-accounts";
 
 /**
  * Même traitement que le login de l'espace de pilotage : split-screen plein
@@ -49,11 +53,12 @@ export default function LoginPage() {
   const { data: existingSession } = useFacilitatorSessionQuery();
   const saveMutation = useSaveFacilitatorSessionMutation();
 
-  const [fullName, setFullName] = useState("");
-  const [region, setRegion] = useState<string>(REGIONS[0]);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [recoveryMode, setRecoveryMode] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
 
   // En mode récupération, on retraite comme une première connexion : un
   // nouveau facilitator_id est généré plutôt que de réutiliser l'ancien.
@@ -71,26 +76,38 @@ export default function LoginPage() {
       return;
     }
 
-    // Connexion existante (hors récupération) : le PIN doit correspondre.
-    if (existingSession && !recoveryMode && existingSession.pin !== pin) {
-      setError("Code PIN incorrect.");
+    // Reconnexion hors-ligne : le PIN local suffit, aucun appel réseau.
+    // C'est ce qui permet à un facilitateur en zone blanche de rouvrir son
+    // app indéfiniment (voir 14-PLAN-FONDATIONS.md).
+    if (existingSession && !recoveryMode) {
+      if (existingSession.pin !== pin) {
+        setError("Code PIN incorrect.");
+        return;
+      }
+      router.push("/home");
       return;
     }
 
+    // Première connexion (ou récupération) : vérification du compte auprès
+    // de Supabase. C'est le SEUL moment où le réseau est nécessaire.
+    setSigningIn(true);
     try {
-      await saveMutation.mutateAsync({
-        facilitator_id: isFirstLoginForm
-          ? crypto.randomUUID()
-          : existingSession!.facilitator_id,
-        full_name: isFirstLoginForm
-          ? fullName || "Facilitateur"
-          : existingSession!.full_name,
-        region: isFirstLoginForm ? region : existingSession!.region,
-        pin,
-      });
+      const outcome = await signInFacilitator(email, password);
+      if (!outcome.ok || !outcome.session) {
+        setError(
+          outcome.offline
+            ? "Pas de réseau. La première connexion doit se faire en zone couverte — ensuite, votre code PIN suffira même hors-ligne."
+            : (outcome.error ?? "Connexion impossible."),
+        );
+        return;
+      }
+
+      await saveMutation.mutateAsync({ ...outcome.session, pin });
       router.push("/home");
     } catch {
       setError("Impossible d'enregistrer la connexion sur cet appareil.");
+    } finally {
+      setSigningIn(false);
     }
   };
 
@@ -126,8 +143,13 @@ export default function LoginPage() {
             <h1 className="font-display mt-1 text-2xl font-bold">
               Espace facilitateur
             </h1>
+            {/* Le sous-titre doit dire la vérité de l'écran affiché : promettre
+                « sans réseau » au-dessus d'un formulaire qui l'exige était une
+                contradiction visible en capture. */}
             <p className="mt-1 text-sm text-muted-foreground">
-              Connectez-vous avec votre code — le réseau n&apos;est pas nécessaire.
+              {isFirstLoginForm
+                ? "Première connexion : elle a besoin du réseau, une seule fois."
+                : "Votre code PIN suffit — le réseau n'est pas nécessaire."}
             </p>
           </div>
 
@@ -143,31 +165,47 @@ export default function LoginPage() {
       {isFirstLoginForm && (
         <>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="full_name">Votre nom</Label>
+            <Label htmlFor="email">Votre email</Label>
             <Input
-              id="full_name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Aïcha"
+              id="email"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="aicha@exemple.org"
               className="h-12 bg-card text-base"
               required
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="region">Région</Label>
-            <select
-              id="region"
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              className="h-12 w-full rounded-lg border border-input bg-card px-3 text-base outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              {REGIONS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
+            <Label htmlFor="password">Mot de passe</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="h-12 bg-card text-base"
+              required
+            />
           </div>
+          <DemoCredentialsBanner
+            email={DEMO_FACILITATOR_EMAIL}
+            password={DEMO_FACILITATOR_PASSWORD}
+            onFill={() => {
+              setEmail(DEMO_FACILITATOR_EMAIL);
+              setPassword(DEMO_FACILITATOR_PASSWORD);
+              setPin("1234");
+            }}
+          />
+
+          {/* Dire pourquoi le réseau est nécessaire MAINTENANT et seulement
+              maintenant : sans cette phrase, un facilitateur hors-ligne
+              croirait l'app cassée. */}
+          <p className="rounded-xl border border-border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
+            Cette première connexion nécessite du réseau. Ensuite, votre code
+            PIN suffira — même sans connexion.
+          </p>
         </>
       )}
 
@@ -200,10 +238,10 @@ export default function LoginPage() {
           double soumission. */}
       <Button
         type="submit"
-        disabled={saveMutation.isPending}
+        disabled={saveMutation.isPending || signingIn}
         className="h-12 font-display text-base font-semibold"
       >
-        {saveMutation.isPending ? (
+        {saveMutation.isPending || signingIn ? (
           <>
             <Loader2 size={18} className="motion-safe:animate-spin" aria-hidden="true" />
             Connexion en cours…
@@ -216,7 +254,7 @@ export default function LoginPage() {
       {/* Rappel de ce que l'app fait : le grand vide sous le bouton n'aidait
           personne, et un facilitateur qui se connecte pour la première fois
           ignore qu'il pourra travailler sans réseau. */}
-      {isFirstLoginForm && !saveMutation.isPending && (
+      {isFirstLoginForm && !saveMutation.isPending && !signingIn && (
         <div className="mt-1 surface">
           <p className="flex items-center gap-2 text-sm font-semibold">
             <WifiOff size={16} className="text-primary" aria-hidden="true" />

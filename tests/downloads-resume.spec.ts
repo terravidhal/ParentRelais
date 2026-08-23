@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { skipFacilitatorOnboarding } from "./helpers";
+import { skipFacilitatorOnboarding, loginAsDemoFacilitator } from "./helpers";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
@@ -17,11 +17,7 @@ const SUPABASE_MEDIA =
 test("reprise Range sur un media Supabase (cas reel des videos uploadees)", async ({
   page,
 }) => {
-  await page.goto("/login");
-  await page.getByLabel("Votre nom").fill("Range Test");
-  await page.getByLabel("Code PIN (4 chiffres)").fill("7373");
-  await page.getByRole("button", { name: "Se connecter" }).click();
-  await page.waitForURL("**/home", { timeout: 45000 });
+  await loginAsDemoFacilitator(page, "7373");
   await skipFacilitatorOnboarding(page);
 
   const result = await page.evaluate(async (url) => {
@@ -58,11 +54,7 @@ test("reprise Range sur un media Supabase (cas reel des videos uploadees)", asyn
 test("le service worker sert les medias precaches en entier (Range ignore)", async ({
   page,
 }) => {
-  await page.goto("/login");
-  await page.getByLabel("Votre nom").fill("SW Range");
-  await page.getByLabel("Code PIN (4 chiffres)").fill("7474");
-  await page.getByRole("button", { name: "Se connecter" }).click();
-  await page.waitForURL("**/home", { timeout: 45000 });
+  await loginAsDemoFacilitator(page, "7474");
   await skipFacilitatorOnboarding(page);
   await page.waitForTimeout(1500);
 

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { skipFacilitatorOnboarding } from "./helpers";
+import { skipFacilitatorOnboarding, loginAsDemoFacilitator } from "./helpers";
 
 /**
  * Flow 8 (FLOW.md) — échec de synchronisation, jamais couvert. Intercepte la
@@ -23,11 +23,7 @@ test.describe("Échec de synchronisation", () => {
       }),
     );
 
-    await page.goto("/login");
-    await page.getByLabel("Votre nom").fill("Test Échec Sync");
-    await page.getByLabel("Code PIN (4 chiffres)").fill("1212");
-    await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/home");
+    await loginAsDemoFacilitator(page, "1212");
     await skipFacilitatorOnboarding(page);
     await page.reload();
 

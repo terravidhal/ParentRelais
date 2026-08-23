@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { skipFacilitatorOnboarding } from "./helpers";
+import { skipFacilitatorOnboarding, loginAsDemoFacilitator } from "./helpers";
 
 /**
  * Parcours facilitateur complet — reflète la Definition of Done de CLAUDE.md :
@@ -14,16 +14,14 @@ test.describe("Parcours facilitateur", () => {
   test("connexion, consultation d'un module et animation d'une séance", async ({
     page,
   }) => {
-    // 1. Connexion (première fois : nom + région + PIN)
-    await page.getByLabel("Votre nom").fill("Aïcha Test");
-    await page.getByLabel("Code PIN (4 chiffres)").fill("1234");
-    await page.getByRole("button", { name: "Se connecter" }).click();
-
-    await expect(page).toHaveURL("/home");
+    // 1. Connexion (première fois : compte réel + PIN local)
+    await loginAsDemoFacilitator(page, "1234");
     await skipFacilitatorOnboarding(page);
     await page.reload();
     await expect(
-      page.getByRole("heading", { name: "Bonjour, Aïcha Test" }),
+      // Le nom vient désormais du COMPTE (user_metadata), plus d'une saisie
+      // libre : c'est ce qui rend l'identité vérifiable côté serveur.
+      page.getByRole("heading", { name: "Bonjour, Facilitateur Démo" }),
     ).toBeVisible();
 
     // 2. Les modules de démo sont visibles

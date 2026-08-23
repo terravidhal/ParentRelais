@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { skipFacilitatorOnboarding } from "./helpers";
+import { skipFacilitatorOnboarding, loginAsDemoFacilitator } from "./helpers";
 
 /**
  * Test critique de la Definition of Done (CLAUDE.md) : l'app facilitateur
@@ -11,11 +11,7 @@ test.describe("Mode hors-ligne", () => {
     context,
   }) => {
     // 1. Premier chargement en ligne : le service worker précache l'app.
-    await page.goto("/login");
-    await page.getByLabel("Votre nom").fill("Facilitateur Offline");
-    await page.getByLabel("Code PIN (4 chiffres)").fill("5678");
-    await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/home");
+    await loginAsDemoFacilitator(page, "5678");
 
     // Laisser le service worker terminer son installation/activation.
     await page
@@ -69,11 +65,7 @@ test.describe("Mode hors-ligne", () => {
     page,
     context,
   }) => {
-    await page.goto("/login");
-    await page.getByLabel("Votre nom").fill("Offline Routes");
-    await page.getByLabel("Code PIN (4 chiffres)").fill("4321");
-    await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/home");
+    await loginAsDemoFacilitator(page, "4321");
 
     await page
       .waitForFunction(() => navigator.serviceWorker?.controller != null, {

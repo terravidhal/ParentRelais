@@ -27,3 +27,25 @@ export async function skipFacilitatorOnboarding(page: Page): Promise<void> {
     });
   });
 }
+
+/**
+ * Connecte le facilitateur de démonstration.
+ *
+ * Depuis la migration 0017, la première connexion vérifie un vrai compte
+ * Supabase (email + mot de passe) au lieu de créer une identité locale
+ * arbitraire : c'est ce qui permet aux politiques RLS de lier chaque séance
+ * à `auth.uid()`.
+ *
+ * Le PIN reste choisi localement et suffit ensuite, même hors-ligne.
+ */
+export async function loginAsDemoFacilitator(
+  page: Page,
+  pin = "1234",
+): Promise<void> {
+  await page.goto("/login");
+  await page.getByLabel("Votre email").fill("facilitateur.demo@parentrelais.app");
+  await page.getByLabel("Mot de passe").fill("DemoTerrain2026!");
+  await page.getByLabel("Code PIN (4 chiffres)").fill(pin);
+  await page.getByRole("button", { name: "Se connecter" }).click();
+  await page.waitForURL("/home", { timeout: 20_000 });
+}

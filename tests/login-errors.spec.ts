@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { loginAsDemoFacilitator } from "./helpers";
 
 /**
  * Cas d'erreur au login facilitateur, jamais couverts : PIN trop court à la
@@ -10,7 +11,8 @@ test.describe("Erreurs de connexion facilitateur", () => {
     page,
   }) => {
     await page.goto("/login");
-    await page.getByLabel("Votre nom").fill("Test PIN Court");
+    await page.getByLabel("Votre email").fill("facilitateur.demo@parentrelais.app");
+    await page.getByLabel("Mot de passe").fill("DemoTerrain2026!");
     await page.getByLabel("Code PIN (4 chiffres)").fill("12");
     await page.getByRole("button", { name: "Se connecter" }).click();
 
@@ -24,17 +26,15 @@ test.describe("Erreurs de connexion facilitateur", () => {
     page,
   }) => {
     // Première connexion : crée une session locale avec le PIN 1357.
-    await page.goto("/login");
-    await page.getByLabel("Votre nom").fill("Test Reconnexion");
-    await page.getByLabel("Code PIN (4 chiffres)").fill("1357");
-    await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/home");
+    await loginAsDemoFacilitator(page, "1357");
 
     // Se déconnecter en revenant sur /login (session toujours en Dexie).
     await page.goto("/login");
 
-    // Le formulaire ne doit plus demander nom/région (session déjà connue).
-    await expect(page.getByLabel("Votre nom")).not.toBeVisible();
+    // Session déjà connue : plus d'email ni de mot de passe, le PIN suffit —
+    // c'est ce qui rend la reconnexion possible hors-ligne.
+    await expect(page.getByLabel("Votre email")).not.toBeVisible();
+    await expect(page.getByLabel("Mot de passe")).not.toBeVisible();
 
     // Mauvais PIN.
     await page.getByLabel("Code PIN (4 chiffres)").fill("0000");

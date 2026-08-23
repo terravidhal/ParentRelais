@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { skipFacilitatorOnboarding } from "./helpers";
+import { skipFacilitatorOnboarding, loginAsDemoFacilitator } from "./helpers";
 
 /**
  * Flow 7 (FLOW.md) — changement de langue via LangPills, jamais couvert :
@@ -7,11 +7,7 @@ import { skipFacilitatorOnboarding } from "./helpers";
  */
 test.describe("Changement de langue", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/login");
-    await page.getByLabel("Votre nom").fill("Test Langue");
-    await page.getByLabel("Code PIN (4 chiffres)").fill("4321");
-    await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/home");
+    await loginAsDemoFacilitator(page, "4321");
     await skipFacilitatorOnboarding(page);
     await page.reload();
   });

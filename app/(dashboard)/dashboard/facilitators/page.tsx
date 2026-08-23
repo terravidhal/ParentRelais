@@ -2,6 +2,7 @@ import { Users, MapPin, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { CreateFacilitatorForm } from "@/components/dashboard/create-facilitator-form";
 
 /**
  * Server component. Le nom du facilitateur est synchronisé depuis
@@ -25,10 +26,12 @@ export default async function DashboardFacilitatorsPage() {
   return (
     <div>
       <div className="mb-6">
-        <p className="font-display text-xs font-semibold tracking-wide text-accent-ink">
-          PILOTAGE NATIONAL
-        </p>
-        <h1 className="font-display text-2xl font-bold">Facilitateurs</h1>
+        <CreateFacilitatorForm>
+          <p className="font-display text-xs font-semibold tracking-wide text-accent-ink">
+            PILOTAGE NATIONAL
+          </p>
+          <h1 className="font-display text-2xl font-bold">Facilitateurs</h1>
+        </CreateFacilitatorForm>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

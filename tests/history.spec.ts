@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { skipFacilitatorOnboarding } from "./helpers";
+import { skipFacilitatorOnboarding, loginAsDemoFacilitator } from "./helpers";
 
 /**
  * /history lit uniquement Dexie.outbox (jamais Supabase) — doit rester
@@ -11,11 +11,7 @@ test.describe("Historique des séances (facilitateur)", () => {
     page,
     context,
   }) => {
-    await page.goto("/login");
-    await page.getByLabel("Votre nom").fill("Facilitateur Historique");
-    await page.getByLabel("Code PIN (4 chiffres)").fill("4321");
-    await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/home");
+    await loginAsDemoFacilitator(page, "4321");
 
     await page
       .waitForFunction(

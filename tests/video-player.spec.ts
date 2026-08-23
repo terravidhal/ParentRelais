@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { loginAsDemoFacilitator } from "./helpers";
 
 /**
  * Flow 9 (FLOW.md) — lecture vidéo avec piste de sous-titres, jamais couvert.
@@ -9,11 +10,7 @@ import { test, expect } from "@playwright/test";
  */
 test.describe("Lecteur vidéo", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/login");
-    await page.getByLabel("Votre nom").fill("Test Vidéo");
-    await page.getByLabel("Code PIN (4 chiffres)").fill("9876");
-    await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/home");
+    await loginAsDemoFacilitator(page, "9876");
   });
 
   test("le module avec video_url affiche un vrai lecteur <video> avec sous-titres", async ({

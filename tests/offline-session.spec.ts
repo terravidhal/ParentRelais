@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { skipFacilitatorOnboarding } from "./helpers";
+import { skipFacilitatorOnboarding, loginAsDemoFacilitator } from "./helpers";
 
 /**
  * Complète offline.spec.ts (qui s'arrête à la navigation vers un module) :
@@ -14,11 +14,7 @@ test.describe("Séance complète hors-ligne", () => {
   }) => {
     // 1. Premier chargement en ligne : précache le service worker et les
     // routes /module?id=1 et /module/session?id=1.
-    await page.goto("/login");
-    await page.getByLabel("Votre nom").fill("Facilitateur Offline Séance");
-    await page.getByLabel("Code PIN (4 chiffres)").fill("7788");
-    await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/home");
+    await loginAsDemoFacilitator(page, "7788");
 
     await page
       .waitForFunction(

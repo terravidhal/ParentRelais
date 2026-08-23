@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { skipFacilitatorOnboarding } from "./helpers";
+import { skipFacilitatorOnboarding, loginAsDemoFacilitator } from "./helpers";
 
 /**
  * Test de synchronisation réelle contre le vrai Supabase de dev (.env.local).
@@ -10,11 +10,7 @@ test.describe("Synchronisation", () => {
   test("une séance animée se synchronise et affiche un toast de succès", async ({
     page,
   }) => {
-    await page.goto("/login");
-    await page.getByLabel("Votre nom").fill("Test Sync Auto");
-    await page.getByLabel("Code PIN (4 chiffres)").fill("2468");
-    await page.getByRole("button", { name: "Se connecter" }).click();
-    await expect(page).toHaveURL("/home");
+    await loginAsDemoFacilitator(page, "2468");
     await skipFacilitatorOnboarding(page);
     await page.reload();
 

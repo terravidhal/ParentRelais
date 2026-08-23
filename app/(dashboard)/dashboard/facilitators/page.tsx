@@ -58,10 +58,20 @@ export default async function DashboardFacilitatorsPage({
   const regionCount = new Set(everyRow.map((r) => r.region)).size;
   const regions = Array.from(new Set(everyRow.map((r) => r.region))).sort();
 
+  // Régions du référentiel : ce sont celles où l'on PEUT affecter quelqu'un,
+  // à distinguer de `regions` ci-dessus qui liste celles où l'on a déjà
+  // animé (utile pour filtrer, pas pour créer).
+  const { data: referenceRegionRows } = await supabase
+    .from("regions")
+    .select("name")
+    .eq("active", true)
+    .order("position");
+  const referenceRegions = (referenceRegionRows ?? []).map((r) => r.name);
+
   return (
     <div>
       <div className="mb-6">
-        <CreateFacilitatorForm>
+        <CreateFacilitatorForm regions={referenceRegions}>
           <p className="font-display text-xs font-semibold tracking-wide text-accent-ink">
             PILOTAGE NATIONAL
           </p>

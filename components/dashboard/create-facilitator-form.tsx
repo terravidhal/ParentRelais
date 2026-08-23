@@ -5,8 +5,6 @@ import { Copy, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { createFacilitatorAccount } from "@/app/(dashboard)/dashboard/facilitators/actions";
 
-const REGIONS = ["Extrême-Nord", "Adamaoua", "Nord-Ouest", "Nord", "Centre"];
-
 /**
  * Création d'un compte facilitateur par l'admin.
  *
@@ -14,7 +12,14 @@ const REGIONS = ["Extrême-Nord", "Adamaoua", "Nord-Ouest", "Nord", "Centre"];
  * et pousse des données dans les statistiques du programme. C'est aussi la
  * pratique de KoboToolbox, référence du secteur humanitaire.
  */
-export function CreateFacilitatorForm({ children }: { children?: ReactNode }) {
+export function CreateFacilitatorForm({
+  regions,
+  children,
+}: {
+  /** Régions du référentiel serveur (migration 0021), plus une liste figée. */
+  regions: string[];
+  children?: ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [tempPassword, setTempPassword] = useState<string | null>(null);
@@ -148,7 +153,7 @@ export function CreateFacilitatorForm({ children }: { children?: ReactNode }) {
               required
               className="h-11 rounded-xl border border-border bg-background px-3 text-sm font-normal"
             >
-              {REGIONS.map((r) => (
+              {regions.map((r) => (
                 <option key={r} value={r}>
                   {r}
                 </option>

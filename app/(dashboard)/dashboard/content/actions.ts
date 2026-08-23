@@ -3,8 +3,24 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
-/** Langues pour lesquelles une case est créée à la naissance d'un module. */
-const LANGS = ["fr", "en", "ff", "sign"] as const;
+/**
+ * Langues actives, lues au moment de la création d'un module.
+ *
+ * Auparavant une constante : ajouter une langue au référentiel n'aurait pas
+ * créé sa case sur les nouveaux modules.
+ */
+async function activeLanguageCodes(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<string[]> {
+  const { data } = await supabase
+    .from("languages")
+    .select("code")
+    .eq("active", true)
+    .order("position");
+  // Le français est la langue socle : un module sans elle serait invisible
+  // côté facilitateur (voir fetchPublishedModules).
+  return data?.length ? data.map((l) => l.code) : ["fr"];
+}
 
 export interface ActionResult {
   ok: boolean;
@@ -77,10 +93,11 @@ export async function createModule(formData: FormData): Promise<ActionResult> {
   // Les cases vides rendent la matrice utilisable immédiatement : sans
   // ligne existante, l'upload d'un média échouerait silencieusement (0 ligne
   // affectée par l'UPDATE) — c'est ce qu'avait corrigé la migration 0011.
+  const langs = await activeLanguageCodes(supabase);
   const { error: translationsError } = await supabase
     .from("module_translations")
     .insert(
-      LANGS.map((lang) => ({
+      langs.map((lang) => ({
         module_id: created.id,
         lang,
         title: lang === "fr" ? title : "",

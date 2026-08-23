@@ -9,6 +9,7 @@ import {
   FileDown,
   Globe,
   LogOut,
+  Settings,
   Menu,
   X,
   HelpCircle,
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/facilitators", label: "Facilitateurs", icon: Users, id: "nav-facilitators" },
   { href: "/dashboard/reports", label: "Rapports", icon: FileDown, id: "nav-reports" },
   { href: "/dashboard/content", label: "Contenus", icon: Globe, id: "nav-content" },
+  { href: "/dashboard/settings", label: "Référentiel", icon: Settings, id: "nav-settings" },
 ] as const;
 
 interface DashboardShellProps {

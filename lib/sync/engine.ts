@@ -3,6 +3,10 @@ import { getPendingSessions, markSessionsSynced } from "@/lib/db/outbox";
 import { readFacilitatorSession } from "@/lib/db/meta";
 import { fetchPublishedModules } from "@/lib/content/fetch-content";
 import { replaceModules } from "@/lib/db/content-store";
+import {
+  fetchReferenceData,
+  saveReferenceData,
+} from "@/lib/content/reference-data";
 
 type SupabaseClient = ReturnType<typeof createClient>;
 
@@ -56,6 +60,15 @@ export async function syncContent(supabase: SupabaseClient): Promise<void> {
     await replaceModules(modules);
   } catch (error: unknown) {
     console.error("[sync] descente du contenu échouée:", error);
+  }
+
+  // Le référentiel (langues, régions, localités) descend séparément : son
+  // échec ne doit pas empêcher la mise à jour des modules, ni l'inverse.
+  try {
+    const reference = await fetchReferenceData(supabase);
+    await saveReferenceData(reference);
+  } catch (error: unknown) {
+    console.error("[sync] descente du référentiel échouée:", error);
   }
 }
 

@@ -5,6 +5,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { fetchPublishedModules } from "@/lib/content/fetch-content";
 import { hasLocalContent, replaceModules } from "@/lib/db/content-store";
+import {
+  fetchReferenceData,
+  saveReferenceData,
+} from "@/lib/content/reference-data";
 
 export type ContentBootstrapState =
   /** Vérification du cache local en cours — bref, aucun écran dédié. */
@@ -51,6 +55,13 @@ export function useContentBootstrap() {
         return;
       }
       await replaceModules(modules);
+      // Le référentiel accompagne le contenu au premier démarrage : sans
+      // lui, l'écran de connexion n'aurait aucune région à proposer.
+      try {
+        await saveReferenceData(await fetchReferenceData(createClient()));
+      } catch (error: unknown) {
+        console.error("[contenu] référentiel initial non reçu:", error);
+      }
       // Les queries Dexie déjà montées ne verraient pas ces nouvelles lignes.
       await queryClient.invalidateQueries({ queryKey: ["dexie", "modules"] });
       setState("ready");

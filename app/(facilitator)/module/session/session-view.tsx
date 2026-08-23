@@ -11,7 +11,7 @@ import { Stepper } from "@/components/facilitator/stepper";
 import { QuizStep } from "@/components/facilitator/quiz-step";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { VILLAGES } from "@/lib/content/session-data";
+import { useReferenceDataQuery } from "@/lib/hooks/use-reference-data";
 
 type Step = 0 | 1 | 2;
 
@@ -22,7 +22,11 @@ export function SessionView({ moduleId }: { moduleId: number }) {
   const addSessionMutation = useAddSessionMutation();
 
   const [step, setStep] = useState<Step>(0);
-  const [village, setVillage] = useState<string>(VILLAGES[0]);
+  // Les localités viennent du référentiel serveur, filtrées sur la région du
+  // facilitateur : une liste figée de quatre villages de l'Extrême-Nord
+  // laissait sans réponse tout facilitateur d'une autre région.
+  const { data: reference } = useReferenceDataQuery();
+  const [village, setVillage] = useState<string>("");
   const [total, setTotal] = useState(12);
   const [women, setWomen] = useState(8);
   const [disability, setDisability] = useState(1);
@@ -45,6 +49,17 @@ export function SessionView({ moduleId }: { moduleId: number }) {
   const translation =
     module.translations.find((t) => t.lang === lang) ?? module.translations[0];
 
+  // Localités de la région du facilitateur. Le repli sur toutes les
+  // localités connues évite un sélecteur vide si sa région n'est pas encore
+  // renseignée dans le référentiel — mieux vaut une liste imparfaite qu'une
+  // séance impossible à enregistrer.
+  const ownRegion = reference?.regions.find((r) => r.name === session.region);
+  const localities =
+    ownRegion?.localities.length
+      ? ownRegion.localities
+      : (reference?.regions.flatMap((r) => r.localities) ?? []);
+  const selectedVillage = village || localities[0] || "";
+
   // Le quiz vient du MODULE, plus d'une constante globale : c'est ce qui
   // faisait afficher les mêmes questions partout (migration 0019).
   const quiz = module.quiz ?? [];
@@ -64,7 +79,7 @@ export function SessionView({ moduleId }: { moduleId: number }) {
         facilitator_id: session.facilitator_id,
         module_id: moduleId,
         region: session.region,
-        locality: village,
+        locality: selectedVillage,
         parents_total: total,
         women,
         disability_count: disability,
@@ -112,13 +127,13 @@ export function SessionView({ moduleId }: { moduleId: number }) {
               <MapPin size={15} aria-hidden="true" /> Village
             </label>
             <div className="mt-2 flex flex-wrap gap-2">
-              {VILLAGES.map((v) => (
+              {localities.map((v) => (
                 <button
                   key={v}
                   type="button"
                   onClick={() => setVillage(v)}
                   className={`h-11 rounded-full border border-border px-3 text-sm font-semibold ${
-                    village === v
+                    selectedVillage === v
                       ? "bg-primary text-primary-foreground"
                       : "bg-card text-foreground"
                   }`}
@@ -185,7 +200,7 @@ export function SessionView({ moduleId }: { moduleId: number }) {
           </div>
           <h3 className="font-display text-lg font-bold">Séance enregistrée</h3>
           <p className="text-sm text-muted-foreground">
-            {village} · {total} parents · {disability} en situation de handicap
+            {selectedVillage} · {total} parents · {disability} en situation de handicap
             {quiz.length > 0 && ` · quiz ${score}/${quiz.length}`}
           </p>
           <div className="w-full rounded-2xl bg-accent-soft p-3 text-sm text-accent-ink">

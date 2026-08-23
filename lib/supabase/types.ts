@@ -33,6 +33,33 @@ export type ModuleRow = {
 
 export type TranslationStatus = "ready" | "pending";
 
+/** Référentiel : langues, régions, localités (migration 0021). */
+export type LanguageRow = {
+  code: string;
+  label: string;
+  short_label: string;
+  position: number;
+  active: boolean;
+  created_at: string;
+};
+
+export type RegionRow = {
+  id: number;
+  name: string;
+  position: number;
+  active: boolean;
+  created_at: string;
+};
+
+export type LocalityRow = {
+  id: number;
+  region_id: number;
+  name: string;
+  position: number;
+  active: boolean;
+  created_at: string;
+};
+
 export type QuizQuestionRow = {
   id: number;
   module_id: number;
@@ -144,6 +171,27 @@ export type Database = {
             Pick<ModuleTranslationRow, "audio_url" | "video_url" | "subtitles_url">
           >;
         Update: Partial<ModuleTranslationRow>;
+        Relationships: [];
+      };
+      languages: {
+        Row: LanguageRow;
+        Insert: Omit<LanguageRow, "created_at" | "position" | "active"> &
+          Partial<Pick<LanguageRow, "position" | "active">>;
+        Update: Partial<LanguageRow>;
+        Relationships: [];
+      };
+      regions: {
+        Row: RegionRow;
+        Insert: Omit<RegionRow, "id" | "created_at" | "position" | "active"> &
+          Partial<Pick<RegionRow, "id" | "position" | "active">>;
+        Update: Partial<RegionRow>;
+        Relationships: [];
+      };
+      localities: {
+        Row: LocalityRow;
+        Insert: Omit<LocalityRow, "id" | "created_at" | "position" | "active"> &
+          Partial<Pick<LocalityRow, "id" | "position" | "active">>;
+        Update: Partial<LocalityRow>;
         Relationships: [];
       };
       quiz_questions: {

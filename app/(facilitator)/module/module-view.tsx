@@ -54,6 +54,12 @@ export function ModuleView({ id }: { id: number }) {
         <LangPills
           lang={lang}
           onLangChange={(l) => setLangMutation.mutate(l)}
+          // La disponibilité vient du contenu RÉEL du module, plus d'une
+          // liste figée : une langue dont la traduction est prête doit être
+          // proposée, et une langue vide doit être grisée.
+          availableLangs={module.translations
+            .filter((t) => t.status === "ready")
+            .map((t) => t.lang)}
         />
       </div>
 

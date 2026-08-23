@@ -25,15 +25,23 @@ test.describe("Changement de langue", () => {
     ).not.toBeVisible();
   });
 
-  test("le pill Fulfulde est désactivé et n'a aucun effet au clic", async ({
+  test("une langue sans traduction est grisée sur le module concerné", async ({
     page,
   }) => {
-    const fulfuldeButton = page.getByRole("button", { name: /Fulfulde/ });
-    await expect(fulfuldeButton).toBeDisabled();
+    // La disponibilité dépend du MODULE, plus d'une liste figée : le
+    // Fulfulde du module 1 est vide (grisé), celui du module 2 est prêt
+    // (actif). L'ancienne version le grisait partout, cachant un contenu
+    // réellement présent en base.
+    await page.goto("/module?id=1");
+    const fulfuldeM1 = page.getByRole("button", { name: /Fulfulde/ });
+    await expect(fulfuldeM1).toBeDisabled();
 
     // Le contenu FR reste affiché même après une tentative de clic.
-    await fulfuldeButton.click({ force: true }).catch(() => {});
+    await fulfuldeM1.click({ force: true }).catch(() => {});
     await expect(page.getByText("La perception de l'enfance")).toBeVisible();
+
+    await page.goto("/module?id=2");
+    await expect(page.getByRole("button", { name: /Fulfulde/ })).toBeEnabled();
   });
 
   test("le changement de langue se reflète aussi sur la page module", async ({

@@ -9,8 +9,6 @@ import { ModulePublicationControls } from "@/components/dashboard/module-publica
 import { TableToolbar } from "@/components/dashboard/table-toolbar";
 import { QuizEditor, type QuizEditorQuestion } from "@/components/dashboard/quiz-editor";
 
-const UPLOADABLE_LANGS = new Set(["fr", "en", "ff", "sign"]);
-
 /**
  * Server component pour la lecture ; l'upload lui-même est délégué à
  * MediaUploadCell (client) qui écrit directement dans Storage + upsert la
@@ -25,6 +23,22 @@ export default async function DashboardContentPage({
   const params = await searchParams;
   const search = (params.q ?? "").trim().toLowerCase();
   const statusFilter = (params.statut ?? "").trim();
+
+  // Les langues viennent du référentiel : elles étaient codées en dur ici,
+  // dans la matrice, dans les actions et dans les pastilles du facilitateur —
+  // cinq endroits à modifier pour ajouter une langue (migration 0021).
+  const { data: languageRows } = await supabase
+    .from("languages")
+    .select("code, label, short_label")
+    .eq("active", true)
+    .order("position");
+
+  const languages = languageRows ?? [];
+  const columns = languages.map((l) => ({
+    lang: l.code,
+    label: l.short_label,
+    fullLabel: l.label,
+  }));
 
   const { data: modules } = await supabase
     .from("modules")
@@ -95,7 +109,7 @@ export default async function DashboardContentPage({
     rows.reduce((max, r) => Math.max(max, r.position), 0) + 1;
   const publishedCount = rows.filter((r) => r.published && !r.archived).length;
 
-  const totalCells = rows.length * 4;
+  const totalCells = rows.length * languages.length;
   const readyCells = rows.reduce(
     (n, r) => n + Object.values(r.statusByLang).filter((s) => s === "ready").length,
     0,
@@ -158,11 +172,10 @@ export default async function DashboardContentPage({
         </div>
         <ContentMatrix
           rows={rows}
-          renderCellAction={(moduleId, lang) =>
-            UPLOADABLE_LANGS.has(lang) ? (
-              <MediaUploadCell moduleId={moduleId} lang={lang} />
-            ) : null
-          }
+          columns={columns}
+          renderCellAction={(moduleId, lang) => (
+            <MediaUploadCell moduleId={moduleId} lang={lang} />
+          )}
         />
       </div>
 
@@ -196,7 +209,7 @@ export default async function DashboardContentPage({
 
         <ul className="flex flex-col gap-3">
           {visibleRows.map((row) => {
-            const pendingLangs = ["fr", "en", "ff", "sign"].filter(
+            const pendingLangs = languages.map((l) => l.code).filter(
               (lang) => row.statusByLang[lang] !== "ready",
             );
             return (

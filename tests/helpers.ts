@@ -43,8 +43,18 @@ export async function loginAsDemoFacilitator(
   pin = "1234",
 ): Promise<void> {
   await page.goto("/login");
-  await page.getByLabel("Votre email").fill("facilitateur.demo@parentrelais.app");
-  await page.getByLabel("Mot de passe").fill("DemoTerrain2026!");
+
+  // Le formulaire a DEUX états : première connexion (email + mot de passe +
+  // PIN) ou reconnexion (PIN seul, si une session locale existe déjà). Un
+  // test qui suppose toujours le premier échoue dès qu'un test précédent a
+  // laissé une session dans Dexie — constaté en suite complète, où l'échec
+  // se déplaçait d'un fichier à l'autre selon l'ordre d'exécution.
+  const emailField = page.getByLabel("Votre email");
+  if (await emailField.isVisible().catch(() => false)) {
+    await emailField.fill("facilitateur.demo@parentrelais.app");
+    await page.getByLabel("Mot de passe").fill("DemoTerrain2026!");
+  }
+
   await page.getByLabel("Code PIN (4 chiffres)").fill(pin);
   await page.getByRole("button", { name: "Se connecter" }).click();
   await page.waitForURL("/home", { timeout: 20_000 });

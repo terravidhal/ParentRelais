@@ -11,7 +11,10 @@ import {
   Pause,
   Play,
   Trash2,
+  X,
 } from "lucide-react";
+import { AudioPlayer } from "./audio-player";
+import { VideoPlayer } from "./video-player";
 import {
   MEDIA_LABEL,
   type ModuleDownloadStatus,
@@ -47,6 +50,9 @@ export function ModuleDownloadCard({
   busy,
 }: ModuleDownloadCardProps) {
   const [expanded, setExpanded] = useState(false);
+  // Média ouvert en lecture. Un seul à la fois : deux lecteurs actifs
+  // joueraient l'un sur l'autre.
+  const [playing, setPlaying] = useState<string | null>(null);
   const { availability, entries, missing, title, module } = status;
 
   const badge = {
@@ -191,8 +197,9 @@ export function ModuleDownloadCard({
               {entries.map((entry) => (
                 <li
                   key={entry.media_url}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-muted/40 px-2.5 py-2 text-xs"
+                  className="rounded-xl bg-muted/40 px-2.5 py-2 text-xs"
                 >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="flex items-center gap-1.5">
                     {entry.available ? (
                       <CheckCircle2 size={13} className="text-success" aria-hidden="true" />
@@ -210,14 +217,40 @@ export function ModuleDownloadCard({
                   </span>
 
                   {entry.available ? (
-                    <button
-                      type="button"
-                      onClick={() => onDelete(entry.media_url)}
-                      disabled={busy}
-                      className="flex h-11 items-center gap-1 rounded-lg px-2 font-semibold text-destructive disabled:opacity-50"
-                    >
-                      <Trash2 size={13} aria-hidden="true" /> Supprimer
-                    </button>
+                    <span className="flex items-center gap-1">
+                      {/* Les sous-titres n'ont rien à lire seuls : ils
+                          accompagnent la vidéo. */}
+                      {entry.media_type !== "subtitles" && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPlaying((cur) =>
+                              cur === entry.media_url ? null : entry.media_url,
+                            )
+                          }
+                          className="flex h-11 items-center gap-1 rounded-lg px-2 font-semibold text-primary"
+                        >
+                          {playing === entry.media_url ? (
+                            <>
+                              <X size={13} aria-hidden="true" /> Fermer
+                            </>
+                          ) : (
+                            <>
+                              <Play size={13} aria-hidden="true" />
+                              {entry.media_type === "video" ? "Regarder" : "Écouter"}
+                            </>
+                          )}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => onDelete(entry.media_url)}
+                        disabled={busy}
+                        className="flex h-11 items-center gap-1 rounded-lg px-2 font-semibold text-destructive disabled:opacity-50"
+                      >
+                        <Trash2 size={13} aria-hidden="true" /> Supprimer
+                      </button>
+                    </span>
                   ) : (
                     <button
                       type="button"
@@ -227,6 +260,28 @@ export function ModuleDownloadCard({
                     >
                       <Download size={13} aria-hidden="true" /> Télécharger
                     </button>
+                  )}
+                  </div>
+
+                  {/* Lecture depuis cette page : le fichier téléchargé est
+                      servi par le service worker à son URL d'origine, donc
+                      la lecture fonctionne hors réseau sans code dédié. */}
+                  {playing === entry.media_url && (
+                    <div className="mt-2">
+                      {entry.media_type === "video" ? (
+                        <VideoPlayer
+                          src={entry.media_url}
+                          lang={entry.lang}
+                          subtitlesUrl={
+                            entries.find(
+                              (e) => e.media_type === "subtitles" && e.available,
+                            )?.media_url
+                          }
+                        />
+                      ) : (
+                        <AudioPlayer src={entry.media_url} lang={entry.lang} />
+                      )}
+                    </div>
                   )}
                 </li>
               ))}

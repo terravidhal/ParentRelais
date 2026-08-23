@@ -14,7 +14,6 @@ import {
   HeartHandshake,
   Languages,
   Menu,
-  Play,
   Radio,
   RefreshCw,
   ShieldCheck,
@@ -116,15 +115,22 @@ export function LandingPage() {
             </button>
           </nav>
 
-          <div className="hidden items-center gap-3 sm:flex">
-            <span className="flex items-center gap-2 rounded-full bg-[#DDF0E4] px-3 py-2 text-xs font-bold text-[#157A47]">
-              <span className="h-2 w-2 rounded-full bg-[#157A47]" /> Conçu pour le terrain
-            </span>
+          {/* Deux entrées distinctes : le jury du concours doit pouvoir
+              atteindre l'espace de pilotage sans chercher. "Pilotage" plutôt
+              qu'"admin" : c'est le terme institutionnel du programme, déjà
+              employé dans le dashboard ("PILOTAGE NATIONAL"). */}
+          <div className="hidden items-center gap-2 sm:flex">
+            <Link
+              href="/dashboard/login"
+              className="rounded-2xl border-2 border-[#0C7C9A] px-4 py-2.5 text-sm font-bold text-[#0C7C9A] transition-all hover:bg-[#0C7C9A]/5 active:scale-[.97]"
+            >
+              Espace de pilotage
+            </Link>
             <Link
               href="/login"
-              className="rounded-2xl bg-[#0C7C9A] px-4 py-3 text-sm font-bold text-white shadow-[0_12px_22px_-14px_rgba(8,89,110,.75)] transition-all hover:bg-[#08596E] active:scale-[.97]"
+              className="rounded-2xl bg-[#0C7C9A] px-4 py-2.5 text-sm font-bold text-white shadow-[0_12px_22px_-14px_rgba(8,89,110,.75)] transition-all hover:bg-[#08596E] active:scale-[.97]"
             >
-              Se connecter comme facilitateur <ArrowRight className="ml-1 inline h-4 w-4" />
+              Espace facilitateur <ArrowRight className="ml-1 inline h-4 w-4" />
             </Link>
           </div>
           <button
@@ -149,9 +155,15 @@ export function LandingPage() {
               </button>
               <Link
                 href="/login"
-                className="rounded-2xl bg-[#0C7C9A] px-4 py-3 text-left font-bold text-white"
+                className="rounded-2xl bg-[#0C7C9A] px-4 py-3 text-center font-bold text-white"
               >
-                Se connecter <ArrowRight className="ml-1 inline h-4 w-4" />
+                Espace facilitateur <ArrowRight className="ml-1 inline h-4 w-4" />
+              </Link>
+              <Link
+                href="/dashboard/login"
+                className="rounded-2xl border-2 border-[#0C7C9A] px-4 py-3 text-center font-bold text-[#0C7C9A]"
+              >
+                Espace de pilotage
               </Link>
             </div>
           </div>
@@ -188,20 +200,30 @@ export function LandingPage() {
               carnet de séance pour faire vivre la parentalité positive partout au Cameroun —
               même sans connexion.
             </p>
+            {/* Les deux vraies portes d'entrée dès le hero. Le jury doit
+                pouvoir essayer l'app en un clic, sans chercher un lien perdu
+                dans le pied de page. Découvrir la page reste possible, mais
+                en action secondaire. */}
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <button
-                onClick={() => scrollTo("solution")}
+              <Link
+                href="/login"
                 className="rounded-2xl bg-[#0C7C9A] px-6 py-4 text-center font-bold text-white shadow-[0_22px_35px_-22px_rgba(8,89,110,.9)] transition-all hover:-translate-y-0.5 hover:bg-[#08596E] active:scale-[.97]"
               >
-                Découvrir la solution <ArrowDownRight className="ml-2 inline h-5 w-5" />
-              </button>
-              <button
-                onClick={() => scrollTo("parcours")}
-                className="rounded-2xl border border-[#0C7C9A]/30 bg-white/60 px-6 py-4 font-bold text-[#08596E] transition-all hover:bg-white active:scale-[.97]"
+                Espace facilitateur <ArrowRight className="ml-2 inline h-5 w-5" />
+              </Link>
+              <Link
+                href="/dashboard/login"
+                className="rounded-2xl border-2 border-[#0C7C9A] bg-white px-6 py-4 text-center font-bold text-[#0C7C9A] transition-all hover:-translate-y-0.5 hover:bg-[#0C7C9A]/5 active:scale-[.97]"
               >
-                <Play className="mr-2 inline h-4 w-4 fill-current" /> Voir comment ça marche
-              </button>
+                Espace de pilotage <ArrowRight className="ml-2 inline h-5 w-5" />
+              </Link>
             </div>
+            <button
+              onClick={() => scrollTo("solution")}
+              className="mt-4 text-sm font-semibold text-[#08596E] underline-offset-4 hover:underline"
+            >
+              Découvrir la solution <ArrowDownRight className="ml-1 inline h-4 w-4" />
+            </button>
             <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-[#6B7B77]">
               <span className="flex items-center gap-2">
                 <CircleCheck className="h-4 w-4 text-[#157A47]" /> PWA installable
@@ -306,26 +328,63 @@ export function LandingPage() {
                 la connexion.
               </p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <article className="border-l-4 border-[#C2410C] bg-[#FBE6DC] p-6 sm:p-8">
-                <CloudOff className="mb-12 h-7 w-7 text-[#C2410C]" />
-                <h3 className="font-display text-2xl font-bold tracking-[-.04em]">
-                  Quand le réseau disparaît
+            {/* Opposition problème / réponse. Les deux cartes précédentes
+                n'étaient qu'un titre et une phrase, avec une barre latérale
+                colorée et un vide arbitraire sous l'icône. Ici chaque carte
+                porte un constat concret et ce que l'app y oppose. */}
+            <div className="grid gap-5 sm:grid-cols-2">
+              <article className="flex flex-col rounded-3xl border border-[#C2410C]/25 bg-[#FBE6DC] p-6 sm:p-8">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#C2410C] text-white">
+                  <CloudOff className="h-6 w-6" />
+                </span>
+                <h3 className="mt-5 font-display text-2xl font-bold leading-tight tracking-[-.04em]">
+                  Le réseau manque là où le besoin est le plus fort
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-[#6B7B77]">
-                  Une application 100% connectée exclut précisément les familles qu&apos;elle
-                  veut aider.
+                <p className="mt-3 text-sm leading-6 text-[#6B4A3A]">
+                  Une application entièrement connectée exclut précisément les familles
+                  qu&apos;elle prétend servir.
                 </p>
+                <ul className="mt-5 flex flex-col gap-2.5 border-t border-[#C2410C]/20 pt-5 text-sm">
+                  <li className="flex items-start gap-2.5">
+                    <X className="mt-0.5 h-4 w-4 shrink-0 text-[#C2410C]" />
+                    <span>Une séance perdue si la connexion tombe</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <X className="mt-0.5 h-4 w-4 shrink-0 text-[#C2410C]" />
+                    <span>Des contenus inaccessibles hors des villes</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <X className="mt-0.5 h-4 w-4 shrink-0 text-[#C2410C]" />
+                    <span>Un forfait data que personne ne veut dépenser</span>
+                  </li>
+                </ul>
               </article>
-              <article className="border-l-4 border-[#0C7C9A] bg-[#EDF1EF] p-6 sm:p-8">
-                <HeartHandshake className="mb-12 h-7 w-7 text-[#0C7C9A]" />
-                <h3 className="font-display text-2xl font-bold tracking-[-.04em]">
-                  Le facilitateur reste là
+
+              <article className="flex flex-col rounded-3xl border border-[#0C7C9A]/25 bg-[#EDF1EF] p-6 sm:p-8">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0C7C9A] text-white">
+                  <HeartHandshake className="h-6 w-6" />
+                </span>
+                <h3 className="mt-5 font-display text-2xl font-bold leading-tight tracking-[-.04em]">
+                  Le facilitateur, lui, est déjà sur place
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-[#6B7B77]">
-                  Il traduit, adapte, écoute. ParentRelais lui donne les bons supports, au bon
-                  moment.
+                <p className="mt-3 text-sm leading-6 text-[#4A5B57]">
+                  Il traduit, adapte, écoute. ParentRelais lui donne les bons supports au bon
+                  moment — et ne lui demande jamais d&apos;attendre le réseau.
                 </p>
+                <ul className="mt-5 flex flex-col gap-2.5 border-t border-[#0C7C9A]/20 pt-5 text-sm">
+                  <li className="flex items-start gap-2.5">
+                    <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#157A47]" />
+                    <span>Séance enregistrée sur l&apos;appareil, envoyée plus tard</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#157A47]" />
+                    <span>Modules écoutables même sans savoir lire</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#157A47]" />
+                    <span>Téléchargement décidé par le facilitateur</span>
+                  </li>
+                </ul>
               </article>
             </div>
           </div>
@@ -566,16 +625,24 @@ export function LandingPage() {
                 Prêt à animer votre première séance ?
               </h2>
               <p className="mt-6 max-w-xl text-lg leading-8 text-white/75">
-                Connectez-vous avec votre code facilitateur — même sans réseau, vous pouvez
-                commencer tout de suite.
+                Facilitateur : connectez-vous avec votre code, même sans réseau. Coordination
+                de programme : suivez la couverture depuis l&apos;espace de pilotage.
               </p>
             </div>
-            <Link
-              href="/login"
-              className="rounded-2xl bg-white px-6 py-4 text-center font-bold text-[#08596E] shadow-xl transition-all hover:-translate-y-1 active:scale-[.97]"
-            >
-              Se connecter comme facilitateur <ArrowRight className="ml-2 inline h-5 w-5" />
-            </Link>
+            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+              <Link
+                href="/login"
+                className="rounded-2xl bg-white px-6 py-4 text-center font-bold text-[#08596E] shadow-xl transition-all hover:-translate-y-1 active:scale-[.97]"
+              >
+                Espace facilitateur <ArrowRight className="ml-2 inline h-5 w-5" />
+              </Link>
+              <Link
+                href="/dashboard/login"
+                className="rounded-2xl border-2 border-white/40 px-6 py-4 text-center font-bold text-white transition-all hover:-translate-y-1 hover:bg-white/10 active:scale-[.97]"
+              >
+                Espace de pilotage <ArrowRight className="ml-2 inline h-5 w-5" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>

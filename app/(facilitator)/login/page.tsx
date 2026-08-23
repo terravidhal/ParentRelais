@@ -14,6 +14,36 @@ import {
 
 const REGIONS = ["Extrême-Nord", "Adamaoua", "Nord-Ouest"] as const;
 
+/**
+ * Même traitement que le login de l'espace de pilotage : split-screen plein
+ * écran, image de contexte à gauche, formulaire à droite. L'ancienne version
+ * était un formulaire nu posé dans le conteneur de l'app, avec un bandeau
+ * écrasé — visuellement en retrait de tout le reste du produit.
+ */
+function BrandPanel() {
+  return (
+    <div className="relative hidden lg:block">
+      <Image
+        src="/images/landing/offline-device.webp"
+        alt=""
+        fill
+        priority
+        sizes="50vw"
+        className="object-cover"
+      />
+      <div className="absolute inset-0 bg-linear-to-t from-primary-dark/90 via-primary-dark/60 to-primary-dark/25" />
+      <div className="absolute bottom-10 left-10 right-10 text-primary-foreground">
+        <p className="font-display text-sm font-semibold tracking-wide opacity-90">
+          PARENTRELAIS
+        </p>
+        <p className="font-display mt-1 text-2xl font-bold">
+          Vos modules et vos séances, même sans réseau.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const { data: existingSession } = useFacilitatorSessionQuery();
@@ -65,27 +95,41 @@ export default function LoginPage() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-4 lg:mx-auto lg:max-w-sm"
-    >
-      {/* Bandeau de marque illustré — remplace l'aplat de couleur unie par
-          une image contextuelle (terrain hors-ligne), teinté brand-accent
-          conformément à l'usage documenté de ce token dans globals.css
-          ("réservé aux surfaces de marque... bandeaux de connexion"). */}
-      <div className="relative -mx-5 -mt-5 flex h-36 flex-col items-center justify-center gap-1 overflow-hidden text-primary-foreground lg:h-44">
-        <Image
-          src="/images/landing/offline-device.webp"
-          alt=""
-          fill
-          priority
-          sizes="(min-width: 1024px) 384px, 100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-linear-to-t from-brand-accent/90 via-brand-accent/70 to-brand-accent/40" />
-        <p className="font-display relative text-lg font-bold tracking-wide">PARENTRELAIS</p>
-        <p className="relative text-xs opacity-90">Connexion facilitateur</p>
-      </div>
+    <div className="lg:grid lg:min-h-screen lg:grid-cols-2">
+      <BrandPanel />
+
+      <div className="flex min-h-screen items-start justify-center bg-muted/40 px-4 pb-10 lg:min-h-0 lg:items-center lg:py-10 lg:bg-background">
+        <form
+          onSubmit={handleSubmit}
+          className="flex w-full max-w-md flex-col gap-4"
+        >
+          {/* Bandeau condensé sur mobile, où le panneau latéral n'existe pas. */}
+          <div className="relative -mx-4 mb-5 flex h-44 flex-col items-center justify-center gap-1 overflow-hidden text-primary-foreground lg:hidden">
+            <Image
+              src="/images/landing/offline-device.webp"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-primary-dark/90 via-primary-dark/65 to-primary-dark/30" />
+            <p className="font-display relative text-lg font-bold tracking-wide">
+              PARENTRELAIS
+            </p>
+          </div>
+
+          <div className="hidden lg:block">
+            <p className="font-display text-xs font-semibold tracking-wide text-brand-accent-ink">
+              PARENTRELAIS
+            </p>
+            <h1 className="font-display mt-1 text-2xl font-bold">
+              Espace facilitateur
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Connectez-vous avec votre code — le réseau n&apos;est pas nécessaire.
+            </p>
+          </div>
 
       {recoveryMode && (
         <p className="text-xs text-muted-foreground">
@@ -196,8 +240,10 @@ export default function LoginPage() {
           className="h-12 text-sm font-semibold text-primary underline-offset-2 hover:underline"
         >
           {recoveryMode ? "Annuler et revenir à la connexion" : "PIN oublié ?"}
-        </button>
-      )}
-    </form>
+            </button>
+          )}
+        </form>
+      </div>
+    </div>
   );
 }

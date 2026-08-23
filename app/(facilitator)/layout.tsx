@@ -65,6 +65,14 @@ export default function FacilitatorLayout({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [online]);
 
+  // La page de connexion occupe l'écran entier (split-screen illustré,
+  // comme côté pilotage). Le seed reste bloquant, mais ni l'en-tête ni le
+  // conteneur applicatif ne s'appliquent : ils n'ont de sens qu'une fois
+  // connecté.
+  if (isLoginPage) {
+    return <>{seedReady ? children : <Skeleton className="h-screen w-full" />}</>;
+  }
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header ancré pleine largeur — remplace la carte "téléphone" centrée,
@@ -72,13 +80,11 @@ export default function FacilitatorLayout({
           (contrairement au dashboard admin) : le facilitateur n'a pas de
           multi-pages de navigation latérale, juste ce header + le contenu. */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
-        {!isLoginPage && (
-          <div className="mx-auto flex h-16 max-w-[1100px] items-center px-5 lg:px-8">
-            <p className="font-display text-sm font-bold tracking-wide text-accent-ink">
-              PARENTRELAIS
-            </p>
-          </div>
-        )}
+        <div className="mx-auto flex h-16 max-w-[1100px] items-center px-5 lg:px-8">
+          <p className="font-display text-sm font-bold tracking-wide text-accent-ink">
+            PARENTRELAIS
+          </p>
+        </div>
         {/* Bannière de connectivité en pleine largeur, sous le kicker : c'est
             l'élément "impossible à manquer" du design system — la garder en
             bandeau plein plutôt que la réduire à un badge à côté du kicker

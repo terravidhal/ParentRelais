@@ -3,6 +3,11 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { CreateFacilitatorForm } from "@/components/dashboard/create-facilitator-form";
+import { TableToolbar } from "@/components/dashboard/table-toolbar";
+import { TablePagination } from "@/components/dashboard/table-pagination";
+
+/** Lignes par page — la table grossit d'un facilitateur par personne recrutée. */
+const PAGE_SIZE = 20;
 
 /**
  * Server component. Le nom du facilitateur est synchronisé depuis
@@ -11,17 +16,47 @@ import { CreateFacilitatorForm } from "@/components/dashboard/create-facilitator
  * peut être absent pour des lignes historiques (séance synchronisée avant
  * l'upsert facilitateur correspondant), d'où le repli sur l'UUID tronqué.
  */
-export default async function DashboardFacilitatorsPage() {
+export default async function DashboardFacilitatorsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; region?: string; page?: string }>;
+}) {
   const supabase = await createClient();
+  const params = await searchParams;
+  const page = Math.max(1, Number(params.page ?? 1) || 1);
+  const search = (params.q ?? "").trim();
+  const regionFilter = (params.region ?? "").trim();
 
-  const { data: facilitators } = await supabase
+  // Recherche et pagination côté SUPABASE (`.range()`), jamais en mémoire :
+  // filtrer côté client supposerait de charger toute la table, ce que la
+  // pagination est précisément là pour éviter.
+  let query = supabase
     .from("dashboard_facilitators")
-    .select("*")
+    .select("*", { count: "exact" })
     .order("last_session_at", { ascending: false });
 
+  if (search) query = query.ilike("full_name", `%${search}%`);
+  if (regionFilter) query = query.eq("region", regionFilter);
+
+  const { data: facilitators, count } = await query.range(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE - 1,
+  );
+
   const rows = facilitators ?? [];
-  const totalSessions = rows.reduce((n, r) => n + r.sessions_count, 0);
-  const regionCount = new Set(rows.map((r) => r.region)).size;
+  const totalCount = count ?? rows.length;
+  const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  // Les totaux portent sur TOUTES les lignes, pas seulement la page
+  // affichée : un indicateur qui changerait en tournant les pages
+  // n'indiquerait rien.
+  const { data: allRows } = await supabase
+    .from("dashboard_facilitators")
+    .select("region, sessions_count");
+  const everyRow = allRows ?? [];
+  const totalSessions = everyRow.reduce((n, r) => n + r.sessions_count, 0);
+  const regionCount = new Set(everyRow.map((r) => r.region)).size;
+  const regions = Array.from(new Set(everyRow.map((r) => r.region))).sort();
 
   return (
     <div>
@@ -37,7 +72,7 @@ export default async function DashboardFacilitatorsPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Facilitateurs actifs"
-          value={rows.length}
+          value={totalCount}
           icon={<Users size={18} aria-hidden="true" />}
           color="primary"
           hint="Ont synchronisé au moins une séance"
@@ -48,8 +83,8 @@ export default async function DashboardFacilitatorsPage() {
           icon={<BookOpen size={18} aria-hidden="true" />}
           color="success"
           hint={
-            rows.length > 0
-              ? `${Math.round(totalSessions / rows.length)} en moyenne par facilitateur`
+            everyRow.length > 0
+              ? `${Math.round(totalSessions / everyRow.length)} en moyenne par facilitateur`
               : undefined
           }
         />
@@ -67,9 +102,23 @@ export default async function DashboardFacilitatorsPage() {
           <h3 className="font-display font-bold">Activité par facilitateur</h3>
         </div>
 
+        <TableToolbar
+          searchLabel="Rechercher un facilitateur"
+          placeholder="Nom du facilitateur"
+          filters={[
+            {
+              name: "region",
+              label: "Région",
+              options: regions.map((r) => ({ value: r, label: r })),
+            },
+          ]}
+        />
+
         {rows.length === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">
-            Aucune séance synchronisée pour l&apos;instant.
+            {search || regionFilter
+              ? "Aucun facilitateur ne correspond à cette recherche."
+              : "Aucune séance synchronisée pour l'instant."}
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -100,6 +149,13 @@ export default async function DashboardFacilitatorsPage() {
             ))}
           </div>
         )}
+
+        <TablePagination
+          page={page}
+          pageCount={pageCount}
+          totalCount={totalCount}
+          itemLabel="facilitateurs"
+        />
       </div>
     </div>
   );

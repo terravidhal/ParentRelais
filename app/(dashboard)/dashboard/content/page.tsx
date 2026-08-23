@@ -6,6 +6,7 @@ import { MediaUploadCell } from "@/components/dashboard/media-upload-cell";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { CreateModuleForm } from "@/components/dashboard/create-module-form";
 import { ModulePublicationControls } from "@/components/dashboard/module-publication-controls";
+import { TableToolbar } from "@/components/dashboard/table-toolbar";
 
 const UPLOADABLE_LANGS = new Set(["fr", "en", "ff", "sign"]);
 
@@ -14,8 +15,15 @@ const UPLOADABLE_LANGS = new Set(["fr", "en", "ff", "sign"]);
  * MediaUploadCell (client) qui écrit directement dans Storage + upsert la
  * ligne module_translations, puis déclenche router.refresh().
  */
-export default async function DashboardContentPage() {
+export default async function DashboardContentPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; statut?: string }>;
+}) {
   const supabase = await createClient();
+  const params = await searchParams;
+  const search = (params.q ?? "").trim().toLowerCase();
+  const statusFilter = (params.statut ?? "").trim();
 
   const { data: modules } = await supabase
     .from("modules")
@@ -44,6 +52,17 @@ export default async function DashboardContentPage() {
       published: m.status === "published",
       archived: m.archived_at !== null,
     };
+  });
+
+  // Le filtrage se fait ici plutôt qu'en base : une dizaine de modules à
+  // terme, la requête reste triviale et les compteurs doivent porter sur
+  // l'ensemble, pas sur la vue filtrée.
+  const visibleRows = rows.filter((r) => {
+    if (search && !r.title.toLowerCase().includes(search)) return false;
+    if (statusFilter === "publie") return r.published && !r.archived;
+    if (statusFilter === "brouillon") return !r.published && !r.archived;
+    if (statusFilter === "archive") return r.archived;
+    return true;
   });
 
   const nextPosition =
@@ -131,8 +150,26 @@ export default async function DashboardContentPage() {
           reste lisible dans les rapports et les historiques.
         </p>
 
+        <div className="-mx-5 mb-4">
+          <TableToolbar
+            searchLabel="Rechercher un module"
+            placeholder="Titre du module"
+            filters={[
+              {
+                name: "statut",
+                label: "Statut",
+                options: [
+                  { value: "publie", label: "Publiés" },
+                  { value: "brouillon", label: "Brouillons" },
+                  { value: "archive", label: "Archivés" },
+                ],
+              },
+            ]}
+          />
+        </div>
+
         <ul className="flex flex-col gap-3">
-          {rows.map((row) => {
+          {visibleRows.map((row) => {
             const pendingLangs = ["fr", "en", "ff", "sign"].filter(
               (lang) => row.statusByLang[lang] !== "ready",
             );
@@ -177,10 +214,11 @@ export default async function DashboardContentPage() {
           })}
         </ul>
 
-        {rows.length === 0 && (
+        {visibleRows.length === 0 && (
           <p className="text-sm text-muted-foreground">
-            Aucun module pour l&apos;instant. Créez le premier avec
-            « Nouveau module ».
+            {rows.length === 0
+              ? "Aucun module pour l'instant. Créez le premier avec « Nouveau module »."
+              : "Aucun module ne correspond à cette recherche."}
           </p>
         )}
       </div>

@@ -33,27 +33,40 @@
 -- après : ces lignes n'ont aucun compte correspondant dans auth.users, et
 -- la contrainte échouerait sur elles.
 --
--- Les séances partent d'abord (elles référencent facilitators).
+-- Le critère de purge n'est PAS le nom : filtrer sur « test » laissait
+-- passer les identités locales réelles (« vidhal ») qui n'ont pas non plus
+-- de compte, et la contrainte de clé étrangère échouait dessus — constaté à
+-- la première application (erreur 23503).
+--
+-- Le seul critère juste est structurel : **une ligne sans compte
+-- `auth.users` correspondant** ne peut pas survivre à cette migration, quel
+-- que soit son nom. Toutes ces lignes viennent de l'ancien système, où le
+-- facilitateur générait son identifiant lui-même sans jamais s'authentifier.
 
+-- Les SÉANCES, elles, ne sont pas supprimées mais RATTACHÉES au compte de
+-- démonstration : elles portent les statistiques que le jury verra (familles
+-- touchées par localité). Les effacer viderait le tableau de bord.
+--
+-- Seules partent celles dont la localité trahit un test automatisé — elles
+-- polluaient la couverture nationale avec « Test5 », « TestSync », « AUDIT ».
 delete from public.sessions
 where region ilike '%test%'
    or region ilike '%audit%'
    or locality ilike '%test%'
    or locality ilike '%audit%';
 
-delete from public.facilitators
-where full_name is null
-   or full_name = ''
-   or full_name ilike '%test%'
-   or full_name ilike '%demo%'
-   or full_name ilike '%audit%'
-   or full_name ilike '%échec%'
-   or full_name ilike '%echec%';
-
--- Les séances devenues orphelines (leur facilitateur vient de partir).
-delete from public.sessions s
+update public.sessions s
+set facilitator_id = (
+  select id from auth.users
+  where email = 'facilitateur.demo@parentrelais.app'
+)
 where not exists (
-  select 1 from public.facilitators f where f.facilitator_id = s.facilitator_id
+  select 1 from auth.users u where u.id = s.facilitator_id
+);
+
+delete from public.facilitators f
+where not exists (
+  select 1 from auth.users u where u.id = f.facilitator_id
 );
 
 -- ------------------------------------------------------------

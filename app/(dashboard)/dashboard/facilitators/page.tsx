@@ -78,7 +78,12 @@ export default async function DashboardFacilitatorsPage() {
             </div>
             {rows.map((f) => (
               <Link
-                key={f.facilitator_id}
+                // Clé composite : la vue dashboard_facilitators groupe par
+                // facilitator_id ET region (0010_facilitators_view_name.sql),
+                // donc un facilitateur actif dans deux régions produit deux
+                // lignes portant le même identifiant. Avec la seule id en
+                // clé, React dupliquait ou omettait des lignes.
+                key={`${f.facilitator_id}-${f.region}`}
                 href={`/dashboard/facilitators/${f.facilitator_id}`}
                 className="grid min-w-150 grid-cols-4 items-center gap-2 border-t border-border px-5 py-3 text-sm transition-colors hover:bg-muted"
               >

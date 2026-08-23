@@ -40,6 +40,30 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
 
+  /**
+   * Traduit les erreurs Supabase en messages exploitables.
+   *
+   * Le message brut affiché jusqu'ici — « new row violates row-level
+   * security policy » — ne dit rien à un coordinateur de programme et ne
+   * lui indique aucune action.
+   */
+  const describeError = (message: string): string => {
+    const m = message.toLowerCase();
+    if (m.includes("row-level security") || m.includes("unauthorized")) {
+      return "Vous n'avez pas les droits pour déposer un fichier. Vérifiez que votre compte est bien administrateur.";
+    }
+    if (m.includes("payload too large") || m.includes("exceeded")) {
+      return "Fichier trop volumineux pour le serveur. Réduisez sa taille puis réessayez.";
+    }
+    if (m.includes("mime") || m.includes("content-type")) {
+      return "Type de fichier refusé par le serveur.";
+    }
+    if (m.includes("failed to fetch") || m.includes("network")) {
+      return "Connexion interrompue pendant l'envoi. Réessayez.";
+    }
+    return `Envoi impossible : ${message}`;
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -64,7 +88,7 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
       .upload(path, file, { upsert: true });
 
     if (uploadError) {
-      setError(uploadError.message);
+      setError(describeError(uploadError.message));
       setIsUploading(false);
       return;
     }
@@ -90,7 +114,10 @@ export function MediaUploadCell({ moduleId, lang }: MediaUploadCellProps) {
     setIsUploading(false);
 
     if (upsertError) {
-      setError(upsertError.message);
+      // Le fichier est bien dans Storage, seule la ligne de suivi a échoué.
+      setError(
+        `Fichier envoyé, mais la fiche n'a pas été mise à jour : ${upsertError.message}`,
+      );
       return;
     }
 

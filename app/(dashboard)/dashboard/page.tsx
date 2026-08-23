@@ -101,7 +101,9 @@ export default async function DashboardPage() {
             <div className="flex flex-col gap-1">
               {activeFacilitators.map((f) => (
                 <Link
-                  key={f.facilitator_id}
+                  // Même vue que /dashboard/facilitators : une ligne par
+                  // couple (facilitateur, région), d'où la clé composite.
+                  key={`${f.facilitator_id}-${f.region}`}
                   href={`/dashboard/facilitators/${f.facilitator_id}`}
                   className="flex items-center justify-between rounded-xl px-2 py-2.5 text-sm hover:bg-muted"
                 >

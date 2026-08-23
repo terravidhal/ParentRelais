@@ -309,11 +309,35 @@
   /* Sans cette marge, "Étape 1 sur 3" se colle au bouton "Passer". */
   margin-right: 0.75rem;
 }
-/* Le footer par défaut tasse les boutons : on force un espacement net et on
-   laisse "Passer" à gauche, les actions de navigation à droite. */
+/* Disposition du pied du popover.
+   Le pied doit loger la progression + "Passer" + "Précédent" + "Suivant".
+   Un popover driver.js fait ~300px de large : ces quatre éléments ne
+   tiennent JAMAIS sur une ligne, quel que soit le viewport — les boutons
+   débordaient du cadre sur le dashboard (constaté en test). On empile donc
+   systématiquement, au lieu de ne traiter que le cas téléphone. */
 .driver-popover-footer {
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 1rem;
+}
+/* La progression occupe sa propre ligne, au-dessus des actions. */
+.driver-popover-progress-text {
+  width: 100%;
+  margin-right: 0;
+  margin-bottom: 0.25rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+/* Les boutons de navigation forment un groupe compact à droite ; "Passer"
+   reste à gauche, séparé, pour se lire comme une sortie et non comme une
+   étape du parcours. */
+.driver-popover-navigation-btns {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 .driver-popover-footer button {
   border-radius: var(--radius-md);
@@ -322,9 +346,10 @@
   /* Cibles tactiles ≥44px (05-DESIGN-SYSTEM.md, exigence n°3) : les boutons
      natifs de driver.js font 32px de haut, difficiles à viser au doigt. */
   min-height: 44px;
-  padding-inline: 1rem;
+  padding-inline: 0.875rem;
   font-size: 0.875rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 .driver-popover-footer .driver-popover-next-btn,
 .driver-popover-footer .driver-popover-prev-btn {
@@ -339,7 +364,6 @@
 /* "Passer" doit se lire comme une vraie porte de sortie : tant que le guide
    est actif, driver.js bloque tous les autres clics de la page. */
 .driver-popover-footer .driver-popover-skip-btn {
-  margin-right: auto;
   background: transparent;
   border: 1px solid var(--border);
   color: var(--foreground);
@@ -348,23 +372,8 @@
 .driver-popover-footer .driver-popover-skip-btn:hover {
   background: var(--muted);
 }
-/* Sur téléphone étroit, "Étape X sur Y" + 3 boutons de 44px ne tiennent pas
-   sur une ligne : "Suivant" sortait du popover. On empile proprement. */
-@media (max-width: 480px) {
-  .driver-popover {
-    max-width: calc(100vw - 2rem);
-  }
-  .driver-popover-footer {
-    flex-wrap: wrap;
-  }
-  .driver-popover-progress-text {
-    width: 100%;
-    margin-right: 0;
-    margin-bottom: 0.25rem;
-  }
-  .driver-popover-footer .driver-popover-skip-btn {
-    margin-right: auto;
-  }
+.driver-popover {
+  max-width: min(340px, calc(100vw - 2rem));
 }
 .driver-popover-close-btn {
   color: var(--muted-foreground);

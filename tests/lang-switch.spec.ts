@@ -46,7 +46,7 @@ test.describe("Changement de langue", () => {
     await page.getByRole("button", { name: "EN", exact: true }).click();
     await page.getByText("How we see childhood").click();
 
-    await expect(page).toHaveURL(/\/modules\/1$/);
+    await expect(page).toHaveURL(/\/module\?id=1$/);
     await expect(
       page.getByRole("heading", { name: "How we see childhood" }),
     ).toBeVisible();

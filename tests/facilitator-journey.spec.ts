@@ -32,14 +32,14 @@ test.describe("Parcours facilitateur", () => {
 
     // 3. Ouvrir le premier module
     await page.getByText("La perception de l'enfance").click();
-    await expect(page).toHaveURL(/\/modules\/1$/);
+    await expect(page).toHaveURL(/\/module\?id=1$/);
     await expect(
       page.getByRole("heading", { name: "La perception de l'enfance" }),
     ).toBeVisible();
 
     // 4. Animer une séance
     await page.getByRole("button", { name: "Animer une séance" }).click();
-    await expect(page).toHaveURL(/\/modules\/1\/session$/);
+    await expect(page).toHaveURL(/\/module\/session\?id=1$/);
 
     // Étape présences : village + steppers (valeurs par défaut acceptées)
     await page.getByRole("button", { name: "Continuer" }).click();

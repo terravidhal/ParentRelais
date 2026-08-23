@@ -20,7 +20,7 @@ test.describe("Lecteur vidéo", () => {
     page,
   }) => {
     await page.getByText("La perception de l'enfance").click();
-    await expect(page).toHaveURL(/\/modules\/1$/);
+    await expect(page).toHaveURL(/\/module\?id=1$/);
 
     const video = page.locator("video");
     await expect(video).toBeVisible();
@@ -51,7 +51,7 @@ test.describe("Lecteur vidéo", () => {
     page,
   }) => {
     await page.getByText("Développement de l'enfant").click();
-    await expect(page).toHaveURL(/\/modules\/2$/);
+    await expect(page).toHaveURL(/\/module\?id=2$/);
 
     // Module 2 partage aussi le fichier vidéo/sous-titres de démo.
     await expect(page.locator("video")).toBeVisible();

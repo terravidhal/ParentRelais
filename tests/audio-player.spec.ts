@@ -21,16 +21,17 @@ test.describe("Lecteur audio", () => {
     page,
   }) => {
     await page.getByText("La perception de l'enfance").click();
-    await expect(page).toHaveURL(/\/modules\/1$/);
+    await expect(page).toHaveURL(/\/module\?id=1$/);
 
     const audio = page.locator("audio");
     await expect(audio).toHaveCount(1);
 
     // Le fichier référencé doit être réellement accessible (pas un lien mort).
-    // Tous les modules/langues partagent le même fichier de démo (voir
-    // DEMO_AUDIO_URL dans lib/content/seed.ts).
+    // La langue par défaut est le français : l'ancien seed local réutilisait
+    // un fichier unique pour toutes les langues, le contenu Supabase a un
+    // audio par langue — d'où le fichier -fr et non -en.
     const src = await audio.getAttribute("src");
-    expect(src).toBe("/audio/module-1-en.mp3");
+    expect(src).toBe("/audio/module-1-fr.mp3");
     const audioResponse = await page.request.get(src!);
     expect(audioResponse.ok()).toBe(true);
 
@@ -58,7 +59,7 @@ test.describe("Lecteur audio", () => {
     page,
   }) => {
     await page.getByText("La perception de l'enfance").click();
-    await expect(page).toHaveURL(/\/modules\/1$/);
+    await expect(page).toHaveURL(/\/module\?id=1$/);
 
     await page.getByLabel("Lire l'audio").click();
 

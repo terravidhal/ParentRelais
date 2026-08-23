@@ -50,7 +50,7 @@ test.describe("Mode hors-ligne", () => {
 
     // 4. Naviguer vers un module toujours hors-ligne.
     await page.getByText("La perception de l'enfance").click();
-    await expect(page).toHaveURL(/\/modules\/1$/);
+    await expect(page).toHaveURL(/\/module\?id=1$/);
     await expect(
       page.getByRole("heading", { name: "La perception de l'enfance" }),
     ).toBeVisible();

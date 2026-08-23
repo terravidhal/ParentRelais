@@ -36,10 +36,31 @@ const serwist = new Serwist({
   navigationPreload: true,
   runtimeCaching: [
     {
+      // Routes de module : `/module?id=3` et `/module/session?id=3`.
+      //
+      // Le document précaché est enregistré sous `/module` NU, sans query
+      // string. Or la query string fait partie de la clé de cache : une
+      // navigation vers `/module?id=3` ne matche donc PAS l'entrée
+      // précachée, et échouait réseau coupé (constaté : ERR_FAILED en test
+      // hors-ligne) alors même que le document était bien en cache.
+      //
+      // On sert ici l'entrée précachée en ignorant le paramètre : c'est
+      // exactement ce qui rend la route unique viable hors-ligne pour
+      // n'importe quel module, y compris ceux créés après le déploiement.
+      matcher: ({ request, url }) =>
+        request.mode === "navigate" &&
+        (url.pathname === "/module" || url.pathname === "/module/session"),
+      handler: async ({ url }) => {
+        const cached = await serwist.matchPrecache(url.pathname);
+        if (cached) return cached;
+        // Pas encore précaché (premier chargement) : on tente le réseau.
+        return fetch(url.pathname);
+      },
+    },
+    {
       // Documents HTML de navigation vers les routes (facilitator) : elles
-      // sont server-rendered à la demande côté Next.js (params dynamiques
-      // sous /modules/[id]) mais 100% client-only en pratique (CLAUDE.md
-      // règle 1) — sans cette règle, le document HTML retombe sur le
+      // sont 100% client-only (CLAUDE.md règle 1) — sans cette règle, le
+      // document HTML retombe sur le
       // NetworkFirst générique de `defaultCache` et échoue réseau coupé
       // même si le JS/CSS est précaché. Placée avant `defaultCache` pour
       // être évaluée en priorité (la première règle qui matche gagne).

@@ -40,10 +40,10 @@ test.describe("Séance complète hors-ligne", () => {
 
     // 3. Animer une séance complète, toujours hors-ligne.
     await page.getByText("La perception de l'enfance").click();
-    await expect(page).toHaveURL(/\/modules\/1$/);
+    await expect(page).toHaveURL(/\/module\?id=1$/);
 
     await page.getByRole("button", { name: "Animer une séance" }).click();
-    await expect(page).toHaveURL(/\/modules\/1\/session$/);
+    await expect(page).toHaveURL(/\/module\/session\?id=1$/);
 
     await page.getByRole("button", { name: "Continuer" }).click();
     await page

@@ -99,7 +99,7 @@ export function DashboardShell({ userEmail, children }: DashboardShellProps) {
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "flex h-11 items-center gap-2.5 rounded-xl px-3 text-sm font-semibold transition-colors",
+                  "flex h-11 items-center gap-2.5 rounded-xl px-3 text-sm font-semibold motion-safe:transition-colors",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",

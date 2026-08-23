@@ -72,9 +72,9 @@ export function LandingPage() {
   };
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#EDF1EF] text-[#16241F]">
-      <div className="border-b border-[#08596E]/20 bg-[#08596E] px-4 py-2.5 text-center text-xs font-semibold tracking-wide text-white sm:text-sm">
-        <span className="mr-2 inline-flex h-2 w-2 rounded-full bg-[#E0961A] align-middle" />
+    <main className="min-h-screen overflow-hidden bg-background text-foreground">
+      <div className="border-b border-primary-dark/20 bg-primary-dark px-4 py-2.5 text-center text-xs font-semibold tracking-wide text-white sm:text-sm">
+        <span className="mr-2 inline-flex h-2 w-2 rounded-full bg-accent align-middle" />
         UNICEF Cameroun × MINPROFF — outil de terrain pour la parentalité positive
       </div>
 
@@ -84,43 +84,43 @@ export function LandingPage() {
       <button
         type="button"
         onClick={() => scrollTo("demo-access")}
-        className="w-full bg-[#E0961A] px-4 py-2 text-center text-xs font-bold text-[#16241F] underline-offset-4 hover:underline"
+        className="w-full bg-accent px-4 py-2 text-center text-xs font-bold text-foreground underline-offset-4 hover:underline"
       >
         Jury : comptes de démonstration et test hors-ligne — voir les accès
       </button>
 
-      <header className="relative z-20 border-b border-[#DCE4E1] bg-[#EDF1EF]/95 backdrop-blur-xl">
+      <header className="relative z-20 border-b border-[#DCE4E1] bg-background/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
           <button
             onClick={() => scrollTo("top")}
             className="group flex items-center gap-3"
             aria-label="Retour en haut"
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#0C7C9A] shadow-[0_8px_24px_-14px_rgba(8,89,110,.55)] ring-1 ring-[#DCE4E1] transition-transform duration-200 group-hover:-rotate-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-primary shadow-[0_8px_24px_-14px_rgba(8,89,110,.55)] ring-1 ring-[#DCE4E1] motion-safe:transition-transform duration-200 motion-safe:group-hover:-rotate-3">
               <LogoMark className="h-7 w-7" />
             </span>
             <span className="text-left font-display text-[18px] font-bold tracking-[-.06em]">
-              Parent<span className="text-[#0C7C9A]">Relais</span>
-              <span className="ml-1.5 inline-block h-2 w-2 rounded-full bg-[#E0961A] align-middle" />
+              Parent<span className="text-primary">Relais</span>
+              <span className="ml-1.5 inline-block h-2 w-2 rounded-full bg-accent align-middle" />
             </span>
           </button>
 
           <nav className="hidden items-center gap-8 lg:flex" aria-label="Navigation principale">
             <button
               onClick={() => scrollTo("solution")}
-              className="text-sm font-semibold text-[#6B7B77] transition-colors hover:text-[#16241F]"
+              className="text-sm font-semibold text-[#6B7B77] motion-safe:transition-colors hover:text-foreground"
             >
               La solution
             </button>
             <button
               onClick={() => scrollTo("parcours")}
-              className="text-sm font-semibold text-[#6B7B77] transition-colors hover:text-[#16241F]"
+              className="text-sm font-semibold text-[#6B7B77] motion-safe:transition-colors hover:text-foreground"
             >
               Comment ça marche
             </button>
             <button
               onClick={() => scrollTo("impact")}
-              className="text-sm font-semibold text-[#6B7B77] transition-colors hover:text-[#16241F]"
+              className="text-sm font-semibold text-[#6B7B77] motion-safe:transition-colors hover:text-foreground"
             >
               Pour le programme
             </button>
@@ -133,13 +133,13 @@ export function LandingPage() {
           <div className="hidden items-center gap-2 sm:flex">
             <Link
               href="/dashboard/login"
-              className="rounded-2xl border-2 border-[#0C7C9A] px-4 py-2.5 text-sm font-bold text-[#0C7C9A] transition-all hover:bg-[#0C7C9A]/5 active:scale-[.97]"
+              className="rounded-2xl border-2 border-primary px-4 py-2.5 text-sm font-bold text-primary motion-safe:transition-all hover:bg-primary/5 motion-safe:active:scale-[.97]"
             >
               Espace de pilotage
             </Link>
             <Link
               href="/login"
-              className="rounded-2xl bg-[#0C7C9A] px-4 py-2.5 text-sm font-bold text-white shadow-[0_12px_22px_-14px_rgba(8,89,110,.75)] transition-all hover:bg-[#08596E] active:scale-[.97]"
+              className="rounded-2xl bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-[0_12px_22px_-14px_rgba(8,89,110,.75)] motion-safe:transition-all hover:bg-primary-dark motion-safe:active:scale-[.97]"
             >
               Espace facilitateur <ArrowRight className="ml-1 inline h-4 w-4" />
             </Link>
@@ -153,7 +153,7 @@ export function LandingPage() {
           </button>
         </div>
         {menuOpen && (
-          <div className="border-t border-[#DCE4E1] bg-[#EDF1EF] px-5 py-5 lg:hidden">
+          <div className="border-t border-[#DCE4E1] bg-background px-5 py-5 lg:hidden">
             <div className="flex flex-col gap-4">
               <button onClick={() => scrollTo("solution")} className="text-left font-semibold">
                 La solution
@@ -166,13 +166,13 @@ export function LandingPage() {
               </button>
               <Link
                 href="/login"
-                className="rounded-2xl bg-[#0C7C9A] px-4 py-3 text-center font-bold text-white"
+                className="rounded-2xl bg-primary px-4 py-3 text-center font-bold text-white"
               >
                 Espace facilitateur <ArrowRight className="ml-1 inline h-4 w-4" />
               </Link>
               <Link
                 href="/dashboard/login"
-                className="rounded-2xl border-2 border-[#0C7C9A] px-4 py-3 text-center font-bold text-[#0C7C9A]"
+                className="rounded-2xl border-2 border-primary px-4 py-3 text-center font-bold text-primary"
               >
                 Espace de pilotage
               </Link>
@@ -181,10 +181,10 @@ export function LandingPage() {
         )}
       </header>
 
-      <div className="border-b border-[#0C7C9A]/20 bg-[#0C7C9A] px-5 py-2.5 text-[11px] font-bold uppercase tracking-[.14em] text-white sm:px-8 lg:px-10">
+      <div className="border-b border-primary/20 bg-primary px-5 py-2.5 text-[11px] font-bold uppercase tracking-[.14em] text-white sm:px-8 lg:px-10">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <span>
-            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#E0961A]" /> Relais actif
+            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-accent" /> Relais actif
           </span>
           <span className="hidden text-white/70 sm:inline">
             Contenu local disponible · Synchro dès que le réseau revient
@@ -195,16 +195,16 @@ export function LandingPage() {
         </div>
       </div>
 
-      <section id="top" className="relative border-b border-[#DCE4E1] bg-[#EDF1EF]">
+      <section id="top" className="relative border-b border-[#DCE4E1] bg-background">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 pb-16 pt-14 sm:px-8 sm:pt-20 lg:grid-cols-[.92fr_1.08fr] lg:gap-16 lg:px-10 lg:pb-24 lg:pt-24">
           <div className="relative z-10">
-            <p className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[.18em] text-[#0C7C9A]">
-              <span className="h-px w-8 bg-[#0C7C9A]" /> Boîte à outils pour facilitateurs
+            <p className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[.18em] text-primary">
+              <span className="h-px w-8 bg-primary" /> Boîte à outils pour facilitateurs
             </p>
             <h1 className="max-w-[680px] font-display text-[clamp(2.9rem,6vw,5.55rem)] font-bold leading-[.96] tracking-[-.075em]">
               Le réseau peut manquer.
               <br />
-              <span className="text-[#0C7C9A]">Le relais, lui, continue.</span>
+              <span className="text-primary">Le relais, lui, continue.</span>
             </h1>
             <p className="mt-7 max-w-[550px] text-[17px] leading-8 text-[#52635E] sm:text-lg">
               ParentRelais donne aux facilitateurs communautaires les contenus, l&apos;audio et le
@@ -218,13 +218,13 @@ export function LandingPage() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/login"
-                className="rounded-2xl bg-[#0C7C9A] px-6 py-4 text-center font-bold text-white shadow-[0_22px_35px_-22px_rgba(8,89,110,.9)] transition-all hover:-translate-y-0.5 hover:bg-[#08596E] active:scale-[.97]"
+                className="rounded-2xl bg-primary px-6 py-4 text-center font-bold text-white shadow-[0_22px_35px_-22px_rgba(8,89,110,.9)] motion-safe:transition-all motion-safe:hover:-translate-y-0.5 hover:bg-primary-dark motion-safe:active:scale-[.97]"
               >
                 Espace facilitateur <ArrowRight className="ml-2 inline h-5 w-5" />
               </Link>
               <Link
                 href="/dashboard/login"
-                className="rounded-2xl border-2 border-[#0C7C9A] bg-white px-6 py-4 text-center font-bold text-[#0C7C9A] transition-all hover:-translate-y-0.5 hover:bg-[#0C7C9A]/5 active:scale-[.97]"
+                className="rounded-2xl border-2 border-primary bg-white px-6 py-4 text-center font-bold text-primary motion-safe:transition-all motion-safe:hover:-translate-y-0.5 hover:bg-primary/5 motion-safe:active:scale-[.97]"
               >
                 Espace de pilotage <ArrowRight className="ml-2 inline h-5 w-5" />
               </Link>
@@ -235,9 +235,9 @@ export function LandingPage() {
                 d'une démonstration inaccessible. */}
             <div
               id="demo-access"
-              className="mt-5 scroll-mt-24 rounded-2xl border border-[#DCE4E1] bg-[#EDF1EF] p-4"
+              className="mt-5 scroll-mt-24 rounded-2xl border border-[#DCE4E1] bg-background p-4"
             >
-              <p className="text-sm font-bold text-[#16241F]">
+              <p className="text-sm font-bold text-foreground">
                 Comptes de démonstration
               </p>
               <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm text-[#4A5B57]">
@@ -251,7 +251,7 @@ export function LandingPage() {
                 </dd>
               </dl>
               <p className="mt-3 text-sm text-[#4A5B57]">
-                <strong className="font-bold text-[#16241F]">
+                <strong className="font-bold text-foreground">
                   Installez l&apos;application
                 </strong>{" "}
                 depuis l&apos;espace facilitateur (Profil → Installer) pour la
@@ -262,7 +262,7 @@ export function LandingPage() {
 
             <button
               onClick={() => scrollTo("solution")}
-              className="mt-4 text-sm font-semibold text-[#08596E] underline-offset-4 hover:underline"
+              className="mt-4 text-sm font-semibold text-primary-dark underline-offset-4 hover:underline"
             >
               Découvrir la solution <ArrowDownRight className="ml-1 inline h-4 w-4" />
             </button>
@@ -276,10 +276,10 @@ export function LandingPage() {
             </div>
           </div>
           <div className="relative lg:-mr-20">
-            <div className="absolute -left-8 -top-8 h-36 w-36 rounded-full border border-[#0C7C9A]/20 [background-image:radial-gradient(#0C7C9A_1.2px,transparent_1.2px)] [background-size:14px_14px] opacity-70" />
-            <div className="relative overflow-hidden rounded-[2rem] rounded-br-[5rem] border-2 border-[#0C7C9A] bg-[#0C7C9A] p-2 shadow-[0_35px_65px_-30px_rgba(8,89,110,.65)]">
-              <div className="absolute left-5 top-5 z-10 flex items-center gap-2 rounded-full bg-[#16241F] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white">
-                <span className="h-2 w-2 rounded-full bg-[#E0961A]" /> Terrain — Cameroun
+            <div className="absolute -left-8 -top-8 h-36 w-36 rounded-full border border-primary/20 [background-image:radial-gradient(#0C7C9A_1.2px,transparent_1.2px)] [background-size:14px_14px] opacity-70" />
+            <div className="relative overflow-hidden rounded-[2rem] rounded-br-[5rem] border-2 border-primary bg-primary p-2 shadow-[0_35px_65px_-30px_rgba(8,89,110,.65)]">
+              <div className="absolute left-5 top-5 z-10 flex items-center gap-2 rounded-full bg-foreground px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white">
+                <span className="h-2 w-2 rounded-full bg-accent" /> Terrain — Cameroun
               </div>
               <div className="relative aspect-16/10 w-full overflow-hidden rounded-[1.6rem]">
                 <Image
@@ -292,7 +292,7 @@ export function LandingPage() {
                 />
               </div>
               <div className="absolute bottom-7 left-7 flex items-center gap-3 rounded-2xl bg-white/95 px-4 py-3 shadow-xl">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FBEFD6] text-[#E0961A]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FBEFD6] text-accent">
                   <CloudOff className="h-5 w-5" />
                 </span>
                 <span>
@@ -305,7 +305,7 @@ export function LandingPage() {
             </div>
             <div className="absolute -bottom-5 -right-4 hidden rounded-2xl border border-[#DCE4E1] bg-white px-5 py-4 shadow-[0_20px_40px_-24px_rgba(22,36,31,.45)] sm:block">
               <div className="flex items-center gap-3">
-                <span className="font-display text-3xl font-bold text-[#0C7C9A]">01</span>
+                <span className="font-display text-3xl font-bold text-primary">01</span>
                 <span className="max-w-[130px] text-xs font-semibold leading-4 text-[#6B7B77]">
                   outil pensé pour les réalités locales
                 </span>
@@ -318,7 +318,7 @@ export function LandingPage() {
       <section className="border-b border-[#DCE4E1] bg-white">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-5 py-9 sm:grid-cols-4 sm:px-8 lg:px-10">
           <div>
-            <div className="font-display text-3xl font-bold tracking-[-.06em] text-[#0C7C9A]">
+            <div className="font-display text-3xl font-bold tracking-[-.06em] text-primary">
               100%
             </div>
             <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#6B7B77]">
@@ -326,7 +326,7 @@ export function LandingPage() {
             </div>
           </div>
           <div>
-            <div className="font-display text-3xl font-bold tracking-[-.06em] text-[#0C7C9A]">
+            <div className="font-display text-3xl font-bold tracking-[-.06em] text-primary">
               0 FCFA
             </div>
             <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#6B7B77]">
@@ -334,7 +334,7 @@ export function LandingPage() {
             </div>
           </div>
           <div>
-            <div className="font-display text-3xl font-bold tracking-[-.06em] text-[#0C7C9A]">
+            <div className="font-display text-3xl font-bold tracking-[-.06em] text-primary">
               Audio
             </div>
             <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#6B7B77]">
@@ -342,7 +342,7 @@ export function LandingPage() {
             </div>
           </div>
           <div>
-            <div className="font-display text-3xl font-bold tracking-[-.06em] text-[#0C7C9A]">
+            <div className="font-display text-3xl font-bold tracking-[-.06em] text-primary">
               1 → ∞
             </div>
             <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#6B7B77]">
@@ -356,13 +356,13 @@ export function LandingPage() {
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
           <div className="grid gap-12 lg:grid-cols-[.7fr_1.3fr] lg:gap-20">
             <div>
-              <p className="mb-4 text-xs font-bold uppercase tracking-[.18em] text-[#E0961A]">
+              <p className="mb-4 text-xs font-bold uppercase tracking-[.18em] text-accent">
                 Le besoin réel
               </p>
               <h2 className="max-w-sm font-display text-4xl font-bold leading-[1.04] tracking-[-.06em] sm:text-5xl">
                 Le contenu existe.
                 <br />
-                <span className="text-[#0C7C9A]">L&apos;accès doit suivre.</span>
+                <span className="text-primary">L&apos;accès doit suivre.</span>
               </h2>
               <p className="mt-6 max-w-sm leading-7 text-[#6B7B77]">
                 Les formations présentielles fonctionnent, mais touchent peu de familles. Dans
@@ -402,8 +402,8 @@ export function LandingPage() {
                 </ul>
               </article>
 
-              <article className="flex flex-col rounded-3xl border border-[#0C7C9A]/25 bg-[#EDF1EF] p-6 sm:p-8">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0C7C9A] text-white">
+              <article className="flex flex-col rounded-3xl border border-primary/25 bg-background p-6 sm:p-8">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white">
                   <HeartHandshake className="h-6 w-6" />
                 </span>
                 <h3 className="mt-5 font-display text-2xl font-bold leading-tight tracking-[-.04em]">
@@ -413,7 +413,7 @@ export function LandingPage() {
                   Il traduit, adapte, écoute. ParentRelais lui donne les bons supports au bon
                   moment — et ne lui demande jamais d&apos;attendre le réseau.
                 </p>
-                <ul className="mt-5 flex flex-col gap-2.5 border-t border-[#0C7C9A]/20 pt-5 text-sm">
+                <ul className="mt-5 flex flex-col gap-2.5 border-t border-primary/20 pt-5 text-sm">
                   <li className="flex items-start gap-2.5">
                     <CircleCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#157A47]" />
                     <span>Séance enregistrée sur l&apos;appareil, envoyée plus tard</span>
@@ -433,11 +433,11 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="parcours" className="bg-[#16241F] py-20 text-white sm:py-28">
+      <section id="parcours" className="bg-foreground py-20 text-white sm:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
           <div className="mb-14 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
-              <p className="mb-4 text-xs font-bold uppercase tracking-[.18em] text-[#E0961A]">
+              <p className="mb-4 text-xs font-bold uppercase tracking-[.18em] text-accent">
                 Un geste simple
               </p>
               <h2 className="max-w-2xl font-display text-4xl font-bold leading-[1.05] tracking-[-.06em] sm:text-5xl">
@@ -457,13 +457,13 @@ export function LandingPage() {
               return (
                 <article
                   key={step.number}
-                  className="group bg-[#1D302A] p-7 transition-colors hover:bg-[#244239] sm:p-9"
+                  className="group bg-[#1D302A] p-7 motion-safe:transition-colors hover:bg-[#244239] sm:p-9"
                 >
                   <div className="mb-14 flex items-center justify-between">
-                    <span className="font-display text-sm font-bold text-[#E0961A]">
+                    <span className="font-display text-sm font-bold text-accent">
                       {step.number}
                     </span>
-                    <Icon className="h-6 w-6 text-[#7BD0D9] transition-transform duration-200 group-hover:-translate-y-1" />
+                    <Icon className="h-6 w-6 text-[#7BD0D9] motion-safe:transition-transform duration-200 group-hover:-translate-y-1" />
                   </div>
                   <h3 className="font-display text-2xl font-bold tracking-[-.04em]">
                     {step.title}
@@ -476,10 +476,10 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-[#EDF1EF] py-20 sm:py-28">
+      <section className="bg-background py-20 sm:py-28">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-[1.05fr_.95fr] lg:gap-20 lg:px-10">
           <div className="relative order-2 lg:order-1">
-            <div className="absolute -bottom-7 -left-7 h-32 w-32 border-b-2 border-l-2 border-[#E0961A]" />
+            <div className="absolute -bottom-7 -left-7 h-32 w-32 border-b-2 border-l-2 border-accent" />
             <div className="relative aspect-4/3 w-full overflow-hidden rounded-[2rem] shadow-[0_30px_55px_-35px_rgba(8,89,110,.65)]">
               <Image
                 src={deviceImage}
@@ -489,18 +489,18 @@ export function LandingPage() {
                 className="object-cover"
               />
             </div>
-            <div className="absolute -right-3 top-7 rounded-2xl bg-[#E0961A] px-4 py-3 text-sm font-bold text-[#16241F] shadow-lg sm:-right-6">
+            <div className="absolute -right-3 top-7 rounded-2xl bg-accent px-4 py-3 text-sm font-bold text-foreground shadow-lg sm:-right-6">
               <AudioLines className="mr-2 inline h-4 w-4" /> Audio-first
             </div>
           </div>
           <div className="order-1 lg:order-2">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[.18em] text-[#0C7C9A]">
+            <p className="mb-4 text-xs font-bold uppercase tracking-[.18em] text-primary">
               L&apos;outil entre les mains
             </p>
             <h2 className="max-w-xl font-display text-4xl font-bold leading-[1.04] tracking-[-.06em] sm:text-5xl">
               Une technologie discrète.
               <br />
-              <span className="text-[#0C7C9A]">Un impact qui circule.</span>
+              <span className="text-primary">Un impact qui circule.</span>
             </h2>
             <p className="mt-6 max-w-lg leading-7 text-[#6B7B77]">
               Tout est pensé pour être compris au premier regard et utilisé en plein soleil :
@@ -526,7 +526,7 @@ export function LandingPage() {
                 },
               ].map(({ icon: Icon, title, text }) => (
                 <div key={title} className="flex gap-4">
-                  <span className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#0C7C9A] shadow-sm">
+                  <span className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-primary shadow-sm">
                     <Icon className="h-4 w-4" />
                   </span>
                   <div>
@@ -544,11 +544,11 @@ export function LandingPage() {
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
           <div className="grid gap-12 lg:grid-cols-[.82fr_1.18fr] lg:gap-20">
             <div>
-              <p className="mb-4 text-xs font-bold uppercase tracking-[.18em] text-[#E0961A]">
+              <p className="mb-4 text-xs font-bold uppercase tracking-[.18em] text-accent">
                 Pour piloter autrement
               </p>
               <h2 className="max-w-md font-display text-4xl font-bold leading-[1.04] tracking-[-.06em] sm:text-5xl">
-                Du geste local à la <span className="text-[#0C7C9A]">vision nationale.</span>
+                Du geste local à la <span className="text-primary">vision nationale.</span>
               </h2>
               <p className="mt-6 max-w-md leading-7 text-[#6B7B77]">
                 Quand la connexion revient, le tableau de bord transforme les séances de terrain
@@ -559,10 +559,10 @@ export function LandingPage() {
                 différée, jamais de séance perdue
               </div>
             </div>
-            <div className="rounded-[2rem] bg-[#EDF1EF] p-5 sm:p-8">
-              <div className="mb-6 flex items-center justify-between border-b-2 border-[#0C7C9A] pb-5">
+            <div className="rounded-[2rem] bg-background p-5 sm:p-8">
+              <div className="mb-6 flex items-center justify-between border-b-2 border-primary pb-5">
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-[.16em] text-[#0C7C9A]">
+                  <div className="text-[10px] font-bold uppercase tracking-[.16em] text-primary">
                     Couverture nationale
                   </div>
                   <div className="mt-1 font-display text-xl font-bold">Tableau de bord pilote</div>
@@ -574,19 +574,19 @@ export function LandingPage() {
               <div className="grid grid-cols-3 gap-3 sm:gap-5">
                 <div className="rounded-2xl bg-white p-4">
                   <div className="text-xs font-semibold text-[#6B7B77]">Familles touchées</div>
-                  <div className="mt-3 font-display text-3xl font-bold text-[#0C7C9A]">
+                  <div className="mt-3 font-display text-3xl font-bold text-primary">
                     1 248
                   </div>
                   <div className="mt-2 text-xs font-semibold text-[#157A47]">↑ sur le terrain</div>
                 </div>
                 <div className="rounded-2xl bg-white p-4">
                   <div className="text-xs font-semibold text-[#6B7B77]">Séances</div>
-                  <div className="mt-3 font-display text-3xl font-bold text-[#0C7C9A]">86</div>
+                  <div className="mt-3 font-display text-3xl font-bold text-primary">86</div>
                   <div className="mt-2 text-xs font-semibold text-[#157A47]">4 localités</div>
                 </div>
                 <div className="rounded-2xl bg-white p-4">
                   <div className="text-xs font-semibold text-[#6B7B77]">Handicap</div>
-                  <div className="mt-3 font-display text-3xl font-bold text-[#0C7C9A]">74</div>
+                  <div className="mt-3 font-display text-3xl font-bold text-primary">74</div>
                   <div className="mt-2 text-xs font-semibold text-[#6B7B77]">participants</div>
                 </div>
               </div>
@@ -595,7 +595,7 @@ export function LandingPage() {
                   <span className="text-[10px] font-bold uppercase tracking-[.14em] text-[#6B7B77]">
                     Familles par localité / données synchronisées
                   </span>
-                  <BarChart3 className="h-4 w-4 text-[#0C7C9A]" />
+                  <BarChart3 className="h-4 w-4 text-primary" />
                 </div>
                 {[
                   { name: "Maroua", value: "86%" },
@@ -605,13 +605,13 @@ export function LandingPage() {
                 ].map((item) => (
                   <div key={item.name} className="mb-3 flex items-center gap-3 text-xs font-semibold">
                     <span className="w-16 text-[#6B7B77]">{item.name}</span>
-                    <div className="h-2 flex-1 rounded-full bg-[#EDF1EF]">
+                    <div className="h-2 flex-1 rounded-full bg-background">
                       <div
-                        className="h-2 rounded-full bg-[#0C7C9A]"
+                        className="h-2 rounded-full bg-primary"
                         style={{ width: item.value }}
                       />
                     </div>
-                    <span className="w-8 text-right text-[#16241F]">{item.value}</span>
+                    <span className="w-8 text-right text-foreground">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -622,7 +622,7 @@ export function LandingPage() {
 
       <section className="bg-[#FBEFD6] py-20 sm:py-24">
         <div className="mx-auto max-w-5xl px-5 text-center sm:px-8">
-          <div className="mx-auto mb-7 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-[#E0961A] shadow-sm">
+          <div className="mx-auto mb-7 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-accent shadow-sm">
             <Headphones className="h-7 w-7" />
           </div>
           <p className="mb-4 text-xs font-bold uppercase tracking-[.18em] text-[#C0780F]">
@@ -639,13 +639,13 @@ export function LandingPage() {
             localement.
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3 text-sm font-bold">
-            <span className="rounded-full bg-white px-4 py-3 text-[#16241F]">
+            <span className="rounded-full bg-white px-4 py-3 text-foreground">
               Audio en langues locales
             </span>
-            <span className="rounded-full bg-white px-4 py-3 text-[#16241F]">
+            <span className="rounded-full bg-white px-4 py-3 text-foreground">
               Sous-titres vidéo
             </span>
-            <span className="rounded-full bg-white px-4 py-3 text-[#16241F]">
+            <span className="rounded-full bg-white px-4 py-3 text-foreground">
               Langue des signes prévue
             </span>
           </div>
@@ -654,7 +654,7 @@ export function LandingPage() {
 
       <section
         id="contact"
-        className="relative overflow-hidden bg-[#0C7C9A] py-20 text-white sm:py-28"
+        className="relative overflow-hidden bg-primary py-20 text-white sm:py-28"
       >
         <div className="absolute right-0 top-0 h-full w-1/2 opacity-20 [background-image:radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:16px_16px]" />
         <div className="relative mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
@@ -674,13 +674,13 @@ export function LandingPage() {
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
               <Link
                 href="/login"
-                className="rounded-2xl bg-white px-6 py-4 text-center font-bold text-[#08596E] shadow-xl transition-all hover:-translate-y-1 active:scale-[.97]"
+                className="rounded-2xl bg-white px-6 py-4 text-center font-bold text-primary-dark shadow-xl motion-safe:transition-all hover:-translate-y-1 motion-safe:active:scale-[.97]"
               >
                 Espace facilitateur <ArrowRight className="ml-2 inline h-5 w-5" />
               </Link>
               <Link
                 href="/dashboard/login"
-                className="rounded-2xl border-2 border-white/40 px-6 py-4 text-center font-bold text-white transition-all hover:-translate-y-1 hover:bg-white/10 active:scale-[.97]"
+                className="rounded-2xl border-2 border-white/40 px-6 py-4 text-center font-bold text-white motion-safe:transition-all hover:-translate-y-1 hover:bg-white/10 motion-safe:active:scale-[.97]"
               >
                 Espace de pilotage <ArrowRight className="ml-2 inline h-5 w-5" />
               </Link>
@@ -689,7 +689,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <footer className="bg-[#16241F] py-9 text-white">
+      <footer className="bg-foreground py-9 text-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-7 px-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-10">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-[#7BD0D9]">
@@ -697,7 +697,7 @@ export function LandingPage() {
             </span>
             <span className="font-display text-lg font-bold tracking-[-.05em]">
               Parent<span className="text-[#7BD0D9]">Relais</span>
-              <span className="ml-1 inline-block h-2 w-2 rounded-full bg-[#E0961A] align-middle" />
+              <span className="ml-1 inline-block h-2 w-2 rounded-full bg-accent align-middle" />
             </span>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold text-white/55">

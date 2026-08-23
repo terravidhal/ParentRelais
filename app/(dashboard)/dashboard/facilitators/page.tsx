@@ -147,7 +147,7 @@ export default async function DashboardFacilitatorsPage({
                 // clé, React dupliquait ou omettait des lignes.
                 key={`${f.facilitator_id}-${f.region}`}
                 href={`/dashboard/facilitators/${f.facilitator_id}`}
-                className="grid min-w-150 grid-cols-4 items-center gap-2 border-t border-border px-5 py-3 text-sm transition-colors hover:bg-muted"
+                className="grid min-w-150 grid-cols-4 items-center gap-2 border-t border-border px-5 py-3 text-sm motion-safe:transition-colors hover:bg-muted"
               >
                 <span className="font-display font-semibold">
                   {f.full_name ?? `${f.facilitator_id.slice(0, 8)}…`}

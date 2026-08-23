@@ -141,6 +141,17 @@
   --sidebar-ring: oklch(0.545 0.099 223.1);
 }
 
+/* Thème sombre : DÉFINI MAIS NON ACTIVÉ.
+ *
+ * La classe `.dark` n'est appliquée nulle part, et aucun composant n'utilise
+ * la variante `dark:`. Ce bloc est donc inerte aujourd'hui.
+ *
+ * Conservé volontairement plutôt que supprimé : les jetons sont complets et
+ * cohérents, et l'usage terrain (téléphone bon marché en plein soleil) rend
+ * un thème sombre pertinent à terme. L'activer demande deux choses — poser
+ * la classe selon `prefers-color-scheme`, et vérifier les contrastes AA sur
+ * chaque écran. Tant que ce n'est pas fait, mieux vaut un thème clair
+ * maîtrisé qu'un thème sombre à moitié vérifié. */
 .dark {
   --background: oklch(0.192 0.012 167.1);
   --foreground: oklch(0.955 0.005 165.0);

@@ -83,7 +83,15 @@ export default function DashboardLoginPage() {
         { redirectTo: `${window.location.origin}/dashboard/reset-password` },
       );
       if (resetError) {
-        setError("Impossible d'envoyer le lien de réinitialisation.");
+        // Vérifié contre Supabase : une adresse dont le domaine n'existe pas
+        // (comme les comptes de démonstration en @parentrelais.app) est
+        // rejetée en `email_address_invalid`. Le message générique laissait
+        // croire à une panne alors que la cause est l'adresse elle-même.
+        setError(
+          resetError.code === "email_address_invalid"
+            ? "Cette adresse n'est pas reconnue comme une adresse email valide. Les comptes de démonstration ne peuvent pas recevoir de lien : utilisez une adresse réelle."
+            : "Impossible d'envoyer le lien de réinitialisation. Réessayez dans un instant.",
+        );
         return;
       }
       setResetSent(true);

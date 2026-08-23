@@ -17,14 +17,25 @@ const CONTENT_SYNCED_AT_KEY = "content_synced_at";
 export async function replaceModules(modules: CachedModule[]): Promise<void> {
   if (modules.length === 0) return;
 
-  await db.transaction("rw", db.modules, db.meta, async () => {
-    await db.modules.clear();
-    await db.modules.bulkAdd(modules);
-    await db.meta.put({
-      key: CONTENT_SYNCED_AT_KEY,
-      value: new Date().toISOString(),
+  try {
+    await db.transaction("rw", db.modules, db.meta, async () => {
+      await db.modules.clear();
+      await db.modules.bulkAdd(modules);
+      await db.meta.put({
+        key: CONTENT_SYNCED_AT_KEY,
+        value: new Date().toISOString(),
+      });
     });
-  });
+  } catch (error: unknown) {
+    // La transaction est atomique : en cas d'échec, le catalogue précédent
+    // reste intact plutôt que d'être à demi remplacé. On relaie l'erreur pour
+    // que l'appelant puisse en informer l'utilisateur (CLAUDE.md — gestion
+    // d'erreur explicite sur toute opération Dexie).
+    console.error("[contenu] remplacement du catalogue échoué:", error);
+    throw new Error("Impossible d'enregistrer le contenu sur l'appareil", {
+      cause: error,
+    });
+  }
 }
 
 /** Date de la dernière mise à jour du contenu, pour l'afficher au facilitateur. */

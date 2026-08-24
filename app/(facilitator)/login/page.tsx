@@ -55,8 +55,12 @@ export default function LoginPage() {
   const { data: existingSession } = useFacilitatorSessionQuery();
   const saveMutation = useSaveFacilitatorSessionMutation();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Pré-remplis d'emblée, pas seulement via le bouton du bandeau : sur
+  // téléphone, recopier une adresse et un mot de passe est pénible, et un
+  // juré pressé peut ne pas voir le bouton. Les identifiants de
+  // démonstration sont publics de toute façon (voir demo-accounts.ts).
+  const [email, setEmail] = useState(DEMO_FACILITATOR_EMAIL);
+  const [password, setPassword] = useState(DEMO_FACILITATOR_PASSWORD);
   // Pré-rempli : c'était le SEUL champ vide du formulaire. Un juré qui
   // choisit son propre code puis l'oublie se retrouve enfermé dehors, sur
   // une application par ailleurs fonctionnelle.

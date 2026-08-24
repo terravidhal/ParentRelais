@@ -60,11 +60,18 @@ export function DashboardShell({ userEmail, children }: DashboardShellProps) {
     setDrawerOpen(false);
   }
 
+  const [signingOut, setSigningOut] = useState(false);
+
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/dashboard/login");
-    router.refresh();
+    setSigningOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/dashboard/login");
+      router.refresh();
+    } finally {
+      setSigningOut(false);
+    }
   };
 
   return (
@@ -170,10 +177,17 @@ export function DashboardShell({ userEmail, children }: DashboardShellProps) {
           <button
             type="button"
             onClick={handleSignOut}
-            className="flex h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-destructive hover:bg-destructive/10"
+            disabled={signingOut}
+            className="flex h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-60"
           >
-            <LogOut size={16} aria-hidden="true" />
-            <span className="hidden sm:inline">Se déconnecter</span>
+            {signingOut ? (
+              <Loader2 size={16} aria-hidden="true" className="motion-safe:animate-spin" />
+            ) : (
+              <LogOut size={16} aria-hidden="true" />
+            )}
+            <span className="hidden sm:inline">
+              {signingOut ? "Déconnexion…" : "Se déconnecter"}
+            </span>
           </button>
         </header>
 

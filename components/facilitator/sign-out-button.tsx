@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import {
   useFacilitatorSessionQuery,
   useSignOutFacilitatorMutation,
@@ -43,9 +43,12 @@ export function FacilitatorSignOutButton() {
           type="button"
           onClick={handleSignOut}
           disabled={signOutMutation.isPending}
-          className="flex h-11 items-center rounded-xl bg-destructive px-3 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
+          className="flex h-11 items-center gap-1.5 rounded-xl bg-destructive px-3 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
         >
-          Confirmer
+          {signOutMutation.isPending && (
+            <Loader2 size={15} aria-hidden="true" className="motion-safe:animate-spin" />
+          )}
+          {signOutMutation.isPending ? "Déconnexion…" : "Confirmer"}
         </button>
         <button
           type="button"

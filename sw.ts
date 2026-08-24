@@ -64,14 +64,11 @@ const serwist = new Serwist({
       // NetworkFirst générique de `defaultCache` et échoue réseau coupé
       // même si le JS/CSS est précaché. Placée avant `defaultCache` pour
       // être évaluée en priorité (la première règle qui matche gagne).
-      // "/" est exclu : c'est la landing publique (en ligne uniquement, hors
-      // route group (facilitator)), elle ne doit jamais laisser croire à une
-      // disponibilité offline qu'elle n'a pas — dégradation gracieuse via
-      // `defaultCache` normale.
+      // "/" est INCLUS : c'est le `start_url` du manifeste, donc l'écran
+      // d'ouverture de l'application installée. L'exclure faisait démarrer
+      // l'app sur une page indisponible hors réseau.
       matcher: ({ request, url }) =>
-        request.mode === "navigate" &&
-        url.pathname !== "/" &&
-        !url.pathname.startsWith("/dashboard"),
+        request.mode === "navigate" && !url.pathname.startsWith("/dashboard"),
       handler: new NetworkFirst({
         cacheName: "parentrelais-facilitator-pages",
         networkTimeoutSeconds: 3,

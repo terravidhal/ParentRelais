@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
  * modules, présents et futurs (CLAUDE.md règle 1 — précache intégral).
  */
 const facilitatorPageUrls = [
+  // La landing est le point d'entrée de l'application installée
+  // (`start_url: "/"`), et c'est elle qui porte le mode d'emploi du jury.
+  // Sans précache, l'app s'ouvrait sur une page indisponible hors réseau.
+  "/",
   "/home",
   "/login",
   "/history",

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ChevronLeft, Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { LogoMark } from "@/components/ui/logo-mark";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,8 +50,10 @@ function BrandPanel() {
 export default function DashboardLoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "reset">("signin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Pré-remplis d'emblée : le jury teste les deux espaces, et recopier des
+  // identifiants sur téléphone est une friction inutile.
+  const [email, setEmail] = useState(DEMO_ADMIN_EMAIL);
+  const [password, setPassword] = useState(DEMO_ADMIN_PASSWORD);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -147,7 +149,18 @@ export default function DashboardLoginPage() {
                   </p>
                 )}
                 <Button type="submit" disabled={loading} className="h-11 font-semibold">
-                  {loading ? "Envoi…" : "Envoyer le lien"}
+                  {loading ? (
+                <>
+                  <Loader2
+                    size={17}
+                    aria-hidden="true"
+                    className="motion-safe:animate-spin"
+                  />
+                  Envoi…
+                </>
+              ) : (
+                "Envoyer le lien"
+              )}
                 </Button>
               </form>
             )}
@@ -250,7 +263,18 @@ export default function DashboardLoginPage() {
               </p>
             )}
             <Button type="submit" disabled={loading} className="h-11 font-semibold">
-              {loading ? "Connexion…" : "Se connecter"}
+              {loading ? (
+                <>
+                  <Loader2
+                    size={17}
+                    aria-hidden="true"
+                    className="motion-safe:animate-spin"
+                  />
+                  Connexion…
+                </>
+              ) : (
+                "Se connecter"
+              )}
             </Button>
             {/* Désactivé pendant l'évaluation : Supabase refuse d'envoyer un
                 lien vers une adresse dont le domaine n'existe pas, ce qui est

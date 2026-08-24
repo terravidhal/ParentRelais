@@ -23,9 +23,9 @@ export interface ReferenceRegion {
   localities: string[];
 }
 
-/** Le Cameroun compte 10 régions, chacune avec ses localités : la liste
- *  dépassera vite la hauteur d'un écran. */
-const PAGE_SIZE = 5;
+/** 2 par page : le référentiel ne compte que 4 langues et 3 régions
+ *  aujourd'hui, et un seuil plus élevé rendrait la pagination invisible. */
+const PAGE_SIZE = 2;
 
 const INPUT_CLASS =
   "h-11 rounded-xl border border-border bg-background px-3 text-sm font-normal";

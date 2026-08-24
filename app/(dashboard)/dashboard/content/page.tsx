@@ -9,8 +9,9 @@ import { ModulePublicationControls } from "@/components/dashboard/module-publica
 import { TableToolbar } from "@/components/dashboard/table-toolbar";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 
-/** Le catalogue reste petit, mais la cohérence d'interface prime. */
-const PAGE_SIZE = 10;
+/** 5 par page : avec 8 modules, un seuil à 10 ne se déclenchait jamais et la
+ *  pagination restait invisible. */
+const PAGE_SIZE = 5;
 import { QuizEditor, type QuizEditorQuestion } from "@/components/dashboard/quiz-editor";
 
 /**

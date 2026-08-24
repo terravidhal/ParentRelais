@@ -152,7 +152,20 @@ export function SessionView({ moduleId }: { moduleId: number }) {
             onChange={setDisability}
             max={total}
           />
-          <Button onClick={() => setStep(1)} className="font-display mt-1 h-11 font-bold">
+          {/* Sans localité, la séance remonte avec un champ vide et crée une
+              ligne anonyme dans la couverture nationale (constaté en base).
+              Le bouton reste donc bloqué tant que rien n'est choisi. */}
+          {localities.length === 0 && (
+            <p className="rounded-xl border border-accent/40 bg-accent/10 px-3 py-2 text-xs text-accent-ink">
+              Aucune localité disponible pour votre région. Reconnectez-vous une
+              fois en ligne pour les récupérer.
+            </p>
+          )}
+          <Button
+            onClick={() => setStep(1)}
+            disabled={!selectedVillage}
+            className="font-display mt-1 h-11 font-bold"
+          >
             Continuer
           </Button>
         </div>

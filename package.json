@@ -10,7 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "demo:record": "playwright test tests/demo-video.spec.ts --workers=1",
+    "demo:video": "pnpm demo:record && node scripts/build-demo-video.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

@@ -11,6 +11,15 @@ const BASE_URL = `http://localhost:${PORT}`;
  */
 export default defineConfig({
   testDir: "./tests",
+  // La vidéo de démonstration n'est pas un test : elle dure des minutes et
+  // ne vérifie rien. Elle est donc exclue de la suite, sauf quand on la
+  // lance explicitement (`pnpm demo:video`, qui pose DEMO_VIDEO=1).
+  // Détecté depuis la ligne de commande plutôt qu'une variable
+  // d'environnement : évite d'ajouter cross-env pour un seul usage, et
+  // fonctionne à l'identique sous Windows et sous Unix.
+  testIgnore: process.argv.some((a) => a.includes("demo-video"))
+    ? []
+    : ["**/demo-video.spec.ts"],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

@@ -68,3 +68,7 @@ candidature-docs/
 # Rien de tout cela ne concerne le projet lui-même.
 .claude/
 CLAUDE.md
+
+# Enregistrements bruts de la vidéo de démo (WebM) : seul le MP4 converti
+# dans public/demo est versionné.
+/demo-video-raw

@@ -214,6 +214,24 @@ export function TryItSection() {
           </ol>
 
           <div className="flex flex-col gap-4 lg:sticky lg:top-24">
+            {/* La démonstration filmée passe avant l'animation : elle montre
+                l'application réelle, pas une illustration. */}
+            <figure className="overflow-hidden rounded-3xl border border-[#DCE4E1] bg-foreground">
+              <video
+                src="/demo/parentrelais-demo.mp4"
+                controls
+                playsInline
+                preload="metadata"
+                poster="/screenshots/mobile-accueil.png"
+                className="mx-auto block max-h-[520px] w-auto"
+                aria-label="Démonstration : une séance animée sans réseau, puis synchronisée"
+              />
+              <figcaption className="px-4 py-3 text-center text-xs text-white/70">
+                73 secondes — du premier module à la remontée dans le tableau
+                de bord, réseau coupé au milieu.
+              </figcaption>
+            </figure>
+
             <OfflineAnimation />
 
             <div className="rounded-2xl border border-[#DCE4E1] bg-white p-4">

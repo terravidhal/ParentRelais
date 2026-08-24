@@ -63,3 +63,8 @@ candidature-docs/
 # design reference projects — inspiration only, never built or deployed
 /parentrelais-landing/
 /parentrelais-preview/
+
+# Outillage Claude Code : configuration locale et fichiers de session.
+# Rien de tout cela ne concerne le projet lui-même.
+.claude/
+CLAUDE.md

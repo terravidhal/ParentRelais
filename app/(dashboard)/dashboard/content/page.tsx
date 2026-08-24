@@ -9,9 +9,10 @@ import { ModulePublicationControls } from "@/components/dashboard/module-publica
 import { TableToolbar } from "@/components/dashboard/table-toolbar";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 
-/** 5 par page : avec 8 modules, un seuil à 10 ne se déclenchait jamais et la
- *  pagination restait invisible. */
-const PAGE_SIZE = 5;
+/** Deux tableaux, deux paginations indépendantes : la matrice est plus large
+ *  (une colonne par langue) et respire mieux avec moins de lignes. */
+const MATRIX_PAGE_SIZE = 4;
+const PUBLICATION_PAGE_SIZE = 5;
 import { QuizEditor, type QuizEditorQuestion } from "@/components/dashboard/quiz-editor";
 
 /**
@@ -22,13 +23,19 @@ import { QuizEditor, type QuizEditorQuestion } from "@/components/dashboard/quiz
 export default async function DashboardContentPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; statut?: string; page?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    statut?: string;
+    page?: string;
+    matrice?: string;
+  }>;
 }) {
   const supabase = await createClient();
   const params = await searchParams;
   const search = (params.q ?? "").trim().toLowerCase();
   const statusFilter = (params.statut ?? "").trim();
   const page = Math.max(1, Number(params.page ?? 1) || 1);
+  const matrixPage = Math.max(1, Number(params.matrice ?? 1) || 1);
 
   // Les langues viennent du référentiel : elles étaient codées en dur ici,
   // dans la matrice, dans les actions et dans les pastilles du facilitateur —
@@ -113,11 +120,24 @@ export default async function DashboardContentPage({
 
   // Pagination appliquée APRÈS le filtrage : le compteur doit refléter la
   // recherche en cours, pas le catalogue entier.
-  const pageCount = Math.max(1, Math.ceil(visibleRows.length / PAGE_SIZE));
+  const pageCount = Math.max(
+    1,
+    Math.ceil(visibleRows.length / PUBLICATION_PAGE_SIZE),
+  );
   const currentPage = Math.min(page, pageCount);
   const pagedRows = visibleRows.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
+    (currentPage - 1) * PUBLICATION_PAGE_SIZE,
+    currentPage * PUBLICATION_PAGE_SIZE,
+  );
+
+  const matrixPageCount = Math.max(
+    1,
+    Math.ceil(visibleRows.length / MATRIX_PAGE_SIZE),
+  );
+  const currentMatrixPage = Math.min(matrixPage, matrixPageCount);
+  const matrixRows = visibleRows.slice(
+    (currentMatrixPage - 1) * MATRIX_PAGE_SIZE,
+    currentMatrixPage * MATRIX_PAGE_SIZE,
   );
 
   const nextPosition =
@@ -208,7 +228,7 @@ export default async function DashboardContentPage({
             deux barres distinctes sur la même page auraient été un piège —
             filtrer d'un côté sans comprendre pourquoi l'autre ne bouge pas. */}
         <ContentMatrix
-          rows={pagedRows}
+          rows={matrixRows}
           columns={columns}
           renderCellAction={(moduleId, lang) => (
             <MediaUploadCell moduleId={moduleId} lang={lang} />
@@ -219,6 +239,16 @@ export default async function DashboardContentPage({
             Aucun module ne correspond à cette recherche.
           </p>
         )}
+
+        <div className="-mx-5 mt-3">
+          <TablePagination
+            page={currentMatrixPage}
+            pageCount={matrixPageCount}
+            totalCount={visibleRows.length}
+            itemLabel="modules"
+            paramName="matrice"
+          />
+        </div>
       </div>
 
       {/* Publication : c'est ici, et nulle part ailleurs, que se décide ce

@@ -199,19 +199,6 @@ numérique :
 
 ---
 
-## 📁 Documentation technique
-
-| Fichier | Contenu |
-| --- | --- |
-| `docs/01-CONTEXT.md` | Le problème, la solution, le concours et ses critères |
-| `docs/02-ARCHITECTURE.md` | Stack, structure des dossiers, flux hors-ligne → synchro |
-| `docs/03-DATA-MODEL.md` | Schéma Supabase, schéma local Dexie, logique de synchro |
-| `docs/04-SCREENS.md` | Toutes les pages, leur rôle, leurs états |
-| `docs/05-DESIGN-SYSTEM.md` | Couleurs, typographie, accessibilité |
-| `docs/06-BUILD-PLAN.md` | Feuille de route par phases |
-
----
-
 ## ❓ En cas de problème
 
 **« Contenu non reçu » à l'ouverture de l'app facilitateur**

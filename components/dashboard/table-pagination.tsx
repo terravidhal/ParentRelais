@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface TablePaginationProps {
   page: number;
@@ -10,6 +9,11 @@ interface TablePaginationProps {
   totalCount: number;
   /** Nom de ce qu'on compte, au pluriel : « facilitateurs », « séances ». */
   itemLabel: string;
+  /**
+   * Paramètre d'URL portant le numéro de page. Configurable pour que deux
+   * tableaux d'une même page ne se marchent pas dessus.
+   */
+  paramName?: string;
 }
 
 /**
@@ -39,14 +43,15 @@ export function TablePagination({
   pageCount,
   totalCount,
   itemLabel,
+  paramName = "page",
 }: TablePaginationProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const hrefFor = (target: number) => {
     const next = new URLSearchParams(searchParams.toString());
-    if (target <= 1) next.delete("page");
-    else next.set("page", String(target));
+    if (target <= 1) next.delete(paramName);
+    else next.set(paramName, String(target));
     const qs = next.toString();
     return qs ? `${pathname}?${qs}` : pathname;
   };
@@ -65,9 +70,9 @@ export function TablePagination({
         Page {page} sur {pageCount} · {totalCount} {itemLabel}
       </p>
       <div className="flex flex-wrap items-center gap-1.5">
-        {/* Numéros de page : avec Précédent/Suivant seuls, atteindre la page
-            7 demandait six clics. La fenêtre glissante évite d'aligner
-            trente numéros quand le volume grandit. */}
+        {/* Numéros seuls : Précédent/Suivant obligeaient à six clics pour
+            atteindre la page 7. La fenêtre glissante évite d'aligner trente
+            numéros quand le volume grandit. */}
         {pageNumbers(page, pageCount).map((n, i) =>
           n === null ? (
             <span key={`gap-${i}`} className="px-1 text-sm text-muted-foreground">
@@ -91,35 +96,6 @@ export function TablePagination({
               {n}
             </Link>
           ),
-        )}
-      </div>
-
-      <div className="flex items-center gap-2">
-        {page > 1 ? (
-          <Link
-            href={hrefFor(page - 1)}
-            rel="prev"
-            className="flex h-11 items-center gap-1 rounded-xl border border-border px-3 text-sm font-semibold"
-          >
-            <ChevronLeft size={15} aria-hidden="true" /> Précédent
-          </Link>
-        ) : (
-          <span className="flex h-11 items-center gap-1 rounded-xl border border-border px-3 text-sm font-semibold opacity-40">
-            <ChevronLeft size={15} aria-hidden="true" /> Précédent
-          </span>
-        )}
-        {page < pageCount ? (
-          <Link
-            href={hrefFor(page + 1)}
-            rel="next"
-            className="flex h-11 items-center gap-1 rounded-xl border border-border px-3 text-sm font-semibold"
-          >
-            Suivant <ChevronRight size={15} aria-hidden="true" />
-          </Link>
-        ) : (
-          <span className="flex h-11 items-center gap-1 rounded-xl border border-border px-3 text-sm font-semibold opacity-40">
-            Suivant <ChevronRight size={15} aria-hidden="true" />
-          </span>
         )}
       </div>
     </div>

@@ -77,9 +77,26 @@ export default async function DashboardPage() {
           <h3 className="font-display mb-4 font-bold">
             Familles touchées par localité
           </h3>
+          {/* Aperçu borné aux dix premières localités, triées par volume :
+              un graphique à barres devient illisible au-delà, et le détail
+              complet est déjà dans les Rapports. */}
           <CoverageBars
-            data={rows.map((r) => ({ label: r.locality, value: r.families_reached }))}
+            data={[...rows]
+              .sort((a, b) => b.families_reached - a.families_reached)
+              .slice(0, 10)
+              .map((r) => ({ label: r.locality, value: r.families_reached }))}
           />
+          {rows.length > 10 && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              10 localités affichées sur {rows.length}.{" "}
+              <Link
+                href="/dashboard/reports"
+                className="font-semibold text-primary hover:underline"
+              >
+                Voir toutes les séances
+              </Link>
+            </p>
+          )}
         </div>
 
         <div id="tour-facilitateurs-actifs" className="surface-raised">

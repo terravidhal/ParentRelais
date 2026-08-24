@@ -2,6 +2,20 @@ import { ChevronLeft, MapPin, BookOpen, Users, Award } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { TableToolbar } from "@/components/dashboard/table-toolbar";
+import { TablePagination } from "@/components/dashboard/table-pagination";
+
+const PAGE_SIZE = 4;
+
+/** Début de la période demandée, ou null si aucune. */
+function periodStart(period: string): string | null {
+  const now = new Date();
+  if (period === "30j") now.setDate(now.getDate() - 30);
+  else if (period === "3m") now.setMonth(now.getMonth() - 3);
+  else if (period === "12m") now.setMonth(now.getMonth() - 12);
+  else return null;
+  return now.toISOString();
+}
 
 /**
  * Server component — historique des séances d'un facilitateur donné. Même
@@ -12,10 +26,17 @@ import { StatCard } from "@/components/dashboard/stat-card";
  */
 export default async function FacilitatorDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ facilitator_id: string }>;
+  searchParams: Promise<{ q?: string; periode?: string; page?: string }>;
 }) {
   const { facilitator_id } = await params;
+  const query = await searchParams;
+  const page = Math.max(1, Number(query.page ?? 1) || 1);
+  const search = (query.q ?? "").trim();
+  const period = (query.periode ?? "").trim();
+  const since = periodStart(period);
   const supabase = await createClient();
 
   const { data: facilitator } = await supabase
@@ -24,20 +45,47 @@ export default async function FacilitatorDetailPage({
     .eq("facilitator_id", facilitator_id)
     .maybeSingle();
 
-  const { data: sessions } = await supabase
+  // Découpage côté Supabase : un facilitateur actif accumule une séance par
+  // animation, sans limite dans le temps.
+  let sessionsQuery = supabase
     .from("sessions")
-    .select("*")
+    .select("*", { count: "exact" })
     .eq("facilitator_id", facilitator_id)
     .order("held_at", { ascending: false });
 
+  if (search) sessionsQuery = sessionsQuery.ilike("locality", `%${search}%`);
+  if (since) sessionsQuery = sessionsQuery.gte("held_at", since);
+
+  const { data: sessions, count } = await sessionsQuery.range(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE - 1,
+  );
+
   const rows = sessions ?? [];
+  const totalCount = count ?? rows.length;
+  const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  // Les indicateurs portent sur TOUTES les séances, pas sur la page
+  // affichée : un total qui changerait en tournant les pages n'indiquerait
+  // rien.
+  const { data: allSessions } = await supabase
+    .from("sessions")
+    .select("parents_total, quiz_score, quiz_max, locality")
+    .eq("facilitator_id", facilitator_id);
+  const everySession = allSessions ?? [];
   const displayName = facilitator?.full_name ?? `${facilitator_id.slice(0, 8)}…`;
-  const totalFamilies = rows.reduce((n, s) => n + s.parents_total, 0);
+  const totalFamilies = everySession.reduce((n, s) => n + s.parents_total, 0);
+  // Un module sans quiz enregistre quiz_max = 0 : la division produisait NaN,
+  // affiché tel quel dans l'indicateur (constaté en capture). On n'agrège
+  // que les séances réellement notées.
+  const scored = everySession.filter((s) => s.quiz_max > 0);
   const avgQuiz =
-    rows.length === 0
+    scored.length === 0
       ? 0
       : Math.round(
-          (rows.reduce((n, s) => n + s.quiz_score / s.quiz_max, 0) / rows.length) * 100,
+          (scored.reduce((n, s) => n + s.quiz_score / s.quiz_max, 0) /
+            scored.length) *
+            100,
         );
 
   return (
@@ -64,7 +112,7 @@ export default async function FacilitatorDetailPage({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Séances animées"
-          value={rows.length}
+          value={totalCount}
           icon={<BookOpen size={18} aria-hidden="true" />}
           color="primary"
         />
@@ -80,7 +128,11 @@ export default async function FacilitatorDetailPage({
           value={avgQuiz}
           icon={<Award size={18} aria-hidden="true" />}
           color="accent"
-          hint={rows.length > 0 ? `Sur ${rows.length} séance${rows.length > 1 ? "s" : ""}` : undefined}
+          hint={
+            scored.length > 0
+              ? `Sur ${scored.length} séance${scored.length > 1 ? "s" : ""} notée${scored.length > 1 ? "s" : ""}`
+              : "Aucune séance avec quiz"
+          }
         />
       </div>
 
@@ -90,9 +142,27 @@ export default async function FacilitatorDetailPage({
           <h3 className="font-display font-bold">Historique des séances</h3>
         </div>
 
+        <TableToolbar
+          searchLabel="Rechercher une localité"
+          placeholder="Maroua, Mokolo…"
+          filters={[
+            {
+              name: "periode",
+              label: "Période",
+              options: [
+                { value: "30j", label: "30 derniers jours" },
+                { value: "3m", label: "3 derniers mois" },
+                { value: "12m", label: "12 derniers mois" },
+              ],
+            },
+          ]}
+        />
+
         {rows.length === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">
-            Aucune séance synchronisée pour ce facilitateur.
+            {search || period
+              ? "Aucune séance ne correspond à cette recherche."
+              : "Aucune séance synchronisée pour ce facilitateur."}
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -127,6 +197,13 @@ export default async function FacilitatorDetailPage({
             ))}
           </div>
         )}
+
+        <TablePagination
+          page={page}
+          pageCount={pageCount}
+          totalCount={totalCount}
+          itemLabel="séances"
+        />
       </div>
     </div>
   );

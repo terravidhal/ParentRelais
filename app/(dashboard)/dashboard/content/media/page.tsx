@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft, Library } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { TablePagination } from "@/components/dashboard/table-pagination";
 import { MediaLibraryList } from "@/components/dashboard/media-library-list";
 
 /**
@@ -8,7 +9,15 @@ import { MediaLibraryList } from "@/components/dashboard/media-library-list";
  * de voir ce qui existe sans revenir case par case sur la matrice de
  * contenus (app/(dashboard)/dashboard/content/page.tsx).
  */
-export default async function MediaLibraryPage() {
+const PAGE_SIZE = 8;
+
+export default async function MediaLibraryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Math.max(1, Number(params.page ?? 1) || 1);
   const supabase = await createClient();
 
   const { data: translations } = await supabase
@@ -17,13 +26,21 @@ export default async function MediaLibraryPage() {
     .or("audio_url.not.is.null,video_url.not.is.null,subtitles_url.not.is.null")
     .order("module_id");
 
-  const entries = (translations ?? []).map((t) => ({
+  const allEntries = (translations ?? []).map((t) => ({
     moduleId: t.module_id,
     lang: t.lang,
     audioUrl: t.audio_url,
     videoUrl: t.video_url,
     subtitlesUrl: t.subtitles_url,
   }));
+
+  // Une ligne par module × langue : le volume croît avec les deux.
+  const pageCount = Math.max(1, Math.ceil(allEntries.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const entries = allEntries.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   return (
     <div>
@@ -48,6 +65,15 @@ export default async function MediaLibraryPage() {
           <Library size={16} aria-hidden="true" /> Bibliothèque média
         </h3>
         <MediaLibraryList entries={entries} />
+
+        <div className="-mx-5 mt-3">
+          <TablePagination
+            page={currentPage}
+            pageCount={pageCount}
+            totalCount={allEntries.length}
+            itemLabel="fichiers"
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
 /**
@@ -24,6 +26,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
+
+  // Un toast dure 5 s : déclenché dans la zone facilitateur, il suivait
+  // l'utilisateur sur la landing publique, où « Synchronisation impossible »
+  // n'a aucun sens et inquiète sans raison. On les efface au changement de
+  // zone plutôt que de raccourcir la durée, qui est correcte là où le
+  // message compte.
+  const pathname = usePathname();
+  useEffect(() => {
+    toast.dismiss();
+  }, [pathname]);
 
   const [queryClient] = useState(
     () =>

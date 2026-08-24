@@ -1,5 +1,9 @@
 import type { createClient } from "@/lib/supabase/client";
-import { getPendingSessions, markSessionsSynced } from "@/lib/db/outbox";
+import {
+  getPendingSessions,
+  markSessionsSynced,
+  reassignSessions,
+} from "@/lib/db/outbox";
 import { readFacilitatorSession } from "@/lib/db/meta";
 import { fetchPublishedModules } from "@/lib/content/fetch-content";
 import { replaceModules } from "@/lib/db/content-store";
@@ -97,7 +101,34 @@ export async function syncOutbox(
     return { syncedCount: 0, failedCount: 0 };
   }
 
-  const rows = pending.map((s) => ({
+  // Les séances antérieures à l'authentification portent un identifiant
+  // local généré sur l'appareil, sans compte correspondant. La RLS les
+  // refuse définitivement (403) — et comme l'upsert part en un seul lot,
+  // UNE seule de ces lignes faisait échouer toutes les autres, à chaque
+  // cycle, indéfiniment.
+  //
+  // On les réattribue au facilitateur connecté : ce sont ses propres
+  // séances, animées avant que son compte n'existe. Les supprimer serait la
+  // seule autre issue, et violerait la règle 4 (la synchro ne perd jamais de
+  // données).
+  const identity = await readFacilitatorSession();
+  const ownedPending = identity
+    ? pending.filter((s) => s.facilitator_id === identity.facilitator_id)
+    : pending;
+  const orphaned = identity
+    ? pending.filter((s) => s.facilitator_id !== identity.facilitator_id)
+    : [];
+
+  if (orphaned.length > 0 && identity) {
+    await reassignSessions(
+      orphaned.map((s) => s.client_uuid),
+      identity.facilitator_id,
+    );
+    // Relecture : les lignes réattribuées doivent partir dans ce même cycle.
+    return syncOutbox(supabase);
+  }
+
+  const rows = ownedPending.map((s) => ({
     client_uuid: s.client_uuid,
     facilitator_id: s.facilitator_id,
     module_id: s.module_id,
@@ -126,6 +157,6 @@ export async function syncOutbox(
 
   return {
     syncedCount: confirmedUuids.length,
-    failedCount: pending.length - confirmedUuids.length,
+    failedCount: ownedPending.length - confirmedUuids.length,
   };
 }

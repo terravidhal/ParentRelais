@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ChevronLeft, Eye, EyeOff } from "lucide-react";
+import { LogoMark } from "@/components/ui/logo-mark";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,8 @@ function BrandPanel() {
       />
       <div className="absolute inset-0 bg-linear-to-t from-brand-accent/90 via-brand-accent/50 to-brand-accent/20" />
       <div className="absolute bottom-10 left-10 right-10 text-primary-foreground">
-        <p className="font-display text-sm font-semibold tracking-wide opacity-90">
+        <p className="font-display flex items-center gap-2 text-sm font-semibold tracking-wide opacity-90">
+          <LogoMark className="h-5 w-5" />
           PARENTRELAIS
         </p>
         <p className="font-display mt-1 text-2xl font-bold">
@@ -114,7 +116,8 @@ export default function DashboardLoginPage() {
         <BrandPanel />
         <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10 lg:min-h-0 lg:bg-background">
           <div className="w-full max-w-md surface-raised">
-            <p className="font-display mb-1 text-xs font-semibold tracking-wide text-brand-accent">
+            <p className="font-display mb-1 flex items-center gap-2 text-xs font-semibold tracking-wide text-brand-accent">
+              <LogoMark className="h-5 w-5" />
               PARENTRELAIS
             </p>
             <h1 className="font-display mb-6 text-xl font-bold">
@@ -178,7 +181,8 @@ export default function DashboardLoginPage() {
             <ChevronLeft size={16} aria-hidden="true" /> Accueil
           </Link>
 
-          <p className="font-display mb-1 text-xs font-semibold tracking-wide text-brand-accent">
+          <p className="font-display mb-1 flex items-center gap-2 text-xs font-semibold tracking-wide text-brand-accent">
+            <LogoMark className="h-5 w-5" />
             PARENTRELAIS
           </p>
           <h1 className="font-display mb-4 text-xl font-bold">

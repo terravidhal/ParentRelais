@@ -705,7 +705,17 @@ export function LandingPage() {
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold text-white/55">
             <span>UNICEF Cameroon × MINPROFF</span>
             <span>Prototype 2026</span>
-            <span>Conçu pour le terrain</span>
+            <span>
+              © 2026 —{" "}
+              <a
+                href="https://github.com/terravidhal"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#7BD0D9] hover:underline"
+              >
+                Vidhal Elame
+              </a>
+            </span>
           </div>
           <div className="flex items-center gap-4 text-xs">
             <Link href="/login" className="font-bold text-[#7BD0D9] hover:underline">

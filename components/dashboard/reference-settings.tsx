@@ -23,6 +23,10 @@ export interface ReferenceRegion {
   localities: string[];
 }
 
+/** Le Cameroun compte 10 régions, chacune avec ses localités : la liste
+ *  dépassera vite la hauteur d'un écran. */
+const PAGE_SIZE = 5;
+
 const INPUT_CLASS =
   "h-11 rounded-xl border border-border bg-background px-3 text-sm font-normal";
 
@@ -44,6 +48,8 @@ export function ReferenceSettings({
   const [addingLang, setAddingLang] = useState(false);
   const [addingRegion, setAddingRegion] = useState(false);
   const [addingLocality, setAddingLocality] = useState<number | null>(null);
+  const [langPage, setLangPage] = useState(1);
+  const [regionPage, setRegionPage] = useState(1);
   const langFormRef = useRef<HTMLFormElement>(null);
   const regionFormRef = useRef<HTMLFormElement>(null);
 
@@ -143,7 +149,9 @@ export function ReferenceSettings({
         )}
 
         <ul className="flex flex-col gap-2">
-          {languages.map((l) => (
+          {languages
+            .slice((langPage - 1) * PAGE_SIZE, langPage * PAGE_SIZE)
+            .map((l) => (
             <li
               key={l.code}
               className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border p-3"
@@ -176,6 +184,13 @@ export function ReferenceSettings({
             </li>
           ))}
         </ul>
+
+        <InlinePagination
+          page={langPage}
+          total={languages.length}
+          onChange={setLangPage}
+          label="langues"
+        />
       </section>
 
       <section className="surface-raised">
@@ -237,7 +252,9 @@ export function ReferenceSettings({
         )}
 
         <ul className="flex flex-col gap-3">
-          {regions.map((r) => (
+          {regions
+            .slice((regionPage - 1) * PAGE_SIZE, regionPage * PAGE_SIZE)
+            .map((r) => (
             <li key={r.id} className="rounded-xl border border-border p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-semibold">{r.name}</span>
@@ -289,7 +306,65 @@ export function ReferenceSettings({
             </li>
           ))}
         </ul>
+
+        <InlinePagination
+          page={regionPage}
+          total={regions.length}
+          onChange={setRegionPage}
+          label="régions"
+        />
       </section>
+    </div>
+  );
+}
+
+/**
+ * Pagination locale, à état React plutôt qu'en URL : ces deux listes vivent
+ * sur la même page, et deux paramètres d'URL concurrents rendraient les
+ * liens partagés ambigus.
+ */
+function InlinePagination({
+  page,
+  total,
+  onChange,
+  label,
+}: {
+  page: number;
+  total: number;
+  onChange: (page: number) => void;
+  label: string;
+}) {
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (pageCount <= 1) {
+    return (
+      <p className="mt-3 text-xs text-muted-foreground">
+        {total} {label}
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+      <p className="text-xs text-muted-foreground">
+        Page {page} sur {pageCount} · {total} {label}
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            aria-current={n === page ? "page" : undefined}
+            className={
+              n === page
+                ? "font-display flex h-11 min-w-11 items-center justify-center rounded-xl bg-primary px-2 text-sm font-semibold text-primary-foreground"
+                : "font-display flex h-11 min-w-11 items-center justify-center rounded-xl border border-border px-2 text-sm font-semibold"
+            }
+          >
+            {n}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

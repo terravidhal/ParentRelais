@@ -7,6 +7,10 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { CreateModuleForm } from "@/components/dashboard/create-module-form";
 import { ModulePublicationControls } from "@/components/dashboard/module-publication-controls";
 import { TableToolbar } from "@/components/dashboard/table-toolbar";
+import { TablePagination } from "@/components/dashboard/table-pagination";
+
+/** Le catalogue reste petit, mais la cohérence d'interface prime. */
+const PAGE_SIZE = 10;
 import { QuizEditor, type QuizEditorQuestion } from "@/components/dashboard/quiz-editor";
 
 /**
@@ -17,12 +21,13 @@ import { QuizEditor, type QuizEditorQuestion } from "@/components/dashboard/quiz
 export default async function DashboardContentPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; statut?: string }>;
+  searchParams: Promise<{ q?: string; statut?: string; page?: string }>;
 }) {
   const supabase = await createClient();
   const params = await searchParams;
   const search = (params.q ?? "").trim().toLowerCase();
   const statusFilter = (params.statut ?? "").trim();
+  const page = Math.max(1, Number(params.page ?? 1) || 1);
 
   // Les langues viennent du référentiel : elles étaient codées en dur ici,
   // dans la matrice, dans les actions et dans les pastilles du facilitateur —
@@ -104,6 +109,15 @@ export default async function DashboardContentPage({
     if (statusFilter === "archive") return r.archived;
     return true;
   });
+
+  // Pagination appliquée APRÈS le filtrage : le compteur doit refléter la
+  // recherche en cours, pas le catalogue entier.
+  const pageCount = Math.max(1, Math.ceil(visibleRows.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pagedRows = visibleRows.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   const nextPosition =
     rows.reduce((max, r) => Math.max(max, r.position), 0) + 1;
@@ -193,7 +207,7 @@ export default async function DashboardContentPage({
             deux barres distinctes sur la même page auraient été un piège —
             filtrer d'un côté sans comprendre pourquoi l'autre ne bouge pas. */}
         <ContentMatrix
-          rows={visibleRows}
+          rows={pagedRows}
           columns={columns}
           renderCellAction={(moduleId, lang) => (
             <MediaUploadCell moduleId={moduleId} lang={lang} />
@@ -218,7 +232,7 @@ export default async function DashboardContentPage({
 
 
         <ul className="flex flex-col gap-3">
-          {visibleRows.map((row) => {
+          {pagedRows.map((row) => {
             const pendingLangs = languages.map((l) => l.code).filter(
               (lang) => row.statusByLang[lang] !== "ready",
             );
@@ -277,6 +291,15 @@ export default async function DashboardContentPage({
               : "Aucun module ne correspond à cette recherche."}
           </p>
         )}
+
+        <div className="-mx-5 mt-3">
+          <TablePagination
+            page={currentPage}
+            pageCount={pageCount}
+            totalCount={visibleRows.length}
+            itemLabel="modules"
+          />
+        </div>
       </div>
     </div>
   );

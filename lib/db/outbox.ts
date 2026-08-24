@@ -71,3 +71,33 @@ export async function markSessionsSynced(
     );
   }
 }
+
+/**
+ * Réattribue des séances à l'identité courante.
+ *
+ * Cas visé : les séances animées AVANT que le facilitateur n'ait un compte
+ * Supabase portent un identifiant local, sans équivalent côté serveur. La
+ * RLS les refuse définitivement (403), et comme la synchro envoie un seul
+ * lot, une seule de ces lignes bloquait toutes les autres à chaque cycle.
+ *
+ * Ce sont ses propres séances : les lui réattribuer est la seule issue qui
+ * ne perde aucune donnée (CLAUDE.md règle 4).
+ */
+export async function reassignSessions(
+  clientUuids: string[],
+  facilitatorId: string,
+): Promise<void> {
+  if (clientUuids.length === 0) return;
+  try {
+    await db.transaction("rw", db.outbox, async () => {
+      for (const uuid of clientUuids) {
+        await db.outbox.update(uuid, { facilitator_id: facilitatorId });
+      }
+    });
+  } catch (error: unknown) {
+    console.error("[outbox] réattribution des séances échouée:", error);
+    throw new Error("Impossible de réattribuer les séances en attente", {
+      cause: error,
+    });
+  }
+}

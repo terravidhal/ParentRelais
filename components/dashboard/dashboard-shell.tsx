@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   HelpCircle,
+  Loader2,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,11 @@ export function DashboardShell({ userEmail, children }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Retour immédiat au clic : ces pages sont rendues côté serveur, et sans
+  // signal l'utilisateur croit que le lien est cassé — constaté sur
+  // téléphone, où la latence réseau rend l'attente bien plus longue.
+  const [isNavigating, startNavigation] = useTransition();
+  const [target, setTarget] = useState<string | null>(null);
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
@@ -104,6 +110,10 @@ export function DashboardShell({ userEmail, children }: DashboardShellProps) {
                 id={item.id}
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
+                onClick={() => {
+                  setTarget(item.href);
+                  startNavigation(() => router.push(item.href));
+                }}
                 className={cn(
                   "flex h-11 items-center gap-2.5 rounded-xl px-3 text-sm font-semibold motion-safe:transition-colors",
                   isActive
@@ -111,7 +121,15 @@ export function DashboardShell({ userEmail, children }: DashboardShellProps) {
                     : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
                 )}
               >
-                <Icon size={16} aria-hidden="true" />
+                {isNavigating && target === item.href ? (
+                  <Loader2
+                    size={16}
+                    aria-hidden="true"
+                    className="motion-safe:animate-spin"
+                  />
+                ) : (
+                  <Icon size={16} aria-hidden="true" />
+                )}
                 {item.label}
               </Link>
             );

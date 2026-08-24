@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 interface TablePaginationProps {
   page: number;
@@ -46,7 +47,17 @@ export function TablePagination({
   paramName = "page",
 }: TablePaginationProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
+  // Ces tableaux sont rendus côté serveur : sans retour au clic, l'utilisateur
+  // appuie sur « 2 » et rien ne bouge pendant la requête.
+  const [isPending, startTransition] = useTransition();
+  const [target, setTarget] = useState<number | null>(null);
+
+  const goTo = (n: number) => {
+    setTarget(n);
+    startTransition(() => router.push(hrefFor(n)));
+  };
 
   const hrefFor = (target: number) => {
     const next = new URLSearchParams(searchParams.toString());
@@ -87,14 +98,23 @@ export function TablePagination({
               {n}
             </span>
           ) : (
-            <Link
+            <button
               key={n}
-              href={hrefFor(n)}
+              type="button"
+              onClick={() => goTo(n)}
               aria-label={`Page ${n}`}
               className="font-display flex h-11 min-w-11 items-center justify-center rounded-xl border border-border px-2 text-sm font-semibold"
             >
-              {n}
-            </Link>
+              {isPending && target === n ? (
+                <Loader2
+                  size={14}
+                  aria-hidden="true"
+                  className="motion-safe:animate-spin"
+                />
+              ) : (
+                n
+              )}
+            </button>
           ),
         )}
       </div>

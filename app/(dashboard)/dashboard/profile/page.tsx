@@ -1,15 +1,13 @@
 import { redirect } from "next/navigation";
 import { Mail, Shield, UserCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { AdminPasswordForm } from "@/components/dashboard/admin-password-form";
 import { AdminSignOutButton } from "@/components/dashboard/admin-sign-out-button";
 
 /**
  * Profil de l'administrateur.
  *
  * Manquait entièrement : le seul moyen de se déconnecter était le bouton de
- * l'en-tête, et rien ne permettait de changer son mot de passe sans passer
- * par le lien de réinitialisation envoyé par email.
+ * l'en-tête, que rien ne signalait.
  */
 export default async function DashboardProfilePage() {
   const supabase = await createClient();
@@ -66,10 +64,6 @@ export default async function DashboardProfilePage() {
           </div>
         </dl>
       </section>
-
-      <div className="mt-4">
-        <AdminPasswordForm />
-      </div>
 
       <div className="mt-4">
         <AdminSignOutButton />

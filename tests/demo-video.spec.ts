@@ -187,8 +187,11 @@ async function titleCard(
 test("démonstration ParentRelais", async ({ page, context }) => {
   test.setTimeout(240_000);
 
-  // ---------- Ouverture ----------
-  await page.goto("/login");
+  // ---------- Ouverture : la landing ----------
+  // On démarre sur la page publique, pas sur /login : le spectateur doit
+  // comprendre la structure du produit — une porte d'entrée, deux espaces.
+  await page.goto("/");
+  await page.waitForTimeout(1200);
   await installOverlay(page);
   await titleCard(
     page,
@@ -198,7 +201,26 @@ test("démonstration ParentRelais", async ({ page, context }) => {
     2600,
   );
 
-  await note(page, "Le facilitateur se connecte une seule fois, en ligne.");
+  await note(page, "Tout part d'une simple adresse web.", 2000);
+  await clearNote(page);
+  await page.mouse.wheel(0, 260);
+  await page.waitForTimeout(1100);
+  await installOverlay(page);
+  await note(page, "Deux espaces : le terrain, et le pilotage national.", 2200);
+  await clearNote(page);
+
+  // ---------- L'espace facilitateur ----------
+  await titleCard(
+    page,
+    "ESPACE 1",
+    "Le facilitateur",
+    "Celui qui anime les séances, souvent sans réseau",
+  );
+  await page.goto("/login");
+  await page.waitForTimeout(1200);
+  await installOverlay(page);
+
+  await note(page, "Il se connecte une seule fois, en ligne.");
   await clearNote(page);
   await clickAt(page, 'button:has-text("Se connecter")');
   await page.waitForURL("/home", { timeout: 25_000 });
@@ -288,10 +310,16 @@ test("démonstration ParentRelais", async ({ page, context }) => {
   // ---------- Le pilotage ----------
   await titleCard(
     page,
-    "ÉTAPE 5",
-    "Côté UNICEF / MINPROFF",
-    "Les séances alimentent le pilotage national",
+    "ESPACE 2",
+    "Le pilotage national",
+    "UNICEF et MINPROFF suivent le programme",
   );
+  // Retour par la landing : c'est le chemin qu'empruntera le jury.
+  await page.goto("/");
+  await page.waitForTimeout(1400);
+  await installOverlay(page);
+  await note(page, "Retour à l'accueil, direction l'espace de pilotage.", 1800);
+  await clearNote(page);
   await page.goto("/dashboard/login");
   await page.waitForTimeout(1200);
   await installOverlay(page);

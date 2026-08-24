@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { TryItSection } from "./try-it-section";
+import { DemoVideoSection } from "./demo-video-section";
 import { LogoMark } from "@/components/ui/logo-mark";
 
 /**
@@ -109,6 +110,12 @@ export function LandingPage() {
             </button>
             {/* Mis en avant : c'est le mode d'emploi du jury, la porte
                 d'entrée la plus utile de la page. */}
+            <button
+              onClick={() => scrollTo("demonstration")}
+              className="text-sm font-semibold text-[#6B7B77] motion-safe:transition-colors hover:text-foreground"
+            >
+              Démonstration
+            </button>
             <button
               onClick={() => scrollTo("essayer")}
               className="text-sm font-bold text-primary motion-safe:transition-colors hover:text-primary-dark"
@@ -351,6 +358,8 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      <DemoVideoSection />
 
       <section id="solution" className="relative bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">

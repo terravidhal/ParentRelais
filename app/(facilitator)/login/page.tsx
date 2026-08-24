@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, Loader2, WifiOff } from "lucide-react";
+import { LogoMark } from "@/components/ui/logo-mark";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -56,9 +57,15 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [pin, setPin] = useState("");
+  // Pré-rempli : c'était le SEUL champ vide du formulaire. Un juré qui
+  // choisit son propre code puis l'oublie se retrouve enfermé dehors, sur
+  // une application par ailleurs fonctionnelle.
+  const [pin, setPin] = useState("1234");
   const [error, setError] = useState<string | null>(null);
-  const [recoveryMode, setRecoveryMode] = useState(false);
+  // Récupération d'identité désactivée pendant l'évaluation (voir plus bas) :
+  // la constante est conservée plutôt que supprimée, car le mécanisme reste
+  // pertinent hors concours — un facilitateur qui oublie son PIN.
+  const recoveryMode = false;
   const [signingIn, setSigningIn] = useState(false);
 
   // En mode récupération, on retraite comme une première connexion : un
@@ -142,13 +149,15 @@ export default function LoginPage() {
               className="object-cover"
             />
             <div className="absolute inset-0 bg-linear-to-t from-primary-dark/90 via-primary-dark/65 to-primary-dark/30" />
-            <p className="font-display relative text-lg font-bold tracking-wide">
+            <p className="font-display relative flex items-center gap-2 text-lg font-bold tracking-wide">
+              <LogoMark className="h-6 w-6" />
               PARENTRELAIS
             </p>
           </div>
 
           <div className="hidden lg:block">
-            <p className="font-display text-xs font-semibold tracking-wide text-brand-accent-ink">
+            <p className="font-display flex items-center gap-2 text-xs font-semibold tracking-wide text-brand-accent-ink">
+              <LogoMark className="h-5 w-5" />
               PARENTRELAIS
             </p>
             <h1 className="font-display mt-1 text-2xl font-bold">
@@ -278,19 +287,17 @@ export default function LoginPage() {
         </div>
       )}
 
+      {/* Désactivé pendant l'évaluation : le PIN est pré-rempli à 1234, et
+          une réinitialisation créerait une nouvelle identité locale — de quoi
+          dérouter un juré qui cliquerait par curiosité. */}
       {existingSession && (
-        <button
-          type="button"
-          onClick={() => {
-            setRecoveryMode((v) => !v);
-            setError(null);
-            setPin("");
-          }}
-          className="h-12 text-sm font-semibold text-primary underline-offset-2 hover:underline"
-        >
-          {recoveryMode ? "Annuler et revenir à la connexion" : "PIN oublié ?"}
-            </button>
-          )}
+        <p className="text-center text-xs text-muted-foreground">
+          <span className="font-semibold">PIN oublié ?</span> Le code de
+          démonstration est{" "}
+          <span className="font-mono font-semibold">1234</span>, déjà rempli
+          ci-dessus.
+        </p>
+      )}
         </form>
       </div>
     </div>

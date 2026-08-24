@@ -10,6 +10,7 @@ import {
   Globe,
   LogOut,
   Settings,
+  UserCircle2,
   Menu,
   X,
   HelpCircle,
@@ -17,6 +18,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { DashboardOnboardingTour, runDashboardTour } from "./onboarding-tour";
+import { LogoMark } from "@/components/ui/logo-mark";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Couverture", icon: LayoutDashboard, id: "nav-coverage" },
@@ -24,6 +26,9 @@ const NAV_ITEMS = [
   { href: "/dashboard/reports", label: "Rapports", icon: FileDown, id: "nav-reports" },
   { href: "/dashboard/content", label: "Contenus", icon: Globe, id: "nav-content" },
   { href: "/dashboard/settings", label: "Référentiel", icon: Settings, id: "nav-settings" },
+  // Le profil n'était accessible qu'en cliquant sur l'email de l'en-tête —
+  // personne ne peut le deviner.
+  { href: "/dashboard/profile", label: "Mon profil", icon: UserCircle2, id: "nav-profile" },
 ] as const;
 
 interface DashboardShellProps {
@@ -76,7 +81,8 @@ export function DashboardShell({ userEmail, children }: DashboardShellProps) {
         )}
       >
         <div className="flex h-16 items-center justify-between px-5">
-          <p className="font-display text-sm font-bold tracking-wide text-accent-ink">
+          <p className="font-display flex items-center gap-2 text-sm font-bold tracking-wide text-accent-ink">
+            <LogoMark className="h-6 w-6" />
             PARENTRELAIS
           </p>
           <button

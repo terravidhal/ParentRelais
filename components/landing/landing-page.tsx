@@ -20,6 +20,8 @@ import {
   Smartphone,
   X,
 } from "lucide-react";
+import { TryItSection } from "./try-it-section";
+import { LogoMark } from "@/components/ui/logo-mark";
 
 /**
  * Assets fournis pour la landing, servis depuis public/images/landing/
@@ -50,19 +52,6 @@ const steps = [
   },
 ] as const;
 
-function LogoMark({ className = "h-8 w-8" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 512 512" className={className} aria-hidden="true">
-      <g fill="currentColor">
-        <circle cx="176" cy="164" r="48" />
-        <path d="M176 224c-58 0-96 46-96 112v22h140v-60c0-34 10-58 28-74-24-1-48 0-72 0z" />
-        <circle cx="322" cy="232" r="34" />
-        <path d="M322 276c-42 0-70 34-70 82v18h108v-52c0-24 6-40 16-52-18-1-38 4-54 4z" />
-      </g>
-    </svg>
-  );
-}
-
 export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -83,10 +72,10 @@ export function LandingPage() {
           Un jury qui ne défile pas ne le verrait jamais. */}
       <button
         type="button"
-        onClick={() => scrollTo("demo-access")}
+        onClick={() => scrollTo("essayer")}
         className="w-full bg-accent px-4 py-2 text-center text-xs font-bold text-foreground underline-offset-4 hover:underline"
       >
-        Jury : comptes de démonstration et test hors-ligne — voir les accès
+        Jury : mode d’emploi complet et comptes de démonstration — cliquez ici
       </button>
 
       <header className="relative z-20 border-b border-[#DCE4E1] bg-background/95 backdrop-blur-xl">
@@ -117,6 +106,14 @@ export function LandingPage() {
               className="text-sm font-semibold text-[#6B7B77] motion-safe:transition-colors hover:text-foreground"
             >
               Comment ça marche
+            </button>
+            {/* Mis en avant : c'est le mode d'emploi du jury, la porte
+                d'entrée la plus utile de la page. */}
+            <button
+              onClick={() => scrollTo("essayer")}
+              className="text-sm font-bold text-primary motion-safe:transition-colors hover:text-primary-dark"
+            >
+              Essayer
             </button>
             <button
               onClick={() => scrollTo("impact")}
@@ -160,6 +157,9 @@ export function LandingPage() {
               </button>
               <button onClick={() => scrollTo("parcours")} className="text-left font-semibold">
                 Comment ça marche
+              </button>
+              <button onClick={() => scrollTo("essayer")} className="text-left font-semibold">
+                Essayer
               </button>
               <button onClick={() => scrollTo("impact")} className="text-left font-semibold">
                 Pour le programme
@@ -539,6 +539,8 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      <TryItSection />
 
       <section id="impact" className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">

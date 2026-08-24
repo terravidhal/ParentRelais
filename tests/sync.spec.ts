@@ -4,7 +4,7 @@ import { skipFacilitatorOnboarding, loginAsDemoFacilitator } from "./helpers";
 /**
  * Test de synchronisation réelle contre le vrai Supabase de dev (.env.local).
  * Complète facilitator-journey.spec.ts, qui s'arrête au récap sans jamais
- * cliquer sur "Synchroniser" ni vérifier le passage pending → synced.
+ * cliquer sur "Envoyer maintenant" ni vérifier le passage pending → synced.
  */
 test.describe("Synchronisation", () => {
   test("une séance animée se synchronise et affiche un toast de succès", async ({
@@ -34,7 +34,7 @@ test.describe("Synchronisation", () => {
     await expect(page.getByText(/1 à synchroniser/)).toBeVisible();
 
     // Déclencher la synchronisation manuellement.
-    const syncButton = page.getByRole("button", { name: /Synchroniser/ });
+    const syncButton = page.getByRole("button", { name: /Envoyer maintenant/ });
     await expect(syncButton).toBeVisible();
     await syncButton.click();
 

@@ -248,16 +248,15 @@ export default function DashboardLoginPage() {
             <Button type="submit" disabled={loading} className="h-11 font-semibold">
               {loading ? "Connexion…" : "Se connecter"}
             </Button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("reset");
-                setError(null);
-              }}
-              className="h-11 text-xs font-semibold text-primary underline-offset-2 hover:underline"
-            >
-              Mot de passe oublié ?
-            </button>
+            {/* Désactivé pendant l'évaluation : Supabase refuse d'envoyer un
+                lien vers une adresse dont le domaine n'existe pas, ce qui est
+                le cas des comptes de démonstration (@parentrelais.app). Un
+                bouton grisé et expliqué vaut mieux qu'un lien qui échoue. */}
+            <p className="text-center text-xs text-muted-foreground">
+              <span className="font-semibold">Mot de passe oublié ?</span>{" "}
+              Indisponible pour les comptes de démonstration — le mot de passe
+              se change depuis « Mon profil » une fois connecté.
+            </p>
           </form>
         </div>
       </div>

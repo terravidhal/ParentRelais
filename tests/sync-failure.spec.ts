@@ -40,7 +40,7 @@ test.describe("Échec de synchronisation", () => {
     await page.getByRole("button", { name: "Revenir à l'accueil" }).click();
     await expect(page).toHaveURL("/home");
 
-    const syncButton = page.getByRole("button", { name: /Synchroniser/ });
+    const syncButton = page.getByRole("button", { name: /Envoyer maintenant/ });
     await expect(syncButton).toBeVisible();
     await syncButton.click();
 

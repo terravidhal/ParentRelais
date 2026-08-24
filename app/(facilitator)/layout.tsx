@@ -13,6 +13,7 @@ import { useSyncOutboxMutation } from "@/lib/hooks/use-sync-outbox-mutation";
 import { ConnectivityBanner } from "@/components/facilitator/connectivity-banner";
 import { ContentBootstrapScreen } from "@/components/facilitator/content-bootstrap-screen";
 import { FacilitatorSignOutButton } from "@/components/facilitator/sign-out-button";
+import { LogoMark } from "@/components/ui/logo-mark";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function FacilitatorLayout({
@@ -86,7 +87,8 @@ export default function FacilitatorLayout({
           multi-pages de navigation latérale, juste ce header + le contenu. */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5 lg:px-8">
-          <p className="font-display text-sm font-bold tracking-wide text-accent-ink">
+          <p className="font-display flex items-center gap-2 text-sm font-bold tracking-wide text-accent-ink">
+            <LogoMark className="h-6 w-6" />
             PARENTRELAIS
           </p>
           {/* Déconnexion à portée : elle n'existait que dans le profil, ce
@@ -98,23 +100,31 @@ export default function FacilitatorLayout({
             bandeau plein plutôt que la réduire à un badge à côté du kicker
             préserve sa lisibilité. */}
         <ConnectivityBanner online={online} pendingCount={pendingSessions.length} />
+        {/* Bouton PLEIN, pas un lien discret : c'est l'action qui fait exister
+            les séances côté pilotage. Sans fond ni contraste, il se lisait
+            comme du texte et pouvait passer inaperçu — or une séance non
+            synchronisée ne compte nulle part. */}
         {online && pendingSessions.length > 0 && (
-          <div className="border-t border-border bg-primary/5">
-            <div className="mx-auto max-w-[1100px] px-5 py-2 lg:px-8">
+          <div className="border-t border-border bg-accent/10">
+            <div className="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-2 px-5 py-2.5 lg:px-8">
+              {/* Formulation choisie pour ne pas contenir « séance
+                  enregistrée » : ce libellé sert déjà de titre au récapitulatif
+                  de fin de séance, et la collision rendait six tests ambigus. */}
+              <p className="text-sm font-semibold text-accent-ink">
+                {pendingSessions.length} en attente d&apos;envoi
+              </p>
               <button
                 type="button"
                 onClick={() => !syncMutation.isPending && syncMutation.mutate()}
                 disabled={syncMutation.isPending}
-                className="font-display flex h-11 w-full items-center justify-center gap-2 text-sm font-semibold text-primary lg:w-auto lg:px-4"
+                className="font-display flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60 sm:flex-none"
               >
                 <RefreshCw
                   size={16}
                   aria-hidden="true"
                   className={syncMutation.isPending ? "motion-safe:animate-spin" : ""}
                 />
-                {syncMutation.isPending
-                  ? "Synchronisation…"
-                  : `Synchroniser ${pendingSessions.length} séance(s)`}
+                {syncMutation.isPending ? "Envoi en cours…" : "Envoyer maintenant"}
               </button>
             </div>
           </div>

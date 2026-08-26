@@ -12,6 +12,8 @@ import {
 
 interface MediaDownloadBannerProps {
   modules: CachedModule[];
+  /** Langue affichée : seuls ses médias sont comptés. */
+  lang: string;
 }
 
 /**
@@ -22,7 +24,10 @@ interface MediaDownloadBannerProps {
  * s'il est sur un réseau qu'il peut se permettre. La bannière annonce donc
  * ce qui est disponible et attend une action explicite.
  */
-export function MediaDownloadBanner({ modules }: MediaDownloadBannerProps) {
+export function MediaDownloadBanner({
+  modules,
+  lang,
+}: MediaDownloadBannerProps) {
   const { data: downloads = [] } = useMediaDownloadsQuery();
   const queueMutation = useQueueDownloadMutation();
   const online = useOnlineStatus();
@@ -31,10 +36,13 @@ export function MediaDownloadBanner({ modules }: MediaDownloadBannerProps) {
   // Dédoublonnage par URL : plusieurs modules et langues partagent le même
   // fichier. Sans cela, l'annonce comptait 48 fichiers pour 3 réels, avec une
   // taille estimée absurde — de quoi décourager de télécharger.
+  // Filtré sur la langue affichée : proposer l'audio anglais à quelqu'un qui
+  // travaille en français gonflait le compte sans lui servir, et le total ne
+  // pouvait jamais retomber à zéro.
   const missing = Array.from(
     new Map(
       collectMediaUrls(modules)
-        .filter((m) => !known.has(m.media_url))
+        .filter((m) => m.lang === lang && !known.has(m.media_url))
         .map((m) => [m.media_url, m]),
     ).values(),
   );

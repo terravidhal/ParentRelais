@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   clearFacilitatorSession,
   readFacilitatorSession,
+  readVerifiedIdentity,
   saveFacilitatorSession,
   type FacilitatorSession,
 } from "@/lib/db/meta";
@@ -24,6 +25,19 @@ export function useFacilitatorSessionQuery() {
  * référence locale ("set on first use"), sans vérification serveur. Le vrai
  * flux "1ère connexion en ligne" (docs/04-SCREENS.md) est prévu en Phase 1.
  */
+/**
+ * Identité déjà vérifiée sur cet appareil, même après déconnexion.
+ *
+ * Permet de proposer une reconnexion par code PIN sans réseau : le compte a
+ * été authentifié auparavant et le contenu est déjà local.
+ */
+export function useVerifiedIdentityQuery() {
+  return useQuery({
+    queryKey: ["dexie", "meta", "facilitator_verified"],
+    queryFn: readVerifiedIdentity,
+  });
+}
+
 export function useSaveFacilitatorSessionMutation() {
   const queryClient = useQueryClient();
 

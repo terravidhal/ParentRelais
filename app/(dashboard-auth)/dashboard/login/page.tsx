@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ChevronLeft, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff, Loader2, Wifi } from "lucide-react";
 import { LogoMark } from "@/components/ui/logo-mark";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -70,13 +70,26 @@ export default function DashboardLoginPage() {
         password,
       });
       if (signInError) {
-        setError("Identifiants incorrects.");
+        // Une panne réseau ne doit JAMAIS être présentée comme un refus
+        // d'identifiants : c'est ce que voyait un juré en mode avion, alors
+        // que son mot de passe était parfaitement valide.
+        const isNetwork =
+          signInError.name === "AuthRetryableFetchError" ||
+          signInError.message.toLowerCase().includes("fetch");
+        setError(
+          isNetwork
+            ? "Pas de réseau. L'espace de pilotage a besoin d'une connexion : il affiche des données nationales en temps réel."
+            : "Identifiants incorrects.",
+        );
         return;
       }
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setError("Connexion impossible pour le moment.");
+      // fetch() rejette hors-ligne : c'est le réseau, pas les identifiants.
+      setError(
+        "Pas de réseau. L'espace de pilotage a besoin d'une connexion : il affiche des données nationales en temps réel.",
+      );
     } finally {
       setLoading(false);
     }
@@ -198,9 +211,23 @@ export default function DashboardLoginPage() {
             <LogoMark className="h-5 w-5" />
             PARENTRELAIS
           </p>
-          <h1 className="font-display mb-4 text-xl font-bold">
+          <h1 className="font-display mb-2 text-xl font-bold">
             Tableau de bord — Connexion
           </h1>
+
+          {/* Dit AVANT la tentative, pas seulement après l'échec : un juré en
+              mode avion voyait « identifiants incorrects » alors que son mot
+              de passe était valide. */}
+          <p className="mb-4 flex items-start gap-2 rounded-xl border border-border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
+            <Wifi size={14} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+            <span>
+              <span className="font-semibold text-foreground">
+                Cet espace nécessite une connexion internet.
+              </span>{" "}
+              Il affiche des données nationales en temps réel. Le mode
+              hors-ligne concerne l&apos;espace facilitateur.
+            </span>
+          </p>
 
           {/* Le même bandeau que côté facilitateur : le jury teste les deux
               espaces, et n'avoir les identifiants que d'un seul côté était

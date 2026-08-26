@@ -101,8 +101,13 @@ export default function HomePage() {
   const downloadedUrls = new Set(
     downloads.filter((d) => d.status === "done").map((d) => d.media_url),
   );
+  // Compté sur la LANGUE AFFICHÉE seulement, comme la page Téléchargements.
+  // L'accueil totalisait les 9 fichiers de toutes les langues alors que la
+  // page n'en proposait que 4 en français : le compteur ne pouvait jamais
+  // retomber à zéro, et annonçait « 5 fichiers » indéfiniment.
   const missingMediaCount = new Set(
     collectMediaUrls(modules)
+      .filter((m) => m.lang === lang)
       .map((m) => m.media_url)
       .filter((url) => !downloadedUrls.has(url)),
   ).size;
@@ -265,7 +270,7 @@ export default function HomePage() {
             au terrain n'en parle pas déjà : les deux annonçaient « 9 fichiers
             à télécharger » l'un sous l'autre (constaté en capture). */}
         {!modulesLoading && missingMediaCount === 0 && (
-          <MediaDownloadBanner modules={modules} />
+          <MediaDownloadBanner modules={modules} lang={lang} />
         )}
 
         {/* Recherche et tri — masqués tant qu'il y a peu de modules : sur un

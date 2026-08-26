@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import {
   useFacilitatorSessionQuery,
   useSaveFacilitatorSessionMutation,
+  useVerifiedIdentityQuery,
 } from "@/lib/hooks/use-facilitator-session";
 import { signInFacilitator } from "@/lib/auth/facilitator-signin";
 import { DemoCredentialsBanner } from "@/components/facilitator/demo-credentials-banner";
@@ -53,6 +54,9 @@ function BrandPanel() {
 export default function LoginPage() {
   const router = useRouter();
   const { data: existingSession } = useFacilitatorSessionQuery();
+  // Identité déjà vérifiée sur cet appareil, conservée après déconnexion :
+  // elle permet de se reconnecter par simple PIN, sans réseau.
+  const { data: verifiedIdentity } = useVerifiedIdentityQuery();
   const saveMutation = useSaveFacilitatorSessionMutation();
 
   // Pré-remplis d'emblée, pas seulement via le bouton du bandeau : sur
@@ -77,7 +81,11 @@ export default function LoginPage() {
   // Les séances déjà écrites dans l'outbox portent leur propre facilitator_id
   // (voir lib/db/outbox.ts, addOutboxSession) et continuent de se synchroniser
   // sous leur identité d'origine, indépendamment du changement de session.
-  const isFirstLoginForm = !existingSession || recoveryMode;
+  // Le formulaire complet (email + mot de passe) n'est nécessaire que si cet
+  // appareil n'a JAMAIS vérifié d'identité. Après une déconnexion, le compte
+  // reste connu et le contenu est local : exiger un appel réseau bloquerait
+  // le facilitateur en zone blanche.
+  const isFirstLoginForm = !existingSession && !verifiedIdentity;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -91,12 +99,25 @@ export default function LoginPage() {
     // Reconnexion hors-ligne : le PIN local suffit, aucun appel réseau.
     // C'est ce qui permet à un facilitateur en zone blanche de rouvrir son
     // app indéfiniment (voir 14-PLAN-FONDATIONS.md).
-    if (existingSession && !recoveryMode) {
+    if (existingSession) {
       if (existingSession.pin !== pin) {
         setError("Code PIN incorrect.");
         return;
       }
       router.push("/home");
+      return;
+    }
+
+    // Déconnecté, mais l'identité a déjà été vérifiée sur cet appareil : on
+    // rétablit la session localement, sans réseau. Le compte a été
+    // authentifié auparavant et le contenu est déjà téléchargé.
+    if (verifiedIdentity) {
+      try {
+        await saveMutation.mutateAsync({ ...verifiedIdentity, pin });
+        router.push("/home");
+      } catch {
+        setError("Impossible d'enregistrer la connexion sur cet appareil.");
+      }
       return;
     }
 

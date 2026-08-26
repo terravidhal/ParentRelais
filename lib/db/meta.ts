@@ -36,13 +36,55 @@ export async function saveFacilitatorSession(
   }
 }
 
+/** Identité vérifiée conservée après déconnexion, pour permettre une
+ *  reconnexion hors-ligne. */
+const VERIFIED_KEY = "facilitator_verified";
+
 export async function clearFacilitatorSession(): Promise<void> {
   try {
+    // On mémorise l'identité AVANT de l'effacer : elle a déjà été vérifiée
+    // en ligne, et le contenu est déjà sur l'appareil. Exiger un nouvel
+    // appel réseau pour se reconnecter bloquait le facilitateur en zone
+    // blanche — constaté sur téléphone : « la première connexion nécessite
+    // du réseau » alors qu'il s'était déjà connecté et avait animé une séance.
+    const current = await readFacilitatorSession();
+    if (current) {
+      await db.meta.put({
+        key: VERIFIED_KEY,
+        value: JSON.stringify({
+          facilitator_id: current.facilitator_id,
+          full_name: current.full_name,
+          region: current.region,
+        }),
+      });
+    }
     await db.meta.delete(SESSION_KEY);
   } catch (error: unknown) {
     throw new Error("Impossible de supprimer la session facilitateur", {
       cause: error,
     });
+  }
+}
+
+/**
+ * Identité déjà vérifiée sur cet appareil, s'il y en a une.
+ *
+ * Permet une reconnexion par simple code PIN, sans réseau : le compte a été
+ * authentifié auparavant, et rien n'oblige à le revérifier pour rouvrir un
+ * contenu déjà téléchargé.
+ */
+export async function readVerifiedIdentity(): Promise<Omit<
+  FacilitatorSession,
+  "pin"
+> | null> {
+  try {
+    const row = await db.meta.get(VERIFIED_KEY);
+    return row?.value
+      ? (JSON.parse(row.value) as Omit<FacilitatorSession, "pin">)
+      : null;
+  } catch (error: unknown) {
+    console.error("[meta] lecture de l'identité vérifiée échouée:", error);
+    return null;
   }
 }
 

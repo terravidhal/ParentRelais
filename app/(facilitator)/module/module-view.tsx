@@ -26,7 +26,21 @@ export function ModuleView({ id }: { id: number }) {
   }
 
   if (!module) {
-    return <p className="text-sm text-muted-foreground">Module introuvable.</p>;
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <p className="text-sm text-muted-foreground">
+          Ce module n&apos;est pas disponible sur cet appareil. Reconnectez-vous
+          une fois en ligne pour récupérer le contenu.
+        </p>
+        <button
+          type="button"
+          onClick={() => router.push("/home")}
+          className="font-display flex h-12 items-center rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
+        >
+          Revenir aux modules
+        </button>
+      </div>
+    );
   }
 
   const translation =

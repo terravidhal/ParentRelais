@@ -28,8 +28,9 @@ export function ContentBootstrapScreen({
             Contenu non reçu
           </h1>
           <p className="mt-2 text-base text-muted-foreground">
-            Le serveur n&apos;a pas répondu, ou n&apos;a encore aucun module
-            publié. Réessayez dans un instant.
+            Cet appareil n&apos;a pas encore reçu les modules. La toute
+            première connexion demande du réseau — ensuite, tout fonctionne
+            hors-ligne.
           </p>
           <button
             type="button"

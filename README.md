@@ -54,6 +54,10 @@ délibéré, pour ne pas consommer le forfait du facilitateur à son insu.
 **4. Rétablissez le réseau.** La séance remonte automatiquement, et apparaît dans l'espace de
 pilotage (Couverture, Rapports).
 
+> **Le mode hors-ligne concerne l'espace facilitateur**, pas l'espace de pilotage. Ce dernier est
+> consulté depuis un bureau et affiche des données nationales agrégées, qui n'auraient aucun sens
+> figées sur un appareil. C'est un choix d'architecture, pas une limite technique.
+
 ### Ce qu'il y a à voir dans l'espace de pilotage
 
 - **Couverture** — familles touchées par localité, activité des facilitateurs.

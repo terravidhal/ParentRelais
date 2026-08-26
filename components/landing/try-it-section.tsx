@@ -184,6 +184,17 @@ export function TryItSection() {
           zone sans couverture.
         </p>
 
+        {/* Précision attendue par le jury : le hors-ligne ne concerne pas
+            l'espace de pilotage, et c'est un choix, pas une limite. */}
+        <p className="mt-4 max-w-2xl rounded-2xl border border-[#DCE4E1] bg-white px-4 py-3 text-sm text-[#4A5B57]">
+          <strong className="font-bold text-[#16241F]">
+            Le mode hors-ligne concerne l&apos;espace facilitateur.
+          </strong>{" "}
+          L&apos;espace de pilotage reste en ligne : il est consulté depuis un
+          bureau, et affiche des données nationales qui n&apos;auraient aucun
+          sens figées sur un appareil.
+        </p>
+
         <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
           <ol className="flex flex-col gap-4">
             {STEPS.map((step, index) => {

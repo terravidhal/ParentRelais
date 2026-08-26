@@ -18,7 +18,13 @@ type Step = 0 | 1 | 2;
 export function SessionView({ moduleId }: { moduleId: number }) {
   const router = useRouter();
   const { data: module, isLoading } = useModuleQuery(moduleId);
-  const { data: session } = useFacilitatorSessionQuery();
+  // `isLoading` de la SESSION aussi : sans lui, une session encore en cours
+  // de lecture faisait afficher « Séance indisponible » alors que tout était
+  // présent. Symptôme constaté sur téléphone : la même page échoue puis
+  // fonctionne à la tentative suivante, selon laquelle des deux requêtes
+  // Dexie répond en premier.
+  const { data: session, isLoading: sessionLoading } =
+    useFacilitatorSessionQuery();
   const addSessionMutation = useAddSessionMutation();
 
   const [step, setStep] = useState<Step>(0);
@@ -38,12 +44,27 @@ export function SessionView({ moduleId }: { moduleId: number }) {
   const { data: lang = "fr" } = usePreferredLangQuery();
   const [recorded, setRecorded] = useState(false);
 
-  if (isLoading) {
+  if (isLoading || sessionLoading) {
     return <Skeleton className="h-64 w-full" />;
   }
 
   if (!module || !session) {
-    return <p className="text-sm text-muted-foreground">Séance indisponible.</p>;
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <p className="text-sm text-muted-foreground">
+          {!session
+            ? "Votre session a expiré sur cet appareil. Reconnectez-vous pour animer une séance."
+            : "Ce module n'est pas disponible sur cet appareil."}
+        </p>
+        <button
+          type="button"
+          onClick={() => router.push(!session ? "/login" : "/home")}
+          className="font-display flex h-12 items-center rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
+        >
+          {!session ? "Se reconnecter" : "Revenir aux modules"}
+        </button>
+      </div>
+    );
   }
 
   const translation =

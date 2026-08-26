@@ -1,6 +1,6 @@
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist, CacheFirst, NetworkFirst, ExpirationPlugin } from "serwist";
+import { Serwist, CacheFirst, ExpirationPlugin } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -18,6 +18,47 @@ declare const self: ServiceWorkerGlobalScope;
  * Supabase), et le précaching manifest ci-dessous ne couvre que les assets
  * de build communs — ces routes retombent sur `defaultCache` (NetworkFirst).
  */
+const RUNTIME_PAGES = "parentrelais-facilitator-pages";
+
+/**
+ * Retrouve un document précaché malgré l'en-tête `Vary` de Next.js.
+ *
+ * En production, Vercel renvoie `Vary: rsc, next-router-state-tree, …` sur
+ * chaque page. Le Cache API respecte `Vary` : une navigation ordinaire
+ * n'envoyant pas ces en-têtes, elle ne correspondait plus à l'entrée
+ * précachée, et l'application installée échouait au lancement hors réseau
+ * — « this page couldn't load », constaté sur téléphone.
+ *
+ * `ignoreVary: true` lève cette contrainte : le document HTML est le même
+ * quels que soient ces en-têtes de routage.
+ */
+async function matchPrecachedDocument(
+  pathname: string,
+): Promise<Response | undefined> {
+  const direct = await serwist.matchPrecache(pathname);
+  if (direct) return direct;
+
+  // Recherche élargie dans tous les caches, en ignorant Vary.
+  const url = new URL(pathname, self.location.origin).href;
+  return caches.match(url, { ignoreVary: true });
+}
+
+/** Abandonne une requête réseau au-delà du délai imparti. */
+async function withTimeout(
+  promise: Promise<Response>,
+  ms: number,
+): Promise<Response | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<null>((resolve) => {
+    timer = setTimeout(() => resolve(null), ms);
+  });
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   // skipWaiting: une nouvelle version du service worker s'active dès son
@@ -51,7 +92,7 @@ const serwist = new Serwist({
         request.mode === "navigate" &&
         (url.pathname === "/module" || url.pathname === "/module/session"),
       handler: async ({ url }) => {
-        const cached = await serwist.matchPrecache(url.pathname);
+        const cached = await matchPrecachedDocument(url.pathname);
         if (cached) return cached;
         // Pas encore précaché (premier chargement) : on tente le réseau.
         return fetch(url.pathname);
@@ -69,16 +110,36 @@ const serwist = new Serwist({
       // l'app sur une page indisponible hors réseau.
       matcher: ({ request, url }) =>
         request.mode === "navigate" && !url.pathname.startsWith("/dashboard"),
-      handler: new NetworkFirst({
-        cacheName: "parentrelais-facilitator-pages",
-        networkTimeoutSeconds: 3,
-        plugins: [
-          new ExpirationPlugin({
-            maxEntries: 32,
-            maxAgeSeconds: 60 * 60 * 24 * 30,
-          }),
-        ],
-      }),
+      handler: async ({ request, url }) => {
+        // Réseau d'abord, avec un délai court : une page fraîche vaut mieux,
+        // mais on ne fait pas attendre un facilitateur sur un réseau mourant.
+        try {
+          const network = await withTimeout(fetch(request), 3000);
+          if (network && network.ok) {
+            const cache = await caches.open(RUNTIME_PAGES);
+            void cache.put(request, network.clone());
+            return network;
+          }
+        } catch {
+          // Hors-ligne : on bascule sur les caches ci-dessous.
+        }
+
+        const runtime = await caches.match(request, {
+          cacheName: RUNTIME_PAGES,
+          ignoreVary: true,
+        });
+        if (runtime) return runtime;
+
+        const precached = await matchPrecachedDocument(url.pathname);
+        if (precached) return precached;
+
+        // Dernier recours : la page d'accueil, toujours précachée. Mieux vaut
+        // l'écran d'ouverture qu'une erreur de navigateur.
+        return (
+          (await matchPrecachedDocument("/")) ??
+          Response.error()
+        );
+      },
     },
     {
       matcher: ({ request }) =>

@@ -724,6 +724,19 @@ export function LandingPage() {
               >
                 Vidhal Elame
               </a>
+              {" \u00B7 "}
+              <a href="mailto:vidhalelame@gmail.com" className="text-[#7BD0D9] hover:underline">
+                vidhalelame@gmail.com
+              </a>
+              {" \u00B7 "}
+              <a
+                href="https://wa.me/237656242185"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#7BD0D9] hover:underline"
+              >
+                WhatsApp : +237 656 242 185
+              </a>
             </span>
           </div>
           <div className="flex items-center gap-4 text-xs">
